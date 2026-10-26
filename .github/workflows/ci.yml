@@ -35,19 +35,72 @@ jobs:
           python3 -m py_compile payload/scripts/download.py payload/python/sitecustomize.py
           python3 -m json.tool payload/versions.json > /dev/null
 
-  integration:
-    name: Integration (${{ matrix.delivery }})
+  images:
+    name: Build and load agents (${{ matrix.arch }})
     needs: quality
-    runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 30
+    env:
+      OPERATOR_IMAGE: ghcr.io/otelx/rio:dev-${{ matrix.arch }}
+      PAYLOAD_IMAGE: ghcr.io/otelx/rio-payload:dev-${{ matrix.arch }}
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - delivery: imageVolume
-            image_volume: 'true'
-          - delivery: initContainer
-            image_volume: 'false'
+        arch: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - name: Build controller
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          load: true
+          tags: ${{ env.OPERATOR_IMAGE }}
+          platforms: linux/${{ matrix.arch }}
+          cache-from: type=gha,scope=operator-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=operator-${{ matrix.arch }}
+      - name: Build payload
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: payload
+          load: true
+          tags: ${{ env.PAYLOAD_IMAGE }}
+          platforms: linux/${{ matrix.arch }}
+          cache-from: type=gha,scope=payload-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=payload-${{ matrix.arch }}
+      - name: Verify all five language loaders with glibc and musl
+        run: make smoke
+      - name: Archive tested images
+        run: docker save "$OPERATOR_IMAGE" "$PAYLOAD_IMAGE" | gzip > .artifacts/release-images.tar.gz
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tested-release-images-${{ matrix.arch }}
+          path: .artifacts/release-images.tar.gz
+          include-hidden-files: true
+          retention-days: 3
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: loaders-${{ matrix.arch }}
+          path: .artifacts/image-smoke/**/*.log
+          include-hidden-files: true
+          if-no-files-found: ignore
+
+  integration:
+    name: Integration (${{ matrix.arch }}, ${{ matrix.delivery }})
+    needs: images
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 30
+    env:
+      OPERATOR_IMAGE: ghcr.io/otelx/rio:dev-${{ matrix.arch }}
+      PAYLOAD_IMAGE: ghcr.io/otelx/rio-payload:dev-${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [amd64, arm64]
+        delivery: [imageVolume, initContainer]
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -56,7 +109,6 @@ jobs:
         with:
           go-version-file: go.mod
           cache: false
-      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
       - name: Install kind
         env:
           GOBIN: ${{ github.workspace }}/.artifacts/bin
@@ -65,62 +117,73 @@ jobs:
           export TMPDIR="$PWD/.artifacts/tmp"
           go install sigs.k8s.io/kind@v0.33.0
           echo "$GOBIN" >> "$GITHUB_PATH"
-      - name: Build controller
-        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
-          context: .
-          load: true
-          tags: ghcr.io/otelx/rio:dev
-          platforms: linux/amd64
-          cache-from: type=gha,scope=operator
-          cache-to: type=gha,mode=max,scope=operator
-      - name: Build payload
-        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
-        with:
-          context: payload
-          load: true
-          tags: ghcr.io/otelx/rio-payload:dev
-          platforms: linux/amd64
-          cache-from: type=gha,scope=payload
-          cache-to: type=gha,mode=max,scope=payload
-      - name: Verify all five language loaders
-        if: matrix.delivery == 'imageVolume'
-        run: make smoke
+          name: tested-release-images-${{ matrix.arch }}
+          path: .artifacts/release
+      - name: Load tested images
+        run: gzip -dc .artifacts/release/release-images.tar.gz | docker load
       - name: Verify rollout, recovery, removal, and HTTP trace export
         env:
-          CLUSTER_NAME: rio-ci-${{ matrix.delivery }}
-          IMAGE_VOLUME_ENABLED: ${{ matrix.image_volume }}
+          CLUSTER_NAME: rio-ci-${{ matrix.arch }}-${{ matrix.delivery }}
+          IMAGE_VOLUME_ENABLED: ${{ matrix.delivery == 'imageVolume' }}
+          EXPECT_ARCHITECTURES: ${{ matrix.arch }}
           EXPECT_DELIVERY: ${{ matrix.delivery }}
         run: |
           export CLUSTER_NAME="${CLUSTER_NAME,,}"
           make e2e
-      - name: Archive tested release images
-        if: startsWith(github.ref, 'refs/tags/') && matrix.delivery == 'imageVolume'
-        run: docker save ghcr.io/otelx/rio:dev ghcr.io/otelx/rio-payload:dev | gzip > .artifacts/release-images.tar.gz
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        if: startsWith(github.ref, 'refs/tags/') && matrix.delivery == 'imageVolume'
-        with:
-          name: tested-release-images
-          path: .artifacts/release-images.tar.gz
-          include-hidden-files: true
-          retention-days: 3
-      - name: Collect sanitized diagnostics
-        if: always()
-        run: |
-          mkdir -p .artifacts/diagnostics
-          find .artifacts/e2e -type f \( -name '*.log' -o -name '*.json' \) -exec cp {} .artifacts/diagnostics/ \; 2>/dev/null || true
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
-          name: diagnostics-${{ matrix.delivery }}
-          path: .artifacts/diagnostics/
+          name: diagnostics-${{ matrix.arch }}-${{ matrix.delivery }}
+          path: |
+            .artifacts/e2e/**/*.log
+            .artifacts/e2e/**/*.json
           include-hidden-files: true
           if-no-files-found: ignore
+
+  platforms:
+    name: Verify multi-platform image selection
+    needs: integration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      registry:
+        image: registry:2@sha256:a3d8aaa63ed8681a604f1dea0aa03f100d5895b6a58ace528858a7b332415373
+        ports: ['5000:5000']
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: tested-release-images-*
+          path: .artifacts/release
+      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+        with:
+          platforms: arm64
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - name: Publish tested images to the disposable registry
+        run: |
+          for arch in amd64 arm64; do
+            gzip -dc ".artifacts/release/tested-release-images-$arch/release-images.tar.gz" | docker load
+          done
+          scripts/publish-images.sh localhost:5000/rio-ci "$GITHUB_SHA"
+      - name: Resolve and execute both architectures through common tags
+        run: |
+          for arch in amd64 arm64; do
+            docker run --rm --pull always --platform "linux/$arch" "localhost:5000/rio-ci/rio:$GITHUB_SHA" --help
+            docker run --rm --pull always --platform "linux/$arch" "localhost:5000/rio-ci/rio-payload:$GITHUB_SHA" /bin/sh -ec '
+              /verify-layout.sh
+              output=$(LD_PRELOAD=/dist/injector/libotelinject.so /bin/sh -c true 2>&1)
+              test -z "$output"
+            '
+          done
 
   release:
     name: Publish validated alpha release
     if: startsWith(github.ref, 'refs/tags/') && github.event_name == 'push'
-    needs: [quality, integration]
+    needs: [quality, integration, platforms]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
@@ -132,13 +195,14 @@ jobs:
           persist-credentials: false
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
-          name: tested-release-images
+          pattern: tested-release-images-*
           path: .artifacts/release
       - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
       - name: Publish tested images and source
         env:
           GH_TOKEN: ${{ github.token }}

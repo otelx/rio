@@ -7,9 +7,10 @@ export GOTMPDIR := $(ARTIFACTS)/tmp
 export TMPDIR := $(ARTIFACTS)/tmp
 OPERATOR_IMAGE ?= ghcr.io/otelx/rio:dev
 PAYLOAD_IMAGE ?= ghcr.io/otelx/rio-payload:dev
+PLATFORMS ?= linux/amd64,linux/arm64
 export OPERATOR_IMAGE PAYLOAD_IMAGE
 
-.PHONY: prepare test build vet image payload images smoke e2e install uninstall
+.PHONY: prepare test build vet image archive payload images smoke e2e install uninstall
 prepare:
 	mkdir -p "$(GOCACHE)" "$(GOMODCACHE)" "$(GOTMPDIR)" "$(ARTIFACTS)/bin"
 test: prepare
@@ -20,6 +21,10 @@ build: prepare
 	CGO_ENABLED=0 go build -trimpath -o "$(ARTIFACTS)/bin/rio" ./cmd/operator
 image: prepare
 	docker build -t "$(OPERATOR_IMAGE)" .
+archive: prepare
+	mkdir -p "$(ARTIFACTS)/images"
+	docker buildx build --platform "$(PLATFORMS)" -t "$(OPERATOR_IMAGE)" --output "type=oci,dest=$(ARTIFACTS)/images/operator.oci.tar" .
+	$(MAKE) -C payload archive PLATFORMS="$(PLATFORMS)" IMAGE="$(PAYLOAD_IMAGE)"
 payload: prepare
 	$(MAKE) -C payload image IMAGE="$(PAYLOAD_IMAGE)"
 images: image payload
