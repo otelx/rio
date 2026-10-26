@@ -1,0 +1,9 @@
+{
+  "name": "far-wide-injector-node",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@opentelemetry/api": "1.9.1",
+    "@opentelemetry/auto-instrumentations-node": "0.78.0"
+  }
+}

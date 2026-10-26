@@ -1,0 +1,55 @@
+{
+  "injector": {
+    "version": "0.11.0",
+    "assets": {
+      "libotelinject_amd64.so": {
+        "url": "https://github.com/open-telemetry/opentelemetry-injector/releases/download/v0.11.0/libotelinject_amd64.so",
+        "sha256": "1457e82f86981ae7af77a06add85eae0c8e6cf0c91d58eb948d4e5af160cff61"
+      },
+      "libotelinject_arm64.so": {
+        "url": "https://github.com/open-telemetry/opentelemetry-injector/releases/download/v0.11.0/libotelinject_arm64.so",
+        "sha256": "ccd6d2d533c8642760211242aa557c0667e4e78fa706ead12756c006d83fff59"
+      }
+    }
+  },
+  "java": {
+    "version": "2.30.0",
+    "assets": {
+      "opentelemetry-javaagent.jar": {
+        "url": "https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.30.0/opentelemetry-javaagent.jar",
+        "sha256": "9d6bc2ad8dd8fb7f730984988e57b8ac0a82d81c7b3b8ae795378718733a509d"
+      }
+    }
+  },
+  "dotnet": {
+    "version": "1.17.0",
+    "assets": {
+      "opentelemetry-dotnet-instrumentation-linux-glibc-arm64.zip": {
+        "url": "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.17.0/opentelemetry-dotnet-instrumentation-linux-glibc-arm64.zip",
+        "sha256": "d7dc0d8f6562eb12108eaf896c277e536133259d49545e3e2545be3ea7a14144"
+      },
+      "opentelemetry-dotnet-instrumentation-linux-glibc-x64.zip": {
+        "url": "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.17.0/opentelemetry-dotnet-instrumentation-linux-glibc-x64.zip",
+        "sha256": "cc56878f0155e28b6554924fbd420fcb8bec7108cd9d41836dc530764ac923f8"
+      },
+      "opentelemetry-dotnet-instrumentation-linux-musl-arm64.zip": {
+        "url": "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.17.0/opentelemetry-dotnet-instrumentation-linux-musl-arm64.zip",
+        "sha256": "27c6315949490ec198025988d48d34c9720066c5dad31ca5769f23f5e2663d27"
+      },
+      "opentelemetry-dotnet-instrumentation-linux-musl-x64.zip": {
+        "url": "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.17.0/opentelemetry-dotnet-instrumentation-linux-musl-x64.zip",
+        "sha256": "36eb55ce2f7a9da8ffd70ccbd97761a1917d7f57709f1a6ca9e7029dfa120516"
+      }
+    }
+  },
+  "node": "0.78.0",
+  "python": {
+    "distro": "0.66b0",
+    "sdk": "1.45.0",
+    "operatorRequirements": "v0.160.0"
+  },
+  "ruby": {
+    "commit": "68af0a92d6d9c2cd0ee38a9327e98797673227d1",
+    "version": "0.1.0"
+  }
+}

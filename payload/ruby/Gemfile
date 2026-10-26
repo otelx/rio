@@ -1,0 +1,2 @@
+source "https://rubygems.org"
+gem "opentelemetry-auto-instrumentation", git: "https://github.com/open-telemetry/opentelemetry-ruby-instrumentation.git", ref: "68af0a92d6d9c2cd0ee38a9327e98797673227d1"

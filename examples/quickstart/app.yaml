@@ -1,0 +1,117 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rio-telemetry
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: collector
+  namespace: rio-telemetry
+data:
+  config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          http:
+            endpoint: 0.0.0.0:4318
+    exporters:
+      debug:
+        verbosity: detailed
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          exporters: [debug]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: collector
+  namespace: rio-telemetry
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: rio-collector}
+  template:
+    metadata:
+      labels: {app: rio-collector}
+    spec:
+      containers:
+        - name: collector
+          image: otel/opentelemetry-collector-contrib:0.163.2
+          args: [--config=/conf/config.yaml]
+          ports:
+            - {name: otlp-http, containerPort: 4318}
+          readinessProbe:
+            tcpSocket: {port: otlp-http}
+          resources:
+            requests: {cpu: 50m, memory: 64Mi}
+            limits: {memory: 256Mi}
+          volumeMounts:
+            - {name: config, mountPath: /conf, readOnly: true}
+      volumes:
+        - name: config
+          configMap: {name: collector}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: collector
+  namespace: rio-telemetry
+spec:
+  selector: {app: rio-collector}
+  ports:
+    - {name: otlp-http, port: 4318, targetPort: otlp-http}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rio-example
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hello
+  namespace: rio-example
+data:
+  server.js: |
+    const http = require('node:http');
+    http.createServer((request, response) => {
+      response.writeHead(200, {'Content-Type': 'text/plain'});
+      response.end('Hello from RIO!\n');
+    }).listen(8080, '0.0.0.0');
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello
+  namespace: rio-example
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: {maxUnavailable: 0, maxSurge: 1}
+  selector:
+    matchLabels: {app: rio-hello}
+  template:
+    metadata:
+      labels: {app: rio-hello}
+    spec:
+      containers:
+        - name: hello
+          image: node:24
+          command: [node, /app/server.js]
+          ports:
+            - {name: http, containerPort: 8080}
+          readinessProbe:
+            tcpSocket: {port: http}
+            periodSeconds: 2
+          resources:
+            requests: {cpu: 50m, memory: 64Mi}
+            limits: {memory: 256Mi}
+          volumeMounts:
+            - {name: app, mountPath: /app, readOnly: true}
+      volumes:
+        - name: app
+          configMap: {name: hello}

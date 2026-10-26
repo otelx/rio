@@ -1,0 +1,16 @@
+RIO — Runtime Instrumentation Operator
+Copyright 2026 RIO contributors
+Licensed under the Apache License, Version 2.0; see LICENSE.
+
+The initial controller and payload packaging originate from:
+https://github.com/MrAlias/OpenTelemetry-Far-and-Wide
+Source revision: 2a3b7809cbca964651ae6a916279833d11c8cdde
+Standalone adaptations include repository layout, API/resource names,
+installation scripts, examples, validation, release automation and documentation.
+
+The design draws on Grafana's composite SDK injection prototype, including
+Jack Berg's implementation work and Nikola Grcevski's design participation:
+https://github.com/grafana/opentelemetry-operator/tree/552f4c550fb58be21721191d5704ba501933b1ef/hackathon
+
+See payload/NOTICE for dependency attribution. Bundled upstream components
+retain their own licenses and notices.

@@ -1,0 +1,4 @@
+.artifacts
+node/node_modules
+**/__pycache__
+*.log

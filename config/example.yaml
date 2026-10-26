@@ -1,0 +1,15 @@
+# Applying this policy starts rolling updates in the selected namespace.
+apiVersion: rio.otelx.github.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: cluster
+spec:
+  image: ghcr.io/otelx/rio-payload:v0.1.0-alpha.1
+  endpoint: http://collector.observability.svc.cluster.local:4318
+  signals: {traces: true, metrics: true, logs: true}
+  timeoutSeconds: 300
+  rules:
+    - name: applications
+      selector:
+        namespaces: [my-applications]
+      action: Inject

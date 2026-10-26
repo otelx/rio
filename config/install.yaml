@@ -1,0 +1,148 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rio-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: rio
+  namespace: rio-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: rio
+rules:
+  - apiGroups: [rio.otelx.github.io]
+    resources: [instrumentations, instrumentations/status, instrumentations/finalizers]
+    verbs: [get, list, watch, update, patch]
+  - apiGroups: [apps]
+    resources: [deployments, statefulsets, daemonsets]
+    verbs: [get, list, watch, update, patch]
+  - apiGroups: [apps]
+    resources: [replicasets]
+    verbs: [get, list, watch]
+  - apiGroups: [batch]
+    resources: [jobs]
+    verbs: [get]
+  - apiGroups: ['']
+    resources: [pods, nodes]
+    verbs: [get, list, watch]
+  - apiGroups: ['']
+    resources: [pods]
+    verbs: [delete]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: rio
+roleRef: {apiGroup: rbac.authorization.k8s.io, kind: ClusterRole, name: rio}
+subjects:
+  - kind: ServiceAccount
+    name: rio
+    namespace: rio-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: volume-probes
+  namespace: rio-system
+rules:
+  - apiGroups: ['']
+    resources: [pods]
+    verbs: [create]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: volume-probes
+  namespace: rio-system
+roleRef: {apiGroup: rbac.authorization.k8s.io, kind: Role, name: volume-probes}
+subjects:
+  - kind: ServiceAccount
+    name: rio
+    namespace: rio-system
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rio
+  namespace: rio-system
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector:
+    matchLabels: {app: rio}
+  template:
+    metadata:
+      labels: {app: rio}
+    spec:
+      serviceAccountName: rio
+      nodeSelector: {kubernetes.io/os: linux}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: operator
+          image: ghcr.io/otelx/rio:v0.1.0-alpha.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - {name: webhook, containerPort: 9443}
+            - {name: health, containerPort: 8080}
+          readinessProbe:
+            httpGet: {path: /readyz, port: health}
+          livenessProbe:
+            httpGet: {path: /healthz, port: health}
+          resources:
+            requests: {cpu: 50m, memory: 64Mi}
+            limits: {memory: 256Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          volumeMounts:
+            - {name: tls, mountPath: /tls, readOnly: true}
+      volumes:
+        - name: tls
+          secret: {secretName: rio-tls}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rio
+  namespace: rio-system
+spec:
+  selector: {app: rio}
+  ports:
+    - {name: https, port: 443, targetPort: webhook}
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: rio
+webhooks:
+  - name: pods.rio.otelx.github.io
+    admissionReviewVersions: [v1]
+    sideEffects: None
+    failurePolicy: Ignore
+    timeoutSeconds: 10
+    reinvocationPolicy: IfNeeded
+    namespaceSelector:
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: NotIn
+          values: [rio-system]
+    clientConfig:
+      service:
+        namespace: rio-system
+        name: rio
+        path: /mutate
+      caBundle: REPLACE_CA_BUNDLE
+    rules:
+      - operations: [CREATE]
+        apiGroups: ['']
+        apiVersions: [v1]
+        resources: [pods]
+        scope: Namespaced
