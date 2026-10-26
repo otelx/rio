@@ -4,15 +4,16 @@ RIO is experimental. The initial release supports evaluation; it does not claim 
 
 ## Kubernetes and delivery
 
-- The integration suite targets kind with Kubernetes 1.35.0 on Linux amd64.
+- Evaluation targets are Linux amd64 and arm64 (aarch64), with glibc and musl application images. CI runs kind with Kubernetes 1.35.0 on native workers for each architecture and checks both delivery paths.
 - Native image-volume delivery is selected only after runtime checks and a probe on every registered Linux node succeed. Known minimum runtimes are containerd 2.1 and CRI-O 1.31. Kubernetes feature gates must also permit image volumes.
 - Otherwise RIO copies the same payload into an `emptyDir` with an init container. This copy runs as UID 0 with all capabilities dropped. Restricted namespaces requiring every container to run nonroot need a volume-permissions adaptation.
 - Windows containers are unsupported. RIO does not change application scheduling.
-- Payload inputs include amd64 and arm64 assets, but initial published images and integration validation cover **amd64 only**. Arm64 is not a supported release target until its build and runtime checks pass on an appropriate worker.
+- The controller and payload release tags contain amd64 and arm64 images. Mixed Linux clusters use the same tags on both architectures; the container runtime selects the matching image, and capability probes must succeed on every Linux node before native delivery is selected. Application images must also provide the architectures on which they can be scheduled.
+- The existing `v0.1.0-alpha.1` images are amd64 only. Build from source or use a subsequent release for arm64; existing release tags are not replaced.
 
 ## Runtimes and signals
 
-The payload includes agents for Java, Node.js, .NET, Python, and Ruby. Loader checks exercise Java 21, Node.js 24, .NET 8, Python 3.14, and Ruby 3.3. The quickstart verifies HTTP trace export from Node.js. These are specific test paths, not a promise of compatibility with every version, framework, libc, native extension, or application image. See [payload inputs](../payload/README.md).
+The payload includes agents for Java, Node.js, .NET, Python, and Ruby. Loader checks exercise Java 21, Node.js 24, .NET 8, Python 3.14, and Ruby 3.3 on both architectures, using glibc and Alpine/musl images. Integration checks verify HTTP trace export from Node.js with each libc. These are specific test paths, not a promise of compatibility with every version, framework, native extension, or application image. See [payload inputs](../payload/README.md).
 
 The Injector library is preloaded into application processes. Test compatibility with existing agents, `LD_PRELOAD` libraries, and restrictive security profiles.
 

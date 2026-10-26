@@ -28,6 +28,12 @@ Run clusters sequentially on a local machine. The integration script creates its
 
 The suite covers injection and removal on Deployments, StatefulSets, and DaemonSets, failed configuration, recovery, operator restart, correction, and real HTTP trace export from the quickstart service. Loader checks cover all five agents; they disable exporters and are distinct from telemetry verification.
 
+CI builds each architecture once and passes the same image archives to both delivery tests and release publication. Integration checks use two-node kind clusters on native amd64 and arm64 workers. Loader checks exercise all five agents with both glibc and musl, and integration checks verify Node.js HTTP export from both Debian and Alpine images. On a machine with arm64 emulation registered, `PLATFORM=linux/arm64 make smoke` selects the arm64 payload and fixtures explicitly. Logs are separated by architecture and libc under `.artifacts/image-smoke/`. A separate CI gate assembles multi-platform tags in a disposable registry and executes the controller and Injector on both architectures through those common tags before permitting a release.
+
+Build both controller and payload images as multi-platform OCI archives with `make archive`. `PLATFORMS` defaults to `linux/amd64,linux/arm64`; the builder must be able to execute the payload's native dependency installation for both architectures. The controller uses Go cross-compilation. Local `make images` still builds for the current worker.
+
+For custom multi-node clusters, set `KIND_CONFIG` to a kind configuration file. Set `LOAD_IMAGES=false` when image references are available from a registry instead of the local Docker store, and use `EXPECT_ARCHITECTURES=amd64,arm64` to require both node types. The integration harness checks a DaemonSet on every node and tests HTTP export from both libc variants on each architecture. A custom configuration supplies its own node images and feature gates.
+
 For a disposable cluster you created yourself, load local images before installing:
 
 ```bash
@@ -43,6 +49,6 @@ Update [versions.json](../payload/versions.json) and the language lockfiles toge
 
 ## Releases
 
-Versions follow `vMAJOR.MINOR.PATCH`, with alpha suffixes while experimental. The initial version is `v0.1.0-alpha.1`. The release workflow validates the tag, builds and tests both images, runs the two delivery paths, then publishes those exact tested image archives to GHCR. Images are Linux amd64 initially. It creates a GitHub prerelease with a source archive and SHA-256 checksum; no `latest` tag is published for alpha versions.
+Versions follow `vMAJOR.MINOR.PATCH`, with alpha suffixes while experimental. The initial version is `v0.1.0-alpha.1`. The release workflow validates the tag, builds and tests both images on native amd64 and arm64 workers, and runs the two delivery paths for each architecture. It loads the tested archives and publishes architecture tags (`VERSION-amd64` and `VERSION-arm64`), then combines them into the common `VERSION` tag without rebuilding. The common tag selects the matching image on mixed Linux clusters. It creates a GitHub prerelease with a source archive and SHA-256 checksum; no `latest` tag is published for alpha versions. The existing `v0.1.0-alpha.1` images remain amd64 only.
 
 Before tagging, update the release references in the quickstart, install template, installer default, policy, and changelog. Push a tag only after CI succeeds. Image packages must be publicly readable before announcing a release. Verify an anonymous pull and repeat the quickstart using the released image references.

@@ -225,6 +225,63 @@ func TestMixedRuntimesUseCopyWithoutProbingOrChangingNodes(t *testing.T) {
 	}
 }
 
+func TestMixedArchitecturesRequireEveryNodeProbe(t *testing.T) {
+	ctx := context.Background()
+	amd64 := &core.Node{ObjectMeta: meta.ObjectMeta{Name: "amd64", UID: "amd64-node"}, Status: core.NodeStatus{NodeInfo: core.NodeSystemInfo{OperatingSystem: "linux", Architecture: "amd64", ContainerRuntimeVersion: "containerd://2.1.0", KubeletVersion: "v1.35.0"}}}
+	arm64 := amd64.DeepCopy()
+	arm64.Name, arm64.UID = "arm64", "arm64-node"
+	arm64.Status.NodeInfo.Architecture = "arm64"
+	client := fake.NewClientset(amd64, arm64)
+	client.Discovery().(*discoveryfake.FakeDiscovery).FakedServerVersion = &versioninfo.Info{GitVersion: "v1.35.0"}
+	c := &Capabilities{Kube: client, Namespace: "operator"}
+	check := func(wantNative, wantPending bool) {
+		t.Helper()
+		native, pending, err := c.Check(ctx, "payload:multiarch")
+		if err != nil || native != wantNative || pending != wantPending {
+			t.Fatalf("native=%v pending=%v err=%v; want native=%v pending=%v", native, pending, err, wantNative, wantPending)
+		}
+	}
+	check(false, true)
+	probes, err := client.CoreV1().Pods("operator").List(ctx, meta.ListOptions{})
+	if err != nil || len(probes.Items) != 2 {
+		t.Fatalf("expected a probe on each architecture: %v %v", probes, err)
+	}
+	// The fake client does not assign the API server's creation timestamp.
+	for i := range probes.Items {
+		probes.Items[i].CreationTimestamp = meta.Now()
+		if _, err := client.CoreV1().Pods("operator").Update(ctx, &probes.Items[i], meta.UpdateOptions{}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	seen := map[string]bool{}
+	for _, probe := range probes.Items {
+		seen[probe.Spec.NodeName] = true
+		if probe.Spec.Volumes[0].Image.Reference != "payload:multiarch" {
+			t.Fatal("probe must let each node resolve the same multiarch reference")
+		}
+		probe.Status.Phase = core.PodSucceeded
+		if _, err := client.CoreV1().Pods("operator").UpdateStatus(ctx, &probe, meta.UpdateOptions{}); err != nil {
+			t.Fatal(err)
+		}
+		check(len(seen) == 2, len(seen) != 2)
+	}
+	if !seen["amd64"] || !seen["arm64"] {
+		t.Fatal("missing architecture probe")
+	}
+	// A loader failure on either architecture must select the copy fallback.
+	failed := probes.Items[0].DeepCopy()
+	failed.Status.Phase = core.PodFailed
+	if _, err := client.CoreV1().Pods("operator").UpdateStatus(ctx, failed, meta.UpdateOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	check(false, false)
+	for _, action := range client.Actions() {
+		if action.GetResource().Resource == "nodes" && action.GetVerb() != "list" {
+			t.Fatalf("capability detection changed node scheduling: %v", action)
+		}
+	}
+}
+
 func TestHealthDoesNotAcceptOldReadyPodsDuringSurge(t *testing.T) {
 	current := testPolicy().Resolve("app", "DaemonSet", "agent")
 	obj := &unstructured.Unstructured{Object: map[string]any{

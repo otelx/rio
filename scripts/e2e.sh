@@ -21,7 +21,7 @@ if [[ ! "$cluster" =~ ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$ || ${#cluster} -gt 50 ]]; 
   printf 'Invalid test cluster name: %q\n' "$cluster" >&2
   exit 2
 fi
-for flag in "${REUSE_CLUSTER:-false}" "${KEEP_CLUSTER:-false}" "${IMAGE_VOLUME_ENABLED:-true}"; do
+for flag in "${REUSE_CLUSTER:-false}" "${KEEP_CLUSTER:-false}" "${IMAGE_VOLUME_ENABLED:-true}" "${LOAD_IMAGES:-true}"; do
   [[ "$flag" == true || "$flag" == false ]] || { printf 'Expected true or false, got %q\n' "$flag" >&2; exit 2; }
 done
 artifacts="$root/.artifacts/e2e/$cluster"
@@ -52,6 +52,8 @@ cleanup() {
   exit "$result"
 }
 trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 cat > "$artifacts/kind.yaml" <<EOF
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
@@ -59,11 +61,28 @@ featureGates:
   ImageVolume: ${IMAGE_VOLUME_ENABLED:-true}
 nodes:
   - role: control-plane
+  - role: worker
 EOF
-if [ "$create_cluster" = true ]; then
-  kind create cluster --name "$cluster" --image "$node_image" --config "$artifacts/kind.yaml" --kubeconfig "$KUBECONFIG" --wait 120s
+if [[ -n "${KIND_CONFIG:-}" ]]; then
+  cp -- "$KIND_CONFIG" "$artifacts/kind.yaml"
 fi
-kind load docker-image --name "$cluster" "$operator_image" "$payload_image"
+if [ "$create_cluster" = true ]; then
+  cluster_args=(--name "$cluster" --config "$artifacts/kind.yaml" --kubeconfig "$KUBECONFIG" --wait 180s)
+  if [[ -z "${KIND_CONFIG:-}" ]]; then cluster_args+=(--image "$node_image"); fi
+  kind create cluster "${cluster_args[@]}"
+fi
+if [[ "${LOAD_IMAGES:-true}" == true ]]; then
+  kind load docker-image --name "$cluster" "$operator_image" "$payload_image"
+fi
+kubectl get nodes -o json > "$artifacts/nodes.json"
+python3 - "$artifacts/nodes.json" "${EXPECT_ARCHITECTURES:-}" <<'PY'
+import json,sys
+nodes=json.load(open(sys.argv[1]))['items']
+actual={n['status']['nodeInfo']['architecture'] for n in nodes}
+if sys.argv[2]: assert actual==set(sys.argv[2].split(',')), actual
+assert all(n['status']['nodeInfo']['operatingSystem']=='linux' for n in nodes)
+print('Cluster architectures:', sorted(actual))
+PY
 "$component/scripts/install.sh" "$operator_image"
 if [ "$create_cluster" = false ]; then
   kubectl rollout restart deployment/rio -n rio-system
@@ -104,7 +123,7 @@ wait_phase() {
     kubectl get instrumentations.rio.otelx.github.io cluster -o json > "$artifacts/status.json"
     if python3 - "$artifacts/status.json" "$wanted" <<'PY'
 import json,sys
-w=json.load(open(sys.argv[1])).get('status',{}).get('workloads',[])
+w=[x for x in json.load(open(sys.argv[1])).get('status',{}).get('workloads',[]) if x['namespace']=='injector-component-test']
 sys.exit(0 if len(w)==3 and all(x['phase']==sys.argv[2] for x in w) else 1)
 PY
     then cp "$artifacts/status.json" "$artifacts/$wanted.json"; return 0; fi
@@ -117,10 +136,13 @@ PY
 kubectl apply -f "$artifacts/policy.json"
 wait_phase Ready
 kubectl get pods -n injector-component-test -o json > "$artifacts/injected-pods.json"
-python3 - "$artifacts/injected-pods.json" "${EXPECT_DELIVERY:-}" <<'PY'
+python3 - "$artifacts/injected-pods.json" "${EXPECT_DELIVERY:-}" "$artifacts/nodes.json" <<'PY'
 import json,sys
 pods=[p for p in json.load(open(sys.argv[1]))['items'] if not p['metadata'].get('deletionTimestamp')]
-assert len(pods)==3, len(pods)
+nodes=json.load(open(sys.argv[3]))['items']
+assert len(pods)==2+len(nodes), len(pods)
+daemon_nodes={p['spec']['nodeName'] for p in pods if p['metadata']['labels']['fixture']=='daemonset'}
+assert daemon_nodes=={n['metadata']['name'] for n in nodes}, daemon_nodes
 for p in pods:
     a=p['metadata']['annotations']; assert a['rio.otelx.github.io/applied-revision']==a['rio.otelx.github.io/revision']
     if sys.argv[2]: assert a['rio.otelx.github.io/delivery']==sys.argv[2], a
@@ -137,10 +159,10 @@ kubectl patch instrumentations.rio.otelx.github.io cluster --type=merge -p '{"sp
 wait_phase Ready
 kubectl delete instrumentations.rio.otelx.github.io cluster --wait=true --timeout=180s
 kubectl get pods -n injector-component-test -o json > "$artifacts/removed-pods.json"
-python3 - "$artifacts/removed-pods.json" <<'PY'
+python3 - "$artifacts/removed-pods.json" "$artifacts/nodes.json" <<'PY'
 import json,sys
 pods=[p for p in json.load(open(sys.argv[1]))['items'] if not p['metadata'].get('deletionTimestamp')]
-assert len(pods)==3
+assert len(pods)==2+len(json.load(open(sys.argv[2]))['items'])
 for pod in pods:
     assert not any(v['name']=='rio-payload' for v in pod['spec'].get('volumes',[]))
     assert not any(e['name']=='LD_PRELOAD' for c in pod['spec']['containers'] for e in c.get('env',[]))
@@ -149,40 +171,65 @@ PY
 kubectl logs deployment/rio -n rio-system > "$artifacts/operator.log"
 kubectl get nodes -o json > "$artifacts/nodes.json"
 kubectl get pods -n rio-system -o json > "$artifacts/capability-probes.json"
-# Verify the exact quickstart application also exports real HTTP spans.
+# Verify HTTP trace export from both glibc and musl application images.
 kubectl apply -f "$root/examples/quickstart/app.yaml"
 kubectl rollout status deployment/collector -n rio-telemetry --timeout=180s
-kubectl rollout status deployment/hello -n rio-example --timeout=180s
-# Baseline is uninstrumented before the namespace is selected.
-kubectl get pods -n rio-example -o json > "$artifacts/hello-before.json"
-python3 - "$artifacts/hello-before.json" <<'CHECK'
+mapfile -t architectures < <(python3 - "$artifacts/nodes.json" <<'PY'
+import json,sys
+print('\n'.join(sorted({n['status']['nodeInfo']['architecture'] for n in json.load(open(sys.argv[1]))['items']})))
+PY
+)
+for arch in "${architectures[@]}"; do
+  for libc in glibc musl; do
+    logs="$artifacts/$arch-$libc"
+    mkdir -p "$logs"
+    if [[ "$libc" == glibc ]]; then app_image=node:24; else app_image=node:24-alpine; fi
+    kubectl patch deployment/hello -n rio-example --type=merge -p "{\"spec\":{\"template\":{\"spec\":{\"nodeSelector\":{\"kubernetes.io/arch\":\"$arch\"}}}}}"
+    kubectl set image deployment/hello -n rio-example "hello=$app_image"
+    kubectl rollout status deployment/hello -n rio-example --timeout=180s
+    # Baseline is uninstrumented before the namespace is selected.
+    kubectl get pods -n rio-example -o json > "$logs/hello-before.json"
+    python3 - "$logs/hello-before.json" <<'CHECK'
 import json, sys
 for pod in json.load(open(sys.argv[1]))['items']:
+    if pod['metadata'].get('deletionTimestamp'): continue
     assert not any(e['name'] == 'LD_PRELOAD' for c in pod['spec']['containers'] for e in c.get('env', []))
 CHECK
-python3 - "$root/examples/quickstart/policy.yaml" "$payload_image" > "$artifacts/quickstart-policy.yaml" <<'RENDER'
+    python3 - "$root/examples/quickstart/policy.yaml" "$payload_image" > "$artifacts/quickstart-policy.yaml" <<'RENDER'
 from pathlib import Path
 import sys
 print(Path(sys.argv[1]).read_text().replace('ghcr.io/otelx/rio-payload:v0.1.0-alpha.1', sys.argv[2]))
 RENDER
-kubectl apply -f "$artifacts/quickstart-policy.yaml"
-kubectl wait --for=jsonpath='{.status.phase}'=Ready instrumentations.rio.otelx.github.io/cluster --timeout=300s
-kubectl exec -n rio-example deployment/hello -- node -e \
-  'const http=require("node:http"); for(let i=0;i<5;i++) http.get("http://127.0.0.1:8080/hello",r=>r.resume());'
-telemetry_verified=false
-for ((attempt=0; attempt<30; attempt++)); do
-  kubectl logs -n rio-telemetry deployment/collector > "$artifacts/collector.log"
-  if python3 - "$artifacts/collector.log" <<'CHECK'
+    kubectl apply -f "$artifacts/quickstart-policy.yaml"
+    kubectl wait --for=jsonpath='{.status.phase}'=Ready instrumentations.rio.otelx.github.io/cluster --timeout=300s
+    kubectl get pods -n rio-example -o json > "$logs/hello-injected.json"
+    python3 - "$logs/hello-injected.json" "${EXPECT_DELIVERY:-}" <<'CHECK'
+import json,sys
+pods=[p for p in json.load(open(sys.argv[1]))['items'] if not p['metadata'].get('deletionTimestamp')]
+assert len(pods)==1, len(pods)
+if sys.argv[2]: assert pods[0]['metadata']['annotations']['rio.otelx.github.io/delivery']==sys.argv[2]
+CHECK
+    # Start a fresh Collector so spans from the previous libc cannot pass this check.
+    kubectl rollout restart deployment/collector -n rio-telemetry
+    kubectl rollout status deployment/collector -n rio-telemetry --timeout=180s
+    kubectl exec -n rio-example deployment/hello -- node -e \
+      'const http=require("node:http"); for(let i=0;i<5;i++) http.get("http://127.0.0.1:8080/hello",r=>r.resume());'
+    telemetry_verified=false
+    for ((attempt=0; attempt<30; attempt++)); do
+      kubectl logs -n rio-telemetry deployment/collector > "$logs/collector.log"
+      if python3 - "$logs/collector.log" <<'CHECK'
 from pathlib import Path
 import sys
 text=Path(sys.argv[1]).read_text()
 assert 'service.name: Str(hello)' in text and 'Trace ID' in text and 'Kind           : Server' in text
 CHECK
-  then telemetry_verified=true; break; fi
-  sleep 2
+      then telemetry_verified=true; break; fi
+      sleep 2
+    done
+    [[ "$telemetry_verified" == true ]] || { printf 'No HTTP server spans found; see %s\n' "$logs/collector.log" >&2; exit 1; }
+    kubectl delete instrumentations.rio.otelx.github.io cluster --wait=true --timeout=180s
+  done
 done
-[[ "$telemetry_verified" == true ]] || { printf 'No HTTP server spans found; see %s\n' "$artifacts/collector.log" >&2; exit 1; }
-kubectl delete instrumentations.rio.otelx.github.io cluster --wait=true --timeout=180s
 # Exercise the documented removal path, including webhook and RBAC cleanup.
 "$component/scripts/uninstall.sh"
 if kubectl get crd instrumentations.rio.otelx.github.io >/dev/null 2>&1; then
