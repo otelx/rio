@@ -1,18 +1,12 @@
 # Quickstart
 
-Run this example in a new, disposable kind cluster. It uses a Node.js HTTP service
-and an OpenTelemetry Collector with the debug exporter. Successful completion
-shows HTTP spans produced by a language agent loaded through the Injector.
+Run this example in a new, disposable kind cluster. It uses a Node.js HTTP service and an OpenTelemetry Collector with the debug exporter. Successful completion shows HTTP spans produced by a language agent loaded through the Injector.
 
 ## Prerequisites
 
-Install Docker, [kind](https://kind.sigs.k8s.io/), kubectl, Git, Bash, Python 3,
-and OpenSSL. Docker must be running. The example uses Linux containers and
-Kubernetes 1.35. The release currently targets Linux amd64; see
-[compatibility](compatibility.md) for architecture limits.
+Install Docker, [kind](https://kind.sigs.k8s.io/), kubectl, Git, Bash, Python 3, and OpenSSL. Docker must be running. The example uses Linux containers and Kubernetes 1.35. The release currently targets Linux amd64; see [compatibility](compatibility.md) for architecture limits.
 
-Cluster creation, installation, and application rollout require cluster-admin
-access. Network access is needed to download container images.
+Cluster creation, installation, and application rollout require cluster-admin access. Network access is needed to download container images.
 
 ## 1. Create the cluster
 
@@ -27,8 +21,7 @@ kind create cluster --name rio-quickstart --image kindest/node:v1.35.0 \
 kubectl config current-context
 ```
 
-Keep `KUBECONFIG` set in this terminal for the following commands. RIO's install
-and uninstall scripts print and use the context selected when they start.
+Keep `KUBECONFIG` set in this terminal for the following commands. RIO's install and uninstall scripts print and use the context selected when they start.
 
 ## 2. Install RIO and the example
 
@@ -39,9 +32,7 @@ kubectl rollout status deployment/collector -n rio-telemetry --timeout=180s
 kubectl rollout status deployment/hello -n rio-example --timeout=180s
 ```
 
-At this point the application has no language agent. Its image contains only
-Node.js; its server source is supplied by a ConfigMap and contains no
-OpenTelemetry API calls.
+At this point the application has no language agent. Its image contains only Node.js; its server source is supplied by a ConfigMap and contains no OpenTelemetry API calls.
 
 ## 3. Select the application namespace
 
@@ -52,9 +43,7 @@ kubectl wait --for=jsonpath='{.status.phase}'=Ready \
 kubectl get instrumentations.rio.otelx.github.io cluster -o yaml
 ```
 
-RIO replaces the existing application Pod using its Deployment's rolling-update
-settings. The policy selects `rio-example`; the Collector runs in a different,
-unselected namespace. An agent rollout does not require an application rebuild.
+RIO replaces the existing application Pod using its Deployment's rolling-update settings. The policy selects `rio-example`; the Collector runs in a different, unselected namespace. An agent rollout does not require an application rebuild.
 
 Inspect the delivery method:
 
@@ -73,16 +62,11 @@ kubectl exec -n rio-example deployment/hello -- node -e \
 kubectl logs -n rio-telemetry deployment/collector --since=2m
 ```
 
-Allow a few seconds for export. The Collector debug output should include
-`service.name` with the value `hello`, an HTTP server span, and a trace ID.
-The policy enables traces and disables metrics and logs to keep this example
-focused. RIO's `Ready` status describes workload health and injection, not proof
-that a backend received telemetry; the Collector output supplies that evidence.
+Allow a few seconds for export. The Collector debug output should include `service.name` with the value `hello`, an HTTP server span, and a trace ID. The policy enables traces and disables metrics and logs to keep this example focused. RIO's `Ready` status describes workload health and injection, not proof that a backend received telemetry; the Collector output supplies that evidence.
 
 ## 5. Remove instrumentation and clean up
 
-Delete the policy while RIO is still running. Its finalizer waits for selected
-managed workloads to return to uninstrumented Pods:
+Delete the policy while RIO is still running. Its finalizer waits for selected managed workloads to return to uninstrumented Pods:
 
 ```bash
 kubectl delete instrumentations.rio.otelx.github.io cluster --timeout=300s
@@ -91,20 +75,13 @@ kind delete cluster --name rio-quickstart
 unset KUBECONFIG
 ```
 
-If removal times out, inspect the policy status and operator logs before retrying.
-Do not remove the finalizer to force a normal uninstall.
+If removal times out, inspect the policy status and operator logs before retrying. Do not remove the finalizer to force a normal uninstall.
 
 ## Troubleshooting
 
-- **Policy is not Ready:** inspect `kubectl get instrumentations.rio.otelx.github.io cluster -o yaml`
-  and `kubectl logs -n rio-system deployment/rio`.
+- **Policy is not Ready:** inspect `kubectl get instrumentations.rio.otelx.github.io cluster -o yaml` and `kubectl logs -n rio-system deployment/rio`.
 - **ImagePullBackOff:** verify registry access and the exact release tags in the policy.
-- **Healthy Pod but no spans:** generate fresh HTTP requests, inspect application
-  logs for agent startup, and check the OTLP endpoint. Signal support depends on
-  the language agent and the libraries used by the application.
-- **InjectionMissing:** inspect the webhook and operator availability. Admission
-  fails open on webhook outages; request a new revision with `spec.retryToken`
-  after correcting the cause.
+- **Healthy Pod but no spans:** generate fresh HTTP requests, inspect application logs for agent startup, and check the OTLP endpoint. Signal support depends on the language agent and the libraries used by the application.
+- **InjectionMissing:** inspect the webhook and operator availability. Admission fails open on webhook outages; request a new revision with `spec.retryToken` after correcting the cause.
 
-For a source build, use the commands in [development](development.md); do not
-substitute mutable image tags when testing updates or rollback.
+For a source build, use the commands in [development](development.md); do not substitute mutable image tags when testing updates or rollback.

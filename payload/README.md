@@ -1,12 +1,8 @@
 # RIO payload image
 
-This component builds the image consumed by
-[RIO](../README.md). It bundles the upstream
-OpenTelemetry Injector and agents for Java, Node.js, .NET, Python, and Ruby.
-The Injector detects the runtime when each application process starts.
+This component builds the image consumed by [RIO](../README.md). It bundles the upstream OpenTelemetry Injector and agents for Java, Node.js, .NET, Python, and Ruby. The Injector detects the runtime when each application process starts.
 
-One filesystem layout supports native Kubernetes image volumes and the
-init-container copy fallback:
+One filesystem layout supports native Kubernetes image volumes and the init-container copy fallback:
 
 ```text
 /dist/
@@ -19,11 +15,7 @@ init-container copy fallback:
   agents/ruby/{glibc,musl}/
 ```
 
-The operator mounts the image root at `/__otel_sdk_auto_instrumentation__`.
-For fallback, `/copy-to-volume.sh` copies `/dist` under the same mount path.
-The copy is repeatable after an interrupted init container and application mounts
-are read-only. Agent configuration, signal selection, and OTLP destination come
-from the operator; the image does not configure or install OBI.
+The operator mounts the image root at `/__otel_sdk_auto_instrumentation__`. For fallback, `/copy-to-volume.sh` copies `/dist` under the same mount path. The copy is repeatable after an interrupted init container and application mounts are read-only. Agent configuration, signal selection, and OTLP destination come from the operator; the image does not configure or install OBI.
 
 ## Inputs
 
@@ -38,19 +30,9 @@ from the operator; the image does not configure or install OBI.
 | .NET | Zero-Code package 1.17.0, both libc variants per architecture |
 | Ruby | Upstream commit `68af0a92d6d9c2cd0ee38a9327e98797673227d1`, Bundler lockfile |
 
-Downloads fail on a checksum mismatch. Python requirements derive from the
-upstream Operator v0.160.0 and include the HTTP/protobuf exporter, rather than a
-Python-version-dependent gRPC exporter. Node uses `npm ci`. Ruby uses a frozen
-Bundler dependency graph and a pinned upstream checkout. Its tiny local loader
-only locates the upstream entry point; it does not implement an SDK or change
-signal behavior. Python's `sitecustomize.py` calls the upstream Zero-Code loader.
+Downloads fail on a checksum mismatch. Python requirements derive from the upstream Operator v0.160.0 and include the HTTP/protobuf exporter, rather than a Python-version-dependent gRPC exporter. Node uses `npm ci`. Ruby uses a frozen Bundler dependency graph and a pinned upstream checkout. Its tiny local loader only locates the upstream entry point; it does not implement an SDK or change signal behavior. Python's `sitecustomize.py` calls the upstream Zero-Code loader.
 
-Python payloads are built on Python 3.14 and Ruby payloads on Ruby 3.3. Runtime,
-framework, libc, and native-extension compatibility still requires application
-testing; bundling five agents does not promise every runtime version or framework.
-Traces, metrics, and logs use the standard agent exporter configuration. Exporter
-availability and automatic capture of a particular signal are distinct: an
-application must use libraries that the corresponding agent instruments.
+Python payloads are built on Python 3.14 and Ruby payloads on Ruby 3.3. Runtime, framework, libc, and native-extension compatibility still requires application testing; bundling five agents does not promise every runtime version or framework. Traces, metrics, and logs use the standard agent exporter configuration. Exporter availability and automatic capture of a particular signal are distinct: an application must use libraries that the corresponding agent instruments.
 
 ## Build
 
@@ -67,40 +49,24 @@ Build both requested Linux architectures into one OCI archive:
 make -C payload archive
 ```
 
-This uses Docker Buildx and requires builders capable of executing amd64 and
-arm64 stages (native workers or emulation). Output goes to
-`.artifacts/images/payload.oci.tar`. To publish a multi-platform
-tag when a registry is available, explicitly run:
+This uses Docker Buildx and requires builders capable of executing amd64 and arm64 stages (native workers or emulation). Output goes to `.artifacts/images/payload.oci.tar`. To publish a multi-platform tag when a registry is available, explicitly run:
 
 ```bash
 make -C payload publish IMAGE=REGISTRY/rio-payload:VERSION
 ```
 
-No registry publishing is part of the normal local build. The build context is
-limited to this component; no presentation files are included.
+No registry publishing is part of the normal local build. The build context is limited to this component; no presentation files are included.
 
 ## Validation and updating
 
-Every image build runs `verify-layout.sh`, checking that all five agent payloads
-are present. Actual startup checks run through the Injector's `LD_PRELOAD` path:
+Every image build runs `verify-layout.sh`, checking that all five agent payloads are present. Actual startup checks run through the Injector's `LD_PRELOAD` path:
 
 ```bash
 PAYLOAD_IMAGE=ghcr.io/otelx/rio-payload:dev payload/scripts/smoke.sh
 ```
 
-The smoke test checks Java 21, Node 24, Python 3.14, Ruby 3.3, and a .NET 8 console
-fixture. It verifies that the agents initialize and that the copied-volume layout
-works. It disables exporters for these loader checks. It does not establish
-end-to-end signal export, cross-service propagation, or OBI coexistence; the quickstart integration test checks Node.js HTTP export. Test images, logs, and copied payload files
-are scoped to this component and `.artifacts/`.
+The smoke test checks Java 21, Node 24, Python 3.14, Ruby 3.3, and a .NET 8 console fixture. It verifies that the agents initialize and that the copied-volume layout works. It disables exporters for these loader checks. It does not establish end-to-end signal export, cross-service propagation, or OBI coexistence; the quickstart integration test checks Node.js HTTP export. Test images, logs, and copied payload files are scoped to this component and `.artifacts/`.
 
-To update dependencies, change the explicit inputs, regenerate lockfiles with
-`make lock` (Node/npm and `uv` required), refresh the Ruby lock with Bundler when
-changing its upstream revision, and rerun build/loader tests for both architectures.
-Update downloaded asset checksums from the corresponding upstream release metadata
-alongside their versions. Keep the image tag immutable once used by an operator.
+To update dependencies, change the explicit inputs, regenerate lockfiles with `make lock` (Node/npm and `uv` required), refresh the Ruby lock with Bundler when changing its upstream revision, and rerun build/loader tests for both architectures. Update downloaded asset checksums from the corresponding upstream release metadata alongside their versions. Keep the image tag immutable once used by an operator.
 
-The packaging layout is inspired by
-[Beyla's webhook image](https://github.com/grafana/beyla/tree/main/pkg/webhook/image).
-This image uses upstream OpenTelemetry agents, including the upstream Java agent.
-See [NOTICE](NOTICE) for source attribution.
+The packaging layout is inspired by [Beyla's webhook image](https://github.com/grafana/beyla/tree/main/pkg/webhook/image). This image uses upstream OpenTelemetry agents, including the upstream Java agent. See [NOTICE](NOTICE) for source attribution.

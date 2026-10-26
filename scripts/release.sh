@@ -32,11 +32,9 @@ git archive --format=tar.gz --prefix="rio-$version/" "$version" > ".artifacts/re
 cat > .artifacts/release/notes.md <<EOF
 RIO is an experimental Kubernetes operator for OpenTelemetry Zero-Code instrumentation.
 
-Select namespaces, detect supported runtimes through the upstream Injector, and
-manage instrumentation rollouts and recovery. This alpha targets Linux amd64.
+Select namespaces, detect supported runtimes through the upstream Injector, and manage instrumentation rollouts and recovery. This alpha targets Linux amd64.
 
-Start with the [quickstart](https://github.com/otelx/rio/blob/$version/docs/quickstart.md)
-and read the [compatibility limits](https://github.com/otelx/rio/blob/$version/docs/compatibility.md).
+Start with the [quickstart](https://github.com/otelx/rio/blob/$version/docs/quickstart.md) and read the [compatibility limits](https://github.com/otelx/rio/blob/$version/docs/compatibility.md).
 
 Images validated by this release workflow:
 

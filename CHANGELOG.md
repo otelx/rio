@@ -10,5 +10,4 @@ Initial experimental release of RIO, extracted from OpenTelemetry Far and Wide.
 - Managed rolling updates, persistent recovery state, and finalizer-based removal.
 - Standalone quickstart, compatibility reference, CI, and release automation.
 
-The API and payload contract are experimental. See
-[compatibility](docs/compatibility.md) for release limitations.
+The API and payload contract are experimental. See [compatibility](docs/compatibility.md) for release limitations.
