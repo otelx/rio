@@ -65,7 +65,9 @@ Every image build runs `verify-layout.sh`, checking that all five agent payloads
 PAYLOAD_IMAGE=ghcr.io/otelx/rio-payload:dev payload/scripts/smoke.sh
 ```
 
-The smoke test checks Java 21, Node 24, Python 3.14, Ruby 3.3, and a .NET 8 console fixture. It verifies that the agents initialize and that the copied-volume layout works. It disables exporters for these loader checks. It does not establish end-to-end signal export, cross-service propagation, or OBI coexistence; the quickstart integration test checks Node.js HTTP export. Test images, logs, and copied payload files are scoped to this component and `.artifacts/`.
+The smoke test checks Java 21, Node 24, Python 3.14, Ruby 3.3, and a .NET 8 console fixture in both glibc and Alpine/musl images. It verifies that the agents initialize and that the copied-volume layout works. `PLATFORM=linux/arm64` or `PLATFORM=linux/amd64` selects an architecture explicitly; executing a foreign architecture requires emulation. CI runs these checks on native workers for both architectures. Logs and copied files are separated by architecture under `.artifacts/image-smoke/`.
+
+Exporters are disabled for the loader checks. The integration test separately checks Node.js HTTP export with both libc variants and both delivery methods. These checks do not establish cross-service propagation or OBI coexistence. Test images, logs, and copied payload files are scoped to this component and `.artifacts/`.
 
 To update dependencies, change the explicit inputs, regenerate lockfiles with `make lock` (Node/npm and `uv` required), refresh the Ruby lock with Bundler when changing its upstream revision, and rerun build/loader tests for both architectures. Update downloaded asset checksums from the corresponding upstream release metadata alongside their versions. Keep the image tag immutable once used by an operator.
 
