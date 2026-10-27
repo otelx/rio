@@ -49,9 +49,9 @@ RIO does not instrument Go. OBI is a separate installation; coexistence is unval
 
 Use `ghcr.io/otelx/rio/operator:VERSION` and `ghcr.io/otelx/rio/instrumentation:VERSION` from the same full release, with its manifests and CRD. This includes policy rule overrides. Keep image references immutable and retain images needed for recovery. Custom builds and substituted agents are experimental.
 
-Mixed versions remain experimental. In-place upgrades or downgrades are unsupported until cross-release tests establish compatibility; [issue #6](https://github.com/otelx/rio/issues/6) tracks that work. Current recovery tests cover operator restarts within one release.
+The upgrade suite validates alpha.2 and alpha.3 to the candidate by preserving and refusing unsigned history, then cleaning up and explicitly resetting it before starting authenticated history. Follow the [tested upgrade procedure](configuration.md#upgrading-existing-releases), including an uninstrumented recovery baseline before changing payload images. Temporary diagnostic controller rollback must leave the candidate CRD, raw state, signature, and policy unchanged; available alpha.3 payload rollback is also tested. Historical controllers lack later safeguards, so follow the documented diagnostic restrictions. Other mixed versions and unvalidated transitions remain unsupported.
 
-To move between releases without reusing persisted state:
+For transitions outside those tested baselines, use a clean reset without reusing persisted state:
 
 1. Back up the policy, manifests, workload annotations, and image digests. Restrict access to backups containing configuration values.
 2. With the old operator running, remove selection and wait for managed workloads to become uninstrumented. Recreate admission-only Pods. Check replacement Pods for removal of RIO volumes, init containers, and injected environment settings.
@@ -71,7 +71,7 @@ Annotations under `rio.otelx.github.io/` store recovery state:
 
 | Location | Suffixes | Contents |
 | --- | --- | --- |
-| Workload metadata | `state` | Current/stable configurations, rollout phase, timing, failed revision |
+| Workload metadata | `state`, `state-signature` | Current/stable configurations, rollout phase, timing, failed revision |
 | Pod template | `configuration`, `revision`, `workload-uid` | Configuration snapshot, hash, owning workload |
 | Admitted Pod | Template annotations plus `applied-revision`, `delivery` | Applied revision and delivery method |
 
@@ -88,7 +88,7 @@ Use immutable payload tags or digests. Replacing bytes behind an existing image 
 ## Operational boundaries
 
 - One operator replica, with Recreate during its own upgrades; no leader election.
-- Self-signed webhook certificates created by the installer expire after one year; no automatic rotation. Reinstallation reuses the current Secret. Plan certificate replacement before expiration.
+- Self-signed webhook certificates created by the installer expire after one year; no automatic rotation. Reinstallation reuses the current Secret. Use the [tested renewal and recovery procedure](configuration.md#webhook-certificate-renewal) before expiration or to recover expired certificates.
 - The webhook uses `failurePolicy: Ignore`. A webhook outage can admit healthy uninstrumented Pods; status reports `InjectionMissing` for managed workloads.
 - Cluster-wide RBAC can patch supported workload templates and delete failed recovery Pods. Only trusted administrators should install RIO or change policy.
 - Policy `env` can resolve values from Secrets in selected application namespaces. Limit permission to edit the cluster policy accordingly.

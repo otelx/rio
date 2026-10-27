@@ -90,20 +90,71 @@ Rollback atomically makes the saved successful configuration the active authenti
 
 ### Migrating unsigned state and recovering the authority key
 
-Versions predating authenticated snapshots leave unsigned `state` annotations. RIO refuses to adopt that history automatically, because it cannot distinguish genuine old state from user-supplied configuration. Before upgrading a cluster with existing managed workloads, export their manifests and state, verify the saved successful configuration as a platform administrator, and set the central policy to the intended known-good configuration. Stop the old operator, remove the legacy `state` annotation on each managed workload and the `configuration`, `revision`, and `workload-uid` annotations on its Pod template, then start the new operator with the updated installation RBAC. This starts a new managed rollout under the central policy. Keep the old backup until the new rollout is healthy; the initial recovery baseline for this new history is uninstrumented. Existing Pods are replaced through normal rollout behavior.
+Versions predating authenticated snapshots leave unsigned `state` annotations. RIO refuses to adopt that history automatically, because it cannot distinguish genuine old state from user-supplied configuration. Export the policy, manifests, and state. With the old operator running, disable selection and verify healthy uninstrumented replacements with both current and stable configurations disabled. Stop the old operator, remove `state` and `state-signature` from those verified workload objects and `configuration`, `revision`, and `workload-uid` from their Pod templates, then install the candidate with updated RBAC. Reapply a known-good policy to start authenticated history with an uninstrumented recovery baseline. Keep the backup until this rollout is healthy. Never clear active or failed history as a shortcut around cleanup.
 
-Do not delete or rotate `rio-snapshot-authority` while retaining signed workload state. If the Secret is lost, restore the original key from a trusted backup before restarting the operator. If it cannot be restored, use the same explicit administrator verification and state reset procedure above, also removing `state-signature`. A new key cannot authenticate old recovery history. Invalid signatures and malformed state are reported as `Error` for the affected workload, without blocking policy admission or reconciliation for other workloads. Stale Pod snapshots are rejected instead of silently becoming trusted configuration.
+Do not delete or rotate `rio-snapshot-authority` while retaining signed workload state. Uninstalling the operator namespace deletes this key; preserve it for reinstall or explicitly reset verified disabled history before reinstalling. TLS certificate renewal preserves the separate authority Secret. If the Secret is lost, restore the original key from a trusted backup before restarting the operator. If it cannot be restored, use the same explicit administrator verification and state reset procedure above, also removing `state-signature`. A new key cannot authenticate old recovery history. Invalid signatures and malformed state are reported as `Error` for the affected workload, without blocking policy admission or reconciliation for other workloads. Stale Pod snapshots are rejected instead of silently becoming trusted configuration.
 
-## Retired image references
+<a id="upgrading-from-alpha1-or-alpha2"></a>
+<a id="retired-image-references"></a>
 
-If an existing manifest references a deleted image repository, replace it with the current path and a matching release tag:
+## Upgrading existing releases
+
+Replace any retired image references with the current repositories:
 
 | Component | Deleted repository | Current repository |
 | --- | --- | --- |
 | Operator | `ghcr.io/otelx/rio` | `ghcr.io/otelx/rio/operator` |
 | Instrumentation | `ghcr.io/otelx/rio-payload` | `ghcr.io/otelx/rio/instrumentation` |
 
-Check the operator Deployment, policy `spec.image`, rule overrides, automation, and registry mirrors. Saved recovery configurations can also reference deleted images. A cached image may disappear on rescheduling; retain a verified mirror if recovery needs it. Follow the [migration procedure](compatibility.md#operatorinstrumentation-versions-and-upgrades) before moving releases.
+The retired `ghcr.io/otelx/rio` and `ghcr.io/otelx/rio-payload` packages have been deleted. Source tags and release archives remain available, but the old images cannot be pulled from GHCR. Do not recreate or reschedule old instrumented Pods before migrating: both their saved configuration and last successful recovery revision can reference the deleted payload. An image still cached on a node is not a durable recovery source. Keep a copy of your policy manifest and workload objects, including annotations, before upgrading.
+
+The integration baselines are alpha.2 and alpha.3. Use this cleanup-first procedure for those releases; alpha.1 and other unvalidated transitions require the [clean reset](compatibility.md#operatorinstrumentation-versions-and-upgrades).
+
+1. If workloads are already `RollingBack`, wait for `RolledBack` or `RecoveryFailed` and inspect their status before proceeding. Temporarily replace the rules with a single `Skip` rule selecting `namespaces: ["*"]` and allow a sufficient cleanup deadline (for example `timeoutSeconds: 300`), keeping the operator, webhook, and CR running. For each previously managed workload, wait for `Disabled` and healthy replacement Pods without `rio-payload` volumes or `LD_PRELOAD`. Check that both `current.enabled` and `stable.enabled` in the workload's `rio.otelx.github.io/state` annotation are false. This establishes an uninstrumented recovery baseline without pulling the retired payload. Standalone Pods and other unsupported rollout resources must be recreated from their original, uninstrumented manifests while selection is disabled.
+2. Alpha.2 and alpha.3 history is unsigned. After the disabled baseline is verified, stop the historical operator and reset its bookkeeping as described in [unsigned-state migration](#migrating-unsigned-state-and-recovering-the-authority-key). Run the candidate's `./scripts/install.sh` with its operator image. This applies the CRD and installation resources and waits for the operator Deployment. It preserves the TLS Secret; use the renewal command below if certificates need replacement. Admission can be unavailable briefly during the single replica's Recreate rollout.
+3. Update `spec.image` **and every `rules[].image` override** in your saved policy to `ghcr.io/otelx/rio/instrumentation` with the intended immutable release tag or digest. Restore the desired rules and apply the policy. Update deployment automation and registry mirrors as well. Wait for `Ready`, then verify replacement Pods have matching `revision` and `applied-revision` annotations and use the intended payload. Once healthy, both current and stable snapshots should reference the new image. A failed first rollout recovers to the uninstrumented baseline, without requiring deleted packages.
+4. Verify real application telemetry. Recreate selected standalone Pods using the new policy. Keep the baseline and evidence until the upgrade is accepted.
+
+For example, save the policy and inspect state before disabling selection:
+
+```bash
+kubectl get instrumentations.rio.otelx.github.io cluster -o yaml > policy-before-upgrade.yaml
+kubectl get deployments,statefulsets,daemonsets -A -o yaml > workloads-before-upgrade.yaml
+kubectl patch instrumentations.rio.otelx.github.io cluster --type=merge -p '{"spec":{"timeoutSeconds":300,"rules":[{"name":"migration-baseline","selector":{"namespaces":["*"]},"action":"Skip"}]}}'
+kubectl get instrumentations.rio.otelx.github.io cluster -o yaml
+```
+
+Do not apply the exported status/resource metadata as a replacement manifest; edit your original policy manifest. Keep backups private if they contain application configuration. The integration suite verifies that an attempted upgrade before cleanup reports unsigned state as an error without overwriting successful or blocked history. It returns to the historical controller to establish the disabled baseline, then resets unsigned bookkeeping and upgrades. No historical annotation is automatically authorized.
+
+### Controller rollback and payload rollback
+
+The historical alpha.2 and alpha.3 controllers can read the candidate's CRD and configuration JSON, but cannot authenticate or issue signed rollout history. The integration suite exercises a temporary diagnostic rollback with unchanged policy/configuration and verifies that both raw state and its signature remain byte-for-byte unchanged before returning to the candidate. Do not change instrumentation policy or recovery state under a historical controller: any unsigned rewrite requires cleanup and explicit reset before returning to the candidate. Keep the authority Secret and candidate CRD intact. Historical controllers also lack current admission safeguards; restrict selection to named, noncritical application workloads during diagnosis. Use retained or privately mirrored images, never deleted GHCR packages. These tests do not establish general cross-version downgrade support.
+
+Payload rollback is an explicit policy update to an available, immutable image, including overrides. It changes the effective revision and goes through the normal readiness and recovery checks. The alpha.3 upgrade scenario explicitly switches the default and override images back to its retained alpha.3 fixture and then restores the candidate, checking admission and current/stable snapshots after each rollout. Restoring a saved annotation manually is unsupported. Rollback to the deleted alpha.1/alpha.2 payload packages is unsupported without a maintained mirror; the supported recovery when those images are unavailable is to disable selection, establish the uninstrumented baseline, and reapply a corrected policy under the new paths. A failed revision remains blocked until its effective configuration or `retryToken` changes. The test deliberately removes the historical payload fixture from every test node after cleanup and verifies that a failed migration still recovers.
+
+## Webhook certificate renewal
+
+The installer creates a one-year self-signed certificate and reuses it on reinstall. There is no automatic renewal. Monitor its expiration, schedule renewal at least 30 days before expiry, and use the candidate's supported single-replica renewal command in the intended kubectl context:
+
+```bash
+kubectl config current-context
+kubectl get secret rio-tls -n rio-system -o jsonpath='{.data.tls\.crt}' | base64 -d | openssl x509 -noout -dates -fingerprint -sha256
+./scripts/renew-certificates.sh
+```
+
+The command first adds overlapping old/new certificate trust to the webhook CA bundle, replaces `rio-tls`, and restarts the operator (the serving certificate is loaded at startup). It verifies the actual serving certificate through a local port-forward with TLS hostname and trust validation before replacing the CA bundle with only the new certificate. It requires kubectl access to read/update the Secret and webhook configuration, restart/read the Deployment, and port-forward Pods, plus OpenSSL and Python 3. Private keys are generated under private `.artifacts/renewal/` directories and removed on exit. Run one installer or renewal operation at a time per cluster. If interrupted, retain the overlapping trust and rerun the renewal command; do not delete the Secret or reduce trust by hand. An installer rerun is not a certificate renewal.
+
+The same command recovers an already expired certificate. The integration suite installs an expiring certificate and an expired one, observes real API-server admission (with `failurePolicy: Fail` only in its isolated test cluster), renews each, and verifies injected dry-run Pods and the final CA bundle. Production keeps `failurePolicy: Ignore`; during certificate failure or a single-replica restart, Pods can be admitted without instrumentation. Pause application rollouts if that gap is unacceptable. After renewal, inspect `InjectionMissing` workloads and change `spec.retryToken` to request fresh instrumented Pods. Recreate standalone Pods that missed injection. Deployment readiness alone does not prove certificate health or admission success.
+
+### Certificate and cleanup diagnostics
+
+Inspect the certificate dates with the command above, compare the Secret certificate with `webhooks[0].clientConfig.caBundle` in `kubectl get mutatingwebhookconfiguration rio -o yaml`, inspect `kubectl get endpointslices -n rio-system -l kubernetes.io/service-name=rio`, and check `kubectl logs -n rio-system deployment/rio`. Look for expired/not-yet-valid certificates, unknown authority, TLS handshake errors, missing endpoints, and `InjectionMissing`. Check cluster/node clocks for validity errors. Renew certificates rather than disabling TLS checks. Verify a newly created selected Pod has `rio.otelx.github.io/applied-revision` matching its expected revision, then verify application telemetry.
+
+For a policy stuck deleting, keep the operator, webhook, namespace, and CRD installed. Inspect the policy's per-workload phase/message, the workload's `rio.otelx.github.io/state`, rollout status, Pods, events, and controller logs. Restore working admission first. Fix unsupported rollout strategies, paused Deployments, resource shortages, image pull failures, or application readiness. `RollingBack` waits for recovery or its saved deadline; `RecoveryFailed` stops automatic retries. Correct the effective policy or retry token when the policy is still editable; deletion resolves toward an uninstrumented configuration. Do not remove revision/configuration/state annotations to retry a live instrumented workload: admission uses them to keep recovery consistent.
+
+If removal remains stuck, restore each affected workload from its original uninstrumented template while preserving application changes, and replace its Pods. Check that no live Pod has the `rio-payload` volume, copy init container, injected environment, or preload settings, including standalone Pods. Only after all affected Pods are verified uninstrumented may an administrator remove the `rio.otelx.github.io/remove-instrumentation` finalizer from the deleting policy, preserving any unrelated finalizers, and rerun `./scripts/uninstall.sh`. Removing the finalizer earlier can strand instrumented Pods and saved references. Never delete the CRD first as a cleanup shortcut.
+
+The steps above describe the image rename, not a validated in-place cross-release upgrade. For the supported migration approach and treatment of saved state, follow [operator/instrumentation versions and upgrades](compatibility.md#operatorinstrumentation-versions-and-upgrades). Cached retired images do not provide a durable recovery guarantee.
 
 ## Automatic payload delivery
 
