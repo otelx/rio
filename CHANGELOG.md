@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Support stable and prerelease SemVer publication with version-specific notes, draft reservations, collision refusal, and a documented failure/retry policy.
+- Publish image-index/architecture digests, source checksums, SPDX SBOMs, and authenticated artifact attestations; require anonymous quickstart checks on both architectures before announcing releases.
+- Preserve Go dependency notices and the Injector license in final images, include tested-image notice inventories in source distributions, and gate releases on a current redistribution review.
+
 - Retire and delete the original `ghcr.io/otelx/rio` and `ghcr.io/otelx/rio-payload` packages to make the current image names clear. Their alpha.1 and alpha.2 images can no longer be pulled from GHCR; use alpha.3 or later at `ghcr.io/otelx/rio/operator` and `ghcr.io/otelx/rio/instrumentation`. Source tags and release archives remain available.
 
 ## v0.1.0-alpha.3

@@ -2,7 +2,7 @@
 
 Run this example in a new, disposable kind cluster. It uses a Node.js HTTP service and an OpenTelemetry Collector with the debug exporter. Successful completion shows HTTP spans produced by a language agent loaded through the Injector.
 
-This example uses `v0.1.0-alpha.3` and its images, `ghcr.io/otelx/rio/operator` and `ghcr.io/otelx/rio/instrumentation`. For a local build, use the [source build instructions](development.md).
+This example uses `v0.1.0-alpha.3` and its images, `ghcr.io/otelx/rio/operator` and `ghcr.io/otelx/rio/instrumentation`. For a local build, use the [source build instructions](development.md). For releases produced by the protected publication workflow, follow [release verification and digest-based installation](releases.md#verify-and-install-by-digest) before installing. Earlier alphas do not contain those SBOM or provenance assets.
 
 ## Prerequisites
 
