@@ -18,6 +18,7 @@ version=${GITHUB_REF_NAME:?Expected a release tag}
 [[ "$version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$ ]] || {
   printf 'Expected an alpha version tag, got %q\n' "$version" >&2; exit 2;
 }
+"$root/scripts/check-release-source.sh"
 for file in scripts/install.sh config/install.yaml config/example.yaml examples/quickstart/policy.yaml docs/quickstart.md docs/configuration.md CHANGELOG.md; do
   grep -Fq -- "$version" "$file" || { printf 'Release reference missing from %s\n' "$file" >&2; exit 1; }
 done
