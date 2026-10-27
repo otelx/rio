@@ -344,11 +344,19 @@ CHECK
     # Start a fresh Collector so spans from the previous libc cannot pass this check.
     kubectl rollout restart deployment/collector -n rio-telemetry
     kubectl rollout status deployment/collector -n rio-telemetry --timeout=180s
+    kubectl get pods -n rio-telemetry -l app=collector -o json > "$logs/collector-pods.json"
+    collector_pod=$(python3 - "$logs/collector-pods.json" <<'CHECK'
+import json,sys
+pods=[p for p in json.load(open(sys.argv[1]))['items'] if not p['metadata'].get('deletionTimestamp')]
+assert len(pods)==1, 'Expected one active replacement Collector'
+print(pods[0]['metadata']['name'])
+CHECK
+)
     kubectl exec -n rio-example deployment/hello -- node -e \
       'const http=require("node:http"); for(let i=0;i<5;i++) http.get("http://127.0.0.1:8080/hello",r=>r.resume());'
     telemetry_verified=false
     for ((attempt=0; attempt<30; attempt++)); do
-      kubectl logs -n rio-telemetry deployment/collector > "$logs/collector.log"
+      kubectl logs -n rio-telemetry "$collector_pod" > "$logs/collector.log"
       if python3 - "$logs/collector.log" <<'CHECK'
 from pathlib import Path
 import sys
