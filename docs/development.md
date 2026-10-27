@@ -18,6 +18,7 @@ Go 1.25+, Docker with Buildx, Bash, kubectl, kind, Python 3, OpenSSL, and ShellC
 
 ```bash
 make test vet build
+make admission-e2e
 make images
 make smoke
 EXPECT_DELIVERY=imageVolume make e2e
@@ -28,7 +29,9 @@ CLUSTER_NAME=rio-fallback IMAGE_VOLUME_ENABLED=false EXPECT_DELIVERY=initContain
 
 Run clusters sequentially on a local machine. The integration script creates its own kind cluster and private kubeconfig, refuses to replace an existing cluster, and preserves failed runs for inspection. Successful runs remove their cluster. `KEEP_CLUSTER=true` preserves a successful run. To rerun a retained cluster, use `REUSE_CLUSTER=true` and its original `CLUSTER_NAME`; the saved private kubeconfig is required.
 
-The suite covers injection and removal on Deployments, StatefulSets, and DaemonSets, failed configuration, recovery, operator restart, correction, and real HTTP trace export from the quickstart service. Loader checks cover all five agents; they disable exporters and are distinct from telemetry verification.
+The admission suite creates a separate disposable kind cluster and runs the real TLS webhook against Kubernetes Pod creation requests. It covers startup, invalid policy, synchronization failure, missing owners, malformed workload state alongside a healthy selected workload, system namespace and critical-priority matching exclusions, explicit rejection with `failurePolicy: Ignore`, and transport failure with `Ignore`. It needs no payload images. Its host webhook endpoint uses the Linux Docker bridge gateway; run it on a Linux Docker host. Evidence is saved under `.artifacts/admission/`.
+
+The lifecycle suite covers injection and removal on Deployments, StatefulSets, and DaemonSets, failed configuration, recovery, operator restart, correction, and real HTTP trace export from the quickstart service. Loader checks cover all five agents; they disable exporters and are distinct from telemetry verification.
 
 CI builds each candidate architecture once and passes the same image archives to both delivery tests and release publication. Integration checks use two-node kind clusters on native amd64 and arm64 workers. Loader checks exercise all five agents with both glibc and musl, and integration checks verify Node.js HTTP export from both Debian and Alpine images. On a machine with arm64 emulation registered, `PLATFORM=linux/arm64 make smoke` selects the arm64 payload and fixtures explicitly. Logs are separated by architecture and libc under `.artifacts/image-smoke/`. A separate CI gate assembles multi-platform tags in a disposable registry and executes the controller and Injector on both architectures through those common tags before permitting a release.
 
