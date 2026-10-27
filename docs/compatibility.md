@@ -49,7 +49,7 @@ RIO does not instrument Go. OBI is a separate installation; coexistence is unval
 
 Use `ghcr.io/otelx/rio/operator:VERSION` and `ghcr.io/otelx/rio/instrumentation:VERSION` from the same full release, with its manifests and CRD. This includes policy rule overrides. Keep image references immutable and retain images needed for recovery. Custom builds and substituted agents are experimental.
 
-Mixed versions and in-place upgrades or downgrades are unsupported until cross-release tests establish compatibility; [issue #6](https://github.com/otelx/rio/issues/6) tracks that work. Current recovery tests cover operator restarts within one release.
+Mixed versions remain experimental. In-place upgrades or downgrades are unsupported until cross-release tests establish compatibility; [issue #6](https://github.com/otelx/rio/issues/6) tracks that work. Current recovery tests cover operator restarts within one release.
 
 To move between releases without reusing persisted state:
 
