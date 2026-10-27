@@ -1,0 +1,49 @@
+{
+  "scope": "Profiler ELF metadata from each pinned released asset; compiler comments do not identify every statically linked runtime object.",
+  "source_commit": "bb2d0ef0cfb64bbe0d9c88640848e4a92f263fd6",
+  "source_build": "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/bb2d0ef0cfb64bbe0d9c88640848e4a92f263fd6/src/OpenTelemetry.AutoInstrumentation.Native/CMakeLists.txt",
+  "build_observation": "The source links static libgcc and libstdc++; CoreCLR headers and spdlog/fmt are vendored. This is not a complete native dependency license approval.",
+  "artifacts": [
+    {
+      "arch": "amd64",
+      "path": "glibc/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so",
+      "sha256": "2f06332c7d2b523f9b719683a222b2b53870b0b123d02059c09531e00a3fe0af",
+      "elf_comments": "\nString dump of section '.comment':\n  [     0]  GCC: (Ubuntu 9.4.0-1ubuntu1~16.04) 9.4.0\n  [    29]  clang version 5.0.2-svn328729-1~exp1~20180509124008.99 (branches/release_50)\n\n",
+      "needed": [
+        "0x0000000000000001 (NEEDED)             Shared library: [libdl.so.2]",
+        "0x0000000000000001 (NEEDED)             Shared library: [libm.so.6]",
+        "0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]",
+        "0x0000000000000001 (NEEDED)             Shared library: [ld-linux-x86-64.so.2]"
+      ]
+    },
+    {
+      "arch": "amd64",
+      "path": "musl/linux-musl-x64/OpenTelemetry.AutoInstrumentation.Native.so",
+      "sha256": "386ba31e680ce3220e7caafd85c7b163cef7fad7fef3ee2ff16f8ef5c71be992",
+      "elf_comments": "\nString dump of section '.comment':\n  [     0]  GCC: (Alpine 15.2.0) 15.2.0\n  [    1c]  Alpine clang version 21.1.2\n\n",
+      "needed": [
+        "0x0000000000000001 (NEEDED)             Shared library: [libc.musl-x86_64.so.1]"
+      ]
+    },
+    {
+      "arch": "arm64",
+      "path": "glibc/linux-arm64/OpenTelemetry.AutoInstrumentation.Native.so",
+      "sha256": "9c570269558fdba2c2abb35b7d1dd4a7d45333baef3009244788fbeac6ee2c6b",
+      "elf_comments": "\nString dump of section '.comment':\n  [     0]  GCC: (Ubuntu 12.3.0-1ubuntu1~22.04.3) 12.3.0\n  [    2d]  Ubuntu clang version 14.0.0-1ubuntu1.1\n\n",
+      "needed": [
+        "0x0000000000000001 (NEEDED)             Shared library: [libm.so.6]",
+        "0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]",
+        "0x0000000000000001 (NEEDED)             Shared library: [ld-linux-aarch64.so.1]"
+      ]
+    },
+    {
+      "arch": "arm64",
+      "path": "musl/linux-musl-arm64/OpenTelemetry.AutoInstrumentation.Native.so",
+      "sha256": "68be211e748aeab58385c92b78512aca24c33fdc24f4dcb68d88bfbc2d5b18fb",
+      "elf_comments": "\nString dump of section '.comment':\n  [     0]  GCC: (Alpine 15.2.0) 15.2.0\n  [    1c]  Alpine clang version 21.1.2\n\n",
+      "needed": [
+        "0x0000000000000001 (NEEDED)             Shared library: [libc.musl-aarch64.so.1]"
+      ]
+    }
+  ]
+}
