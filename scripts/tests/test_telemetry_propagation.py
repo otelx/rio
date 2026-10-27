@@ -5,7 +5,7 @@ import sys
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from telemetry.propagation import check_headers, relationship
+from telemetry.propagation import check_headers, generated_traceparent, relationship
 
 
 class PropagationAssertions(unittest.TestCase):
@@ -51,3 +51,12 @@ class PropagationAssertions(unittest.TestCase):
                                          'tracestate': ['rio=state'], 'baggage': ['']}}}
         with self.assertRaises(AssertionError):
             check_headers(body, self.trace, self.client, 'rio=state', set())
+
+    def test_fresh_context_accepts_sampled_random_bit_without_allowing_reserved_flags(self):
+        for flags, suffix in [(257, '01'), (259, '03')]:
+            self.client['flags'] = flags
+            self.assertEqual(generated_traceparent(self.client), f'00-{self.trace}-{self.client["spanId"]}-{suffix}')
+        for flags in (0, 2, 5, 255):
+            self.client['flags'] = flags
+            with self.assertRaises(AssertionError):
+                generated_traceparent(self.client)

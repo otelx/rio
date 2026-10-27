@@ -10,6 +10,14 @@ def baggage_values(headers):
     return {part.strip() for value in headers.get('baggage', []) for part in value.split(',') if part.strip()}
 
 
+def generated_traceparent(client):
+    # Fresh Java roots set W3C Level 2's Random bit as well as Sampled (03).
+    # https://www.w3.org/TR/trace-context-2/#trace-flags
+    flags = int(client['flags']) & 0xff
+    assert flags & 1 and not flags & ~3, client
+    return f'00-{client["traceId"]}-{client["spanId"]}-{flags:02x}'
+
+
 def relationship(records, caller, callee, first, second, incoming=None):
     parent = server_span(records, caller, first)
     child = server_span(records, callee, second)
@@ -90,7 +98,7 @@ def run(h):
                         assert parent['traceId'] not in {case[0] for case in cases}, parent
                         assert not body['downstream']['headers'].get('tracestate'), body
                         assert not baggage_values(body['downstream']['headers']), body
-                        assert body['downstream']['headers']['traceparent'] == [f'00-{parent["traceId"]}-{client["spanId"]}-01']
+                        assert body['downstream']['headers']['traceparent'] == [generated_traceparent(client)], body
                     # An unsampled incoming parent must stay unsampled with parentbased_always_on.
                     trace, remote, first, second = uuid.uuid4().hex, uuid.uuid4().hex[:16], uuid.uuid4().hex, uuid.uuid4().hex
                     body = h.request(names[caller], first, {'traceparent': f'00-{trace}-{remote}-00'},
