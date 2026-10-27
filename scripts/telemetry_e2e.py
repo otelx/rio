@@ -158,6 +158,14 @@ class Harness:
             'spec': {'image': self.payload, 'endpoint': 'http://collector.rio-telemetry.svc:4318',
                      'signals': signals, 'timeoutSeconds': 300,
                      'env': [{'name': k, 'value': v} for k, v in agent_env.items()], 'rules': [rule]}})
+        def observed():
+            policy = json.loads(self.kube('get', 'instrumentations.rio.otelx.github.io', 'cluster', '-o', 'json'))
+            assert policy.get('status', {}).get('observedGeneration') == policy['metadata']['generation'], policy.get('status')
+            assert policy['status']['phase'] == 'Ready', policy['status']
+        # Reconcile publishes the shared admission snapshot before this status.
+        # A new Pod must not start briefly with the preceding signal settings
+        # and leave its runtime metrics in the new service's negative control.
+        self.poll(observed, timeout=180)
 
     def deploy(self, lang, libc, name, injected):
         env = {'OTEL_SERVICE_NAME': name}
