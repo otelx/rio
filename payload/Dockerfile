@@ -7,6 +7,9 @@ ARG TARGETARCH
 WORKDIR /build
 COPY versions.json scripts/download.py ./
 RUN python download.py versions.json "$TARGETARCH" /payload
+COPY scripts/check_managed_notices.py ./
+COPY licenses/dotnet/managed/ /managed-notices/
+RUN python check_managed_notices.py /payload/dotnet /managed-notices versions.json
 
 FROM downloads AS alpine-sources
 ARG RUNTIME_IMAGE

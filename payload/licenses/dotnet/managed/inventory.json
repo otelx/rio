@@ -1,0 +1,3392 @@
+{
+  "schema": 1,
+  "scope": "Managed DLLs only; native profiler and runtime review remains separate. Both architectures have identical managed bytes.",
+  "upstream": {
+    "version": "1.17.0",
+    "assets": {
+      "opentelemetry-dotnet-instrumentation-linux-glibc-arm64.zip": {
+        "url": "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.17.0/opentelemetry-dotnet-instrumentation-linux-glibc-arm64.zip",
+        "sha256": "d7dc0d8f6562eb12108eaf896c277e536133259d49545e3e2545be3ea7a14144"
+      },
+      "opentelemetry-dotnet-instrumentation-linux-glibc-x64.zip": {
+        "url": "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.17.0/opentelemetry-dotnet-instrumentation-linux-glibc-x64.zip",
+        "sha256": "cc56878f0155e28b6554924fbd420fcb8bec7108cd9d41836dc530764ac923f8"
+      },
+      "opentelemetry-dotnet-instrumentation-linux-musl-arm64.zip": {
+        "url": "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.17.0/opentelemetry-dotnet-instrumentation-linux-musl-arm64.zip",
+        "sha256": "27c6315949490ec198025988d48d34c9720066c5dad31ca5769f23f5e2663d27"
+      },
+      "opentelemetry-dotnet-instrumentation-linux-musl-x64.zip": {
+        "url": "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.17.0/opentelemetry-dotnet-instrumentation-linux-musl-x64.zip",
+        "sha256": "36eb55ce2f7a9da8ffd70ccbd97761a1917d7f57709f1a6ca9e7029dfa120516"
+      }
+    }
+  },
+  "source_project": {
+    "commit": "bb2d0ef0cfb64bbe0d9c88640848e4a92f263fd6",
+    "materials": [
+      "e880d1303edfe7b0630d063aa6e4a50cd40df83820dd3b86fc6bad9aeb12d93c.txt"
+    ]
+  },
+  "packages": {
+    "Google.Protobuf/3.36.2": {
+      "url": "https://api.nuget.org/v3-flatcontainer/google.protobuf/3.36.2/google.protobuf.3.36.2.nupkg",
+      "sha256": "1182590db175f9057707857a1df48b217226d0732716cd353fa4aa4683d38dcb",
+      "license": {
+        "type": "expression",
+        "value": "BSD-3-Clause"
+      },
+      "materials": [
+        "6e5e117324afd944dcf67f36cf329843bc1a92229a8cd9bb573d7a83130fea7d.txt",
+        "a810b27a73254dae1de716c30cea9ffd6b6754d561ad5ce2ce4564c17ecd512f.txt"
+      ]
+    },
+    "Microsoft.Extensions.Configuration/10.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration/10.0.0/microsoft.extensions.configuration.10.0.0.nupkg",
+      "sha256": "32c2ec9153e9902be8bf9f835886802c2b75a9f4515f8bb6dbc787c6fa44d1d8",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "34693997ad3738ce76702051669f5380fb7c6614804804102b10ec7a704a6ca1.txt",
+        "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21.txt",
+        "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310.txt"
+      ]
+    },
+    "Microsoft.Extensions.Configuration/8.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration/8.0.0/microsoft.extensions.configuration.8.0.0.nupkg",
+      "sha256": "f413ec012971ad5f229663028dd6f74e251c9b9bc56719019c023f7cd0521320",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "19c19dcac9f3ee6302cfbc6745bb8e79f08efc4c933eb8dc5509bf14b88347ec.txt",
+        "d2031d205a8b0653a1aee7c63d9cd021c249f3611934e02da8968c0839095e0a.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt"
+      ]
+    },
+    "Microsoft.Extensions.Configuration/9.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration/9.0.0/microsoft.extensions.configuration.9.0.0.nupkg",
+      "sha256": "b812de6f8cfad32f33ecd7a51ecf6e4f770b0fac0e0e4770c9f266ebf6192c33",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "40686c6447a7d5b5d3693068e4571b5f483d7ed335aeee773ef662440de4c5d5.txt",
+        "48656b0b0004dade4132e7c19a47a4d9bc011bb09e90c994a1491d3b389afab8.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt"
+      ]
+    },
+    "Microsoft.Extensions.Configuration.Abstractions/10.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.abstractions/10.0.0/microsoft.extensions.configuration.abstractions.10.0.0.nupkg",
+      "sha256": "19c82b9d302278257b0154f5df3c8e8dfc302fce9ef7d8a23bf32230ec4f186d",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21.txt",
+        "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310.txt",
+        "d8124af5988bf172eff7d8469a0e16bf7c5253530440b4ca6ba18a4890740f9c.txt"
+      ]
+    },
+    "Microsoft.Extensions.Configuration.Abstractions/8.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.abstractions/8.0.0/microsoft.extensions.configuration.abstractions.8.0.0.nupkg",
+      "sha256": "e1e0690e47fb309a334d99cec10bf071f81129019c3577b42bf905fa1e5197ca",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "19c19dcac9f3ee6302cfbc6745bb8e79f08efc4c933eb8dc5509bf14b88347ec.txt",
+        "93dee1a923d8435a77fb5020f0de7c2949b678f65b7d354f82190ad06a084eb1.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt"
+      ]
+    },
+    "Microsoft.Extensions.Configuration.Abstractions/9.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.abstractions/9.0.0/microsoft.extensions.configuration.abstractions.9.0.0.nupkg",
+      "sha256": "c6d1b65120bd426d1fd8d9fa8e4724969c840d3de170464ec4ec137347a9eee7",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "40686c6447a7d5b5d3693068e4571b5f483d7ed335aeee773ef662440de4c5d5.txt",
+        "64f0a4e16ce4e61ff48799142c64d75dced40d2bc7e387e765af0966cf20759d.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt"
+      ]
+    },
+    "Microsoft.Extensions.Configuration.Binder/10.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.binder/10.0.0/microsoft.extensions.configuration.binder.10.0.0.nupkg",
+      "sha256": "612896a00dd5411db693af9b484014a9e1bb503cd99497c75834ee6d43b957c5",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "10a186eb097268352bfaa01d9e78256557f8c3ef7fc0a370d05fc8952b03dca4.txt",
+        "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21.txt",
+        "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310.txt"
+      ]
+    },
+    "Microsoft.Extensions.Configuration.Binder/8.0.2": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.binder/8.0.2/microsoft.extensions.configuration.binder.8.0.2.nupkg",
+      "sha256": "68607456ea02df861a74012aaf0a1a5cb739aa56b9e69b300d5db12d2991ed21",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "b60b2912da28eaa6518593c9e2efb5334ee062d3c42e80d8fdfa806b3dc52977.txt",
+        "d0ce26f2700ff95f522f5f4d7d388cc388744bcb6eafccf49309824b4ed6e920.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt"
+      ]
+    },
+    "Microsoft.Extensions.Configuration.Binder/9.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.binder/9.0.0/microsoft.extensions.configuration.binder.9.0.0.nupkg",
+      "sha256": "e9a8d859c34e417d96a9fb609e852656dcaf0b59243ceb530a27f80222847df5",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "40686c6447a7d5b5d3693068e4571b5f483d7ed335aeee773ef662440de4c5d5.txt",
+        "85e9c3963962646d7ceaa39eae0ed434978d37a9df5d7a5a3ba19f33e32ddc70.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt"
+      ]
+    },
+    "Microsoft.Extensions.Configuration.EnvironmentVariables/10.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.environmentvariables/10.0.0/microsoft.extensions.configuration.environmentvariables.10.0.0.nupkg",
+      "sha256": "51ac9f7aaac098dc9f3a4ba170129f8fc5298d0a95fd932a5ab0f2c42486d4c0",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21.txt",
+        "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310.txt",
+        "d983844f640f57fe17180056f9720d4380ace835d4d66e79747b04357862e7f9.txt"
+      ]
+    },
+    "Microsoft.Extensions.Configuration.EnvironmentVariables/8.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.environmentvariables/8.0.0/microsoft.extensions.configuration.environmentvariables.8.0.0.nupkg",
+      "sha256": "f9b8c566fa82b0c7f6151336a25ab1fdfb9bf90c1f335901863195393e470b8f",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "19c19dcac9f3ee6302cfbc6745bb8e79f08efc4c933eb8dc5509bf14b88347ec.txt",
+        "2819c2e9c646fd6c214bf2afd6478d59772bd6beefa8081af29159fe1f1f7d3a.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt"
+      ]
+    },
+    "Microsoft.Extensions.Configuration.EnvironmentVariables/9.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.environmentvariables/9.0.0/microsoft.extensions.configuration.environmentvariables.9.0.0.nupkg",
+      "sha256": "b43271da9ad8669af444a4b09897ec2bd165506c1a0e6cae4b3da4a90c6c5a82",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "40686c6447a7d5b5d3693068e4571b5f483d7ed335aeee773ef662440de4c5d5.txt",
+        "72ece9dfb0adae73b18a8bc412a776b45d58e1595486f7c3de0c2c712ba84c66.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt"
+      ]
+    },
+    "Microsoft.Extensions.DependencyInjection/10.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.dependencyinjection/10.0.0/microsoft.extensions.dependencyinjection.10.0.0.nupkg",
+      "sha256": "2d89bd855968fd1f5cd9a00a1ec0d8279bd8f54d3edc9bdc9667b7a2edc1b6f4",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "0f3b7bc57edb81ae05a1c59b0828d99cd2c1bd6b5de34dcce9b7519081461904.txt",
+        "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21.txt",
+        "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310.txt"
+      ]
+    },
+    "Microsoft.Extensions.DependencyInjection/8.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.dependencyinjection/8.0.0/microsoft.extensions.dependencyinjection.8.0.0.nupkg",
+      "sha256": "faa20347c851ceb7821cd103b5470f7d51d076eaf358fa3f9aabe2087efcf844",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "19c19dcac9f3ee6302cfbc6745bb8e79f08efc4c933eb8dc5509bf14b88347ec.txt",
+        "cb12025ac9f22cc8f19028bc68a02f89507580ab390c6dd9e65e052c3bcdcd53.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt"
+      ]
+    },
+    "Microsoft.Extensions.DependencyInjection/9.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.dependencyinjection/9.0.0/microsoft.extensions.dependencyinjection.9.0.0.nupkg",
+      "sha256": "7401f9d8f3e54cb9fb5fed5a23fee7a5dac3ccc1053cc5d1bf88ac5756bed789",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "40686c6447a7d5b5d3693068e4571b5f483d7ed335aeee773ef662440de4c5d5.txt",
+        "53634709a58159c8387a7bd77f1849d5d6f7d6a913c28e087e5dbd83a6687bb0.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt"
+      ]
+    },
+    "Microsoft.Extensions.DependencyInjection.Abstractions/10.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.dependencyinjection.abstractions/10.0.0/microsoft.extensions.dependencyinjection.abstractions.10.0.0.nupkg",
+      "sha256": "f62a1d5cfdfd62a831a269ce3cec5dfe6cdb1b425f3925f3168354de8993d8fb",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21.txt",
+        "9e13d9b543405e86955f6b047a1d7680684fa37f4ec094f4bad6e33ba775c0db.txt",
+        "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310.txt"
+      ]
+    },
+    "Microsoft.Extensions.DependencyInjection.Abstractions/8.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.dependencyinjection.abstractions/8.0.0/microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg",
+      "sha256": "ef92b31065a36d110b7332690a226e6fe96d35430c6f3e40ff529053ee5d80ff",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "19c19dcac9f3ee6302cfbc6745bb8e79f08efc4c933eb8dc5509bf14b88347ec.txt",
+        "5e666a909af764ae8ab3faeeccc2773187d4ca4155d5d756356cad6766443f51.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt"
+      ]
+    },
+    "Microsoft.Extensions.DependencyInjection.Abstractions/9.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.dependencyinjection.abstractions/9.0.0/microsoft.extensions.dependencyinjection.abstractions.9.0.0.nupkg",
+      "sha256": "0a7715c24299e42b081b63b4f8e33da97b985e1de9e941b2b9e4c748b0d52fe7",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "40686c6447a7d5b5d3693068e4571b5f483d7ed335aeee773ef662440de4c5d5.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt",
+        "eda64b8d4359a8bfd67eab97c8da24699e723c07751698482417537c635f09ae.txt"
+      ]
+    },
+    "Microsoft.Extensions.Diagnostics.Abstractions/10.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.diagnostics.abstractions/10.0.0/microsoft.extensions.diagnostics.abstractions.10.0.0.nupkg",
+      "sha256": "722c7b43143f837b23eab797bb78e7d1c46fd918a3cdc79a2cb91c844193b791",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "341c0a1750db316a932c601ec1282596eae2c478fd39ed877eeb1f3802cad23f.txt",
+        "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21.txt",
+        "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310.txt"
+      ]
+    },
+    "Microsoft.Extensions.Diagnostics.Abstractions/8.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.diagnostics.abstractions/8.0.0/microsoft.extensions.diagnostics.abstractions.8.0.0.nupkg",
+      "sha256": "5120f9b9939a6a132a8babbba30356c7f2d1e040eb3b0a8fac00229bb891a496",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "19c19dcac9f3ee6302cfbc6745bb8e79f08efc4c933eb8dc5509bf14b88347ec.txt",
+        "92d994ee380c3621dd1cc9bf71707e46be7b38ffc6f0aa2094efb489c6127b98.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt"
+      ]
+    },
+    "Microsoft.Extensions.Diagnostics.Abstractions/9.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.diagnostics.abstractions/9.0.0/microsoft.extensions.diagnostics.abstractions.9.0.0.nupkg",
+      "sha256": "c06d4b7044fe30f46351dcf71c83931d51276c6fc8345254ab33c4ac233bf5e6",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "40686c6447a7d5b5d3693068e4571b5f483d7ed335aeee773ef662440de4c5d5.txt",
+        "9ffb2cd3eb19b9438731b8ecbeea51a6d816c00f73f7669c532c28476fcf5000.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt"
+      ]
+    },
+    "Microsoft.Extensions.Logging/10.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging/10.0.0/microsoft.extensions.logging.10.0.0.nupkg",
+      "sha256": "3feccf01a74b2fade4fc6a8adf8fea0a1a908d8f5a211c597f1941f65aac4abb",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21.txt",
+        "a98260030de003de5c14cb84e56a8bbc9937df42e3174e627e683fe64beace23.txt",
+        "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310.txt"
+      ]
+    },
+    "Microsoft.Extensions.Logging/8.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging/8.0.0/microsoft.extensions.logging.8.0.0.nupkg",
+      "sha256": "31e8746745fb2b23841b897445605cb871e285c00172f0b27d45e06ac990f75a",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "19c19dcac9f3ee6302cfbc6745bb8e79f08efc4c933eb8dc5509bf14b88347ec.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt",
+        "e19a61bfe08181bfd77de79dfdaad7c382007ef321eafd0b429453ad60fc70a2.txt"
+      ]
+    },
+    "Microsoft.Extensions.Logging/9.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging/9.0.0/microsoft.extensions.logging.9.0.0.nupkg",
+      "sha256": "911d7a73e37c9d0ad67982da8ea9d73e0ed18978d931214b9ca2c4b3855f8dc3",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "2fe42588885a138c915a7f227a1b68edc232bbed83139c899fde40dc9db6597d.txt",
+        "40686c6447a7d5b5d3693068e4571b5f483d7ed335aeee773ef662440de4c5d5.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt"
+      ]
+    },
+    "Microsoft.Extensions.Logging.Abstractions/10.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.abstractions/10.0.0/microsoft.extensions.logging.abstractions.10.0.0.nupkg",
+      "sha256": "067860199734d47c134b1a206afabb51eab857b88c037c0f9db7d1c10e118469",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "126d33e134dcbe6a65a969b93e2faa3dcf73dbc460c307e783b4f719eed12688.txt",
+        "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21.txt",
+        "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310.txt"
+      ]
+    },
+    "Microsoft.Extensions.Logging.Abstractions/8.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.abstractions/8.0.0/microsoft.extensions.logging.abstractions.8.0.0.nupkg",
+      "sha256": "26675d8de83c5394be8814f046554054b7881f1738cabacd82a54c381ec48cce",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "19c19dcac9f3ee6302cfbc6745bb8e79f08efc4c933eb8dc5509bf14b88347ec.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt",
+        "e49e6e9827ea70fb0f7c8162aa4356a1d2d211157851ba3faeb2cbacbba913f5.txt"
+      ]
+    },
+    "Microsoft.Extensions.Logging.Abstractions/9.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.abstractions/9.0.0/microsoft.extensions.logging.abstractions.9.0.0.nupkg",
+      "sha256": "8814ecf6dc2359715e111b78084ae42087282595358eb775456088f15e63eca5",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "40686c6447a7d5b5d3693068e4571b5f483d7ed335aeee773ef662440de4c5d5.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt",
+        "ece339d8d2d362ccb64382b97e77c30902dccc08057281300feb86b8d566f8a2.txt"
+      ]
+    },
+    "Microsoft.Extensions.Logging.Configuration/10.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.configuration/10.0.0/microsoft.extensions.logging.configuration.10.0.0.nupkg",
+      "sha256": "eff4d63b56aaf217606dc4c42830562238120bd2a914dde4467317fb5d9b3a45",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21.txt",
+        "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310.txt",
+        "d19e44fe80416905850f91045907bcfb23de39a8cb9b96b9d6a55a795ddf3807.txt"
+      ]
+    },
+    "Microsoft.Extensions.Logging.Configuration/8.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.configuration/8.0.0/microsoft.extensions.logging.configuration.8.0.0.nupkg",
+      "sha256": "9b39acb4db158ca4f412d41c740ba419189f0f7d13f3604c198952bbc9382bb5",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "19c19dcac9f3ee6302cfbc6745bb8e79f08efc4c933eb8dc5509bf14b88347ec.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt",
+        "e28c774e4ea6fbe0d0ba5ae6d49649af8e2255eee971e45e9d08e59fa9d86f13.txt"
+      ]
+    },
+    "Microsoft.Extensions.Logging.Configuration/9.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.configuration/9.0.0/microsoft.extensions.logging.configuration.9.0.0.nupkg",
+      "sha256": "cac3e306aeb8a7a24ce0499e56776bc979e12d61d862ccf3955a4fc515a4524c",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "40686c6447a7d5b5d3693068e4571b5f483d7ed335aeee773ef662440de4c5d5.txt",
+        "7d023edd365397263d06a654a568ea6df9a3034903cf8ecd3e378a31d4a65dfe.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt"
+      ]
+    },
+    "Microsoft.Extensions.Options/10.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options/10.0.0/microsoft.extensions.options.10.0.0.nupkg",
+      "sha256": "8f930ea9948a794b71c739998f364c1b2d2f10b1ddbcfadaab04d0410355b180",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21.txt",
+        "7209d42974a0de402e1eec4c5099c48c6f1f83d08b36016c710e8dc23c9e1eff.txt",
+        "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310.txt"
+      ]
+    },
+    "Microsoft.Extensions.Options/8.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options/8.0.0/microsoft.extensions.options.8.0.0.nupkg",
+      "sha256": "9f69b82527a040a51394eb0a2d95141c728cabddba789d30f4df46f88dc5a05c",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "19c19dcac9f3ee6302cfbc6745bb8e79f08efc4c933eb8dc5509bf14b88347ec.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt",
+        "e843f26e0d5ea5596177e076996848430baebdfbf7c59c64818d1c1c9a7495bf.txt"
+      ]
+    },
+    "Microsoft.Extensions.Options/9.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options/9.0.0/microsoft.extensions.options.9.0.0.nupkg",
+      "sha256": "0d3e5eb80418fc8b41e4b3c8f16229e839ddd254af0513f7e6f1643970baf1c9",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "40686c6447a7d5b5d3693068e4571b5f483d7ed335aeee773ef662440de4c5d5.txt",
+        "635f2f0ca6f89a8d7477be9150fc251d35fe6c53fa94024e379227ae9f0f63d0.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt"
+      ]
+    },
+    "Microsoft.Extensions.Options.ConfigurationExtensions/10.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options.configurationextensions/10.0.0/microsoft.extensions.options.configurationextensions.10.0.0.nupkg",
+      "sha256": "5c602ce43c4cbd69e68d7f1da91c0a634becb92e34487bec7c9a81d6b3b82fb9",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "30ba601042f9ea75eef8de3826fa8fbdd41f1bd935c38c76dc0ebc74d828cb07.txt",
+        "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21.txt",
+        "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310.txt"
+      ]
+    },
+    "Microsoft.Extensions.Options.ConfigurationExtensions/8.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options.configurationextensions/8.0.0/microsoft.extensions.options.configurationextensions.8.0.0.nupkg",
+      "sha256": "03905bcf0d6488d9208ab939c7c932c7083d94b4dc4a78288de0fea1ca46d512",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "19c19dcac9f3ee6302cfbc6745bb8e79f08efc4c933eb8dc5509bf14b88347ec.txt",
+        "58bf5d5d51441edd347859a910ea57f5e2526741ddd6d72734ac61cdcebfcd85.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt"
+      ]
+    },
+    "Microsoft.Extensions.Options.ConfigurationExtensions/9.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options.configurationextensions/9.0.0/microsoft.extensions.options.configurationextensions.9.0.0.nupkg",
+      "sha256": "af5677b04552223787d942a3f8a323f3a85aafaf20ff3c9b4aaa128c44817280",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "40686c6447a7d5b5d3693068e4571b5f483d7ed335aeee773ef662440de4c5d5.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt",
+        "e0d4efcce675fd1bbe23faefa8405a7702edaf9ab3292b0b159eabf50a5f7eb2.txt"
+      ]
+    },
+    "Microsoft.Extensions.Primitives/10.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.primitives/10.0.0/microsoft.extensions.primitives.10.0.0.nupkg",
+      "sha256": "0eea74f0a729b4b8e59e9379b79ffffa9e27f0551381102ae27ff0d6ceaeb3e2",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "01892e3b694e60d0fbbc2920f600a3344be647bdf9c046f7acf69272e4fa968f.txt",
+        "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21.txt",
+        "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310.txt"
+      ]
+    },
+    "Microsoft.Extensions.Primitives/8.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.primitives/8.0.0/microsoft.extensions.primitives.8.0.0.nupkg",
+      "sha256": "154f2a8f70d1f1b0dd73573e59e199c7f3c265eaaa9ddc1e64cf5ea5ca578d2a",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "19c19dcac9f3ee6302cfbc6745bb8e79f08efc4c933eb8dc5509bf14b88347ec.txt",
+        "4045fa8f5cf63fca91cb0da0cea90b2a00236ad50796da7ac5dc65984cf253e1.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt"
+      ]
+    },
+    "Microsoft.Extensions.Primitives/9.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.primitives/9.0.0/microsoft.extensions.primitives.9.0.0.nupkg",
+      "sha256": "64d2eeb0ad4246eab9059619303a9acf4e0f20a49c13667bb12dad7a153b109b",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "40686c6447a7d5b5d3693068e4571b5f483d7ed335aeee773ef662440de4c5d5.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt",
+        "f75b9c1c4c9565a391454a47e8f2034268910e6e42d2aacf0409152c6ca5b2e2.txt"
+      ]
+    },
+    "OpenTelemetry/1.19.1": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry/1.19.1/opentelemetry.1.19.1.nupkg",
+      "sha256": "d447b5be4a21bbb674e398660eae08270836d1ce13eabddc83beb0f0b29936ab",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt",
+        "3e8336cb4ab3ad8ecd2433c871648df7da03a2a7d62311896b25a0226a309fd3.txt",
+        "94b7bad0a3f4e43b9821e7f6e80c8c9bf1859200844025cfc0137f206c56ba2c.txt"
+      ]
+    },
+    "OpenTelemetry.Api/1.19.1": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.api/1.19.1/opentelemetry.api.1.19.1.nupkg",
+      "sha256": "714680742653abe2c3bfac673b658309cbefc4f01b65659cb0abb0db9e4bb1ae",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt",
+        "3e8336cb4ab3ad8ecd2433c871648df7da03a2a7d62311896b25a0226a309fd3.txt",
+        "a6cd8013a1b8a0cc2320d1d174f6f07815f803f752c2e301800d7d983e039d08.txt"
+      ]
+    },
+    "OpenTelemetry.Api.ProviderBuilderExtensions/1.19.1": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.api.providerbuilderextensions/1.19.1/opentelemetry.api.providerbuilderextensions.1.19.1.nupkg",
+      "sha256": "25b04ab6e18321ab6773e0cfaf0add63c17b5b7200d95bf4e688269e2eab3950",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt",
+        "3e8336cb4ab3ad8ecd2433c871648df7da03a2a7d62311896b25a0226a309fd3.txt",
+        "dbb2e8fee4abae9f107d8137f482c982449f83ee99c8c6c6eb167c09ee0049c8.txt"
+      ]
+    },
+    "OpenTelemetry.Exporter.Console/1.19.1": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.exporter.console/1.19.1/opentelemetry.exporter.console.1.19.1.nupkg",
+      "sha256": "39c71ea3b08f5b62739c0d5d3de251d7c8a31e6657315df8fa07ef98ec799764",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt",
+        "3e8336cb4ab3ad8ecd2433c871648df7da03a2a7d62311896b25a0226a309fd3.txt",
+        "b05a2502982c92df422bd6e75b6383d66aa323c2014d9efc70c1a1432c61ad61.txt"
+      ]
+    },
+    "OpenTelemetry.Exporter.OpenTelemetryProtocol/1.19.1": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.exporter.opentelemetryprotocol/1.19.1/opentelemetry.exporter.opentelemetryprotocol.1.19.1.nupkg",
+      "sha256": "08a4239de643584517a008928f91b92552ebd37060e42287d2191a8129fc1c81",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt",
+        "20ecb63a6ea2b403f1e454a8e683130c060f42b89b991d21d8a2ecb00a744d04.txt",
+        "3e8336cb4ab3ad8ecd2433c871648df7da03a2a7d62311896b25a0226a309fd3.txt"
+      ]
+    },
+    "OpenTelemetry.Exporter.Prometheus.HttpListener/1.19.1-beta.1": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.exporter.prometheus.httplistener/1.19.1-beta.1/opentelemetry.exporter.prometheus.httplistener.1.19.1-beta.1.nupkg",
+      "sha256": "4061368ddef34d9c330717314e37375295a309507be775bf2f850636238e3ffb",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt",
+        "3e8336cb4ab3ad8ecd2433c871648df7da03a2a7d62311896b25a0226a309fd3.txt",
+        "ee410270d4b43052af56dee7d2e51579d749dc6ccb8d85771621892931400c99.txt"
+      ]
+    },
+    "OpenTelemetry.Exporter.Zipkin/1.19.1": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.exporter.zipkin/1.19.1/opentelemetry.exporter.zipkin.1.19.1.nupkg",
+      "sha256": "2376b97910f66743cfaaf918836e9f6074c06d17fd7ea0f67cad7b7713789c94",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "03ef580a813afcc6f5f017f74520897238d67f866e22e3f04f7d51ff4d35d5dd.txt",
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt",
+        "3e8336cb4ab3ad8ecd2433c871648df7da03a2a7d62311896b25a0226a309fd3.txt"
+      ]
+    },
+    "OpenTelemetry.Extensions.Propagators/1.19.1": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.extensions.propagators/1.19.1/opentelemetry.extensions.propagators.1.19.1.nupkg",
+      "sha256": "89ec36f6a16ce07a3e40d4b03c65c3ad391524102e02180ec817d9ba44d8a929",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt",
+        "2d403a76e1f0fda6825cb94067dc27e4eb2ffb5972f9f79e8b7c1ef8999b8280.txt",
+        "3e8336cb4ab3ad8ecd2433c871648df7da03a2a7d62311896b25a0226a309fd3.txt"
+      ]
+    },
+    "OpenTelemetry.Instrumentation.AspNetCore/1.19.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.aspnetcore/1.19.0/opentelemetry.instrumentation.aspnetcore.1.19.0.nupkg",
+      "sha256": "dff21b4f29561592407d85b3277df5fcee241c18e8325482c3145481bec74aa6",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt",
+        "5cc3472c611f8ea18d8382e04fb79316439545c1181183e77360a9266a2c222e.txt"
+      ]
+    },
+    "OpenTelemetry.Instrumentation.EntityFrameworkCore/1.19.0-beta.1": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.entityframeworkcore/1.19.0-beta.1/opentelemetry.instrumentation.entityframeworkcore.1.19.0-beta.1.nupkg",
+      "sha256": "b13703252a547cde1e8b3eba703ba0d30b52994834b39a8ec01bd5ea1bb3d84e",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt",
+        "78677b02272827751b74161d376b9d0b36b3280211c9e594818be7030ae1651a.txt"
+      ]
+    },
+    "OpenTelemetry.Instrumentation.GrpcNetClient/1.19.1-beta.1": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.grpcnetclient/1.19.1-beta.1/opentelemetry.instrumentation.grpcnetclient.1.19.1-beta.1.nupkg",
+      "sha256": "d1c352dc9ab701965205ceaa400fcf3a0648adabc86787782db81ac96ccde0d4",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt",
+        "96c8bd6685f3437fa3c99669489a92ef9794475b21078b40ce125d5ead6142f3.txt"
+      ]
+    },
+    "OpenTelemetry.Instrumentation.Http/1.19.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.http/1.19.0/opentelemetry.instrumentation.http.1.19.0.nupkg",
+      "sha256": "4d76ab0f040f8202ce727c5fac9a4460e9c703520fd1237aa62717a1666edce4",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt",
+        "8aad4287281e1b5db08cbb0ffcf907567a5052a38a032a31db36e12776bf931d.txt"
+      ]
+    },
+    "OpenTelemetry.Instrumentation.Process/1.19.0-rc.1": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.process/1.19.0-rc.1/opentelemetry.instrumentation.process.1.19.0-rc.1.nupkg",
+      "sha256": "9597f50522afd786716199755b9be158c21a2eca1709dcba99c48a5a05f241d2",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt",
+        "cb3ba2eb442f5ff287760460ceb6264f6d214114f7b04f751a22e1b46e371853.txt"
+      ]
+    },
+    "OpenTelemetry.Instrumentation.Quartz/1.19.0-beta.1": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.quartz/1.19.0-beta.1/opentelemetry.instrumentation.quartz.1.19.0-beta.1.nupkg",
+      "sha256": "852ae86a652115dd5eb648b4def782e22d5666f1492ebb96bf28fccdf7e8999a",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt",
+        "75aca24d6498cd668358303b022c14938bb2345f11cc04389cf25ab014e65519.txt"
+      ]
+    },
+    "OpenTelemetry.Instrumentation.Runtime/1.19.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.runtime/1.19.0/opentelemetry.instrumentation.runtime.1.19.0.nupkg",
+      "sha256": "65c6475c5038394934530a992915d4346c57d78b0ae8f372b664339b752f505c",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt",
+        "a89b8bce497060341cd7c82c5dcc7510df01737fd86f75fbb548d162fe582e07.txt"
+      ]
+    },
+    "OpenTelemetry.Instrumentation.SqlClient/1.19.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.sqlclient/1.19.0/opentelemetry.instrumentation.sqlclient.1.19.0.nupkg",
+      "sha256": "4fc3dd015b284fd490be01eb2bbb3b21a1d78215377fa14ad06c9ac16e8bb789",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt",
+        "bb77a7c63314cbf4832135ca4dce13dd6ee55528b1afb5f8d33d98ab4d75c570.txt"
+      ]
+    },
+    "OpenTelemetry.Instrumentation.StackExchangeRedis/1.19.0-beta.1": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.stackexchangeredis/1.19.0-beta.1/opentelemetry.instrumentation.stackexchangeredis.1.19.0-beta.1.nupkg",
+      "sha256": "542331134dd026f47b49eee9f258d40cbbe5db5a99e801afef8a0ca0d9c0f5b6",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt",
+        "ace7e08aca0a6d9c9d77c3543a870071033a6d694d674b86f858446bf973a251.txt"
+      ]
+    },
+    "OpenTelemetry.Instrumentation.Wcf/1.19.1-beta.1": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.wcf/1.19.1-beta.1/opentelemetry.instrumentation.wcf.1.19.1-beta.1.nupkg",
+      "sha256": "1892f90192986cec76efba96d435d0e1e033eec9d02e48df1677bedbd8b33faa",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt",
+        "869445788d625f9c1499f708a42048cbac0da510182efab10695d0596299ad0f.txt"
+      ]
+    },
+    "OpenTelemetry.OpAmp.Client/0.7.0-alpha.2": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.opamp.client/0.7.0-alpha.2/opentelemetry.opamp.client.0.7.0-alpha.2.nupkg",
+      "sha256": "8e81ce388ce59efe9401d383580a79c8fb46faf878dfbab576c04f36ebee8fe2",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt",
+        "ebb2613d4964a56cd433a2dc6b39d07ef4d756836872bc4e91b64d2f607c9675.txt"
+      ]
+    },
+    "OpenTelemetry.Resources.Azure/1.19.1-beta.1": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.resources.azure/1.19.1-beta.1/opentelemetry.resources.azure.1.19.1-beta.1.nupkg",
+      "sha256": "a4f7e9fc675a2d9571ae567d40261ccff13bd844fb9cd83e2765d08a33a23207",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "0173db220309a689e149acb26d9d1ae006b7ca9c79d44ea6bfc091fe11a280e4.txt",
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt"
+      ]
+    },
+    "OpenTelemetry.Resources.Container/1.19.1-beta.1": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.resources.container/1.19.1-beta.1/opentelemetry.resources.container.1.19.1-beta.1.nupkg",
+      "sha256": "c8833f2feb3e350631f98d644b3f5134ab6adbf6e956c2b61e4d4655e4f5c5be",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "188d3b58873a852b22527a663a107838f09de7bff0194e9b43a62a720967e500.txt",
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt"
+      ]
+    },
+    "OpenTelemetry.Resources.Host/1.19.1-beta.1": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.resources.host/1.19.1-beta.1/opentelemetry.resources.host.1.19.1-beta.1.nupkg",
+      "sha256": "d3692f3de293f7cf77df740c7a5fd4bf57dffffa5f8369e4c8af23c36646170c",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt",
+        "330787f1973144e46186e8d72b4d393620220f57c8f87ff4e8e7d8781bda69a1.txt"
+      ]
+    },
+    "OpenTelemetry.Resources.OperatingSystem/1.19.1-beta.1": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.resources.operatingsystem/1.19.1-beta.1/opentelemetry.resources.operatingsystem.1.19.1-beta.1.nupkg",
+      "sha256": "2f6772df1ad397f7fc963b9f5920792aed8367f9dd84df08c597da55a0dc9cf7",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt",
+        "9ac839e1e8bda4d8b68d2d624dc3820e34fbd426dbd217f9c25d1ca925de818c.txt"
+      ]
+    },
+    "OpenTelemetry.Resources.Process/1.19.1-rc.1": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.resources.process/1.19.1-rc.1/opentelemetry.resources.process.1.19.1-rc.1.nupkg",
+      "sha256": "0e78b8c9e6a74525abd0b65da890e57ede72ede2bf6751f2c471a1573363e3e2",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt",
+        "83a95a76a612de7cea4fdc55f5d10d0a1b910ef828361c7bda88cc3294bde64d.txt"
+      ]
+    },
+    "OpenTelemetry.Resources.ProcessRuntime/1.19.1-beta.1": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.resources.processruntime/1.19.1-beta.1/opentelemetry.resources.processruntime.1.19.1-beta.1.nupkg",
+      "sha256": "9de243ada073a431e83efb6d0dec61e63b53dfe4fcd2a219ccf3249feaf0f5c3",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "1403d85fb38b093d7afd76954c768dc60d274159ae10978a2781536dd8655f54.txt",
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt"
+      ]
+    },
+    "OpenTelemetry.Shims.OpenTracing/1.19.1-beta.1": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.shims.opentracing/1.19.1-beta.1/opentelemetry.shims.opentracing.1.19.1-beta.1.nupkg",
+      "sha256": "70d6ef89b3676e40396eade7bb797f9a8a885edbe137334ca304c696a8affdb6",
+      "license": {
+        "type": "expression",
+        "value": "Apache-2.0"
+      },
+      "materials": [
+        "16a1d6fc2dad2f3eacdf24b808d3a77ce09b2a67513f083c6a6f6beb25cb2b15.txt",
+        "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt",
+        "3e8336cb4ab3ad8ecd2433c871648df7da03a2a7d62311896b25a0226a309fd3.txt"
+      ]
+    },
+    "OpenTracing/0.12.1": {
+      "url": "https://api.nuget.org/v3-flatcontainer/opentracing/0.12.1/opentracing.0.12.1.nupkg",
+      "sha256": "973d0d348a4a268aa3e49ba6592da146ebcb9c47d91cf35ca3c1e2f5cb343fe2",
+      "license": {
+        "legacy_url": "https://raw.githubusercontent.com/opentracing/opentracing-csharp/master/LICENSE"
+      },
+      "materials": [
+        "39ecb7278016dd45909999f53d941d144547a728bb618f1d8e675581ff08a226.txt",
+        "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1.txt"
+      ]
+    },
+    "System.Diagnostics.DiagnosticSource/10.0.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/system.diagnostics.diagnosticsource/10.0.0/system.diagnostics.diagnosticsource.10.0.0.nupkg",
+      "sha256": "b7b35a92604d4996cc214f34d84a5f3f03541f04bb49df4695e6ce1ef62dcbe3",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21.txt",
+        "98b623149a4f5cc2eb5141bcae2e668d690552cbeeea66ce27337021e80a95e5.txt",
+        "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310.txt"
+      ]
+    },
+    "System.Private.ServiceModel/4.7.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/system.private.servicemodel/4.7.0/system.private.servicemodel.4.7.0.nupkg",
+      "sha256": "6318d59c11044529bad5c0581e695f78f1de8cdaee1a5ba1c41f12f63fee22db",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "208d31ba373d2017a0bad0a5593f3050952abd3a1f6a29df85c33494c48d2885.txt",
+        "c41eec0a3e1314bf25d0d403e50ea4ff6d4464000444ad8d491faf4563fef421.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt"
+      ]
+    },
+    "System.Security.Permissions/4.7.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/system.security.permissions/4.7.0/system.security.permissions.4.7.0.nupkg",
+      "sha256": "04681730b522e6bc559a60a18c885c5d4c62b098ef94d4e85e5c9a21b531c38d",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "388c07f579998286e5df706a2e68bf6e01100187ccb0ff0310e26c3383f7b2b2.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt",
+        "f633e62098af8b52865337e3b5b6373c95702296522773c5687d8a9af48d773e.txt"
+      ]
+    },
+    "System.ServiceModel.Primitives/4.7.0": {
+      "url": "https://api.nuget.org/v3-flatcontainer/system.servicemodel.primitives/4.7.0/system.servicemodel.primitives.4.7.0.nupkg",
+      "sha256": "41eb57444d943d299c7b4cf34a58a648408489d78b44c1994e89383361f5d3a5",
+      "license": {
+        "type": "expression",
+        "value": "MIT"
+      },
+      "materials": [
+        "208d31ba373d2017a0bad0a5593f3050952abd3a1f6a29df85c33494c48d2885.txt",
+        "4a01e447dc22bd11fe009f4f3d50ad36e2d140c69d523dbc0ad9d4adddceba78.txt",
+        "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt"
+      ]
+    }
+  },
+  "assemblies": {
+    "glibc/net/Google.Protobuf.dll": {
+      "sha256": "0f93ce18692e0b789c41299d0d2af2b477644fc4b13482bd0680b29289603996",
+      "package": "Google.Protobuf/3.36.2",
+      "member": "lib/net8.0/Google.Protobuf.dll"
+    },
+    "glibc/net/OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper.dll": {
+      "sha256": "268163d2421c5961ada9cee6e4aea092b3554bf45d21d33519a685de08e7c3fc",
+      "package": "source-project"
+    },
+    "glibc/net/OpenTelemetry.AutoInstrumentation.Loader.dll": {
+      "sha256": "760f364b589488d98bec5f07758d8361c1eeeb5084bdb41c7e3aa6ae7562b034",
+      "package": "source-project"
+    },
+    "glibc/net/OpenTelemetry.AutoInstrumentation.PluginApi.dll": {
+      "sha256": "c06dc139501b79f22df55e2b81a0e531fa0a451175033df6e01107e72f055e7c",
+      "package": "source-project"
+    },
+    "glibc/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll": {
+      "sha256": "de7eddace2b3484c657d35edd1a72b7d196cb81f3fc59533a5dcc152bb9743db",
+      "package": "source-project"
+    },
+    "glibc/net/OpenTelemetry.AutoInstrumentation.dll": {
+      "sha256": "29ffe093c949f5acef6f9033f9c71c919de1acc3657b1905893d42af386dbfe6",
+      "package": "source-project"
+    },
+    "glibc/net/OpenTracing.dll": {
+      "sha256": "aaedd66ffd728581d25cd57ddab9a14e711a1fc2bceaab9045e35b17a04ccde4",
+      "package": "OpenTracing/0.12.1",
+      "member": "lib/netstandard2.0/OpenTracing.dll"
+    },
+    "glibc/net/System.Private.ServiceModel.dll": {
+      "sha256": "8191caef096ca91d79587bc08ba123a805c01997bd15b573ef28a882ea007d6d",
+      "package": "System.Private.ServiceModel/4.7.0",
+      "member": "lib/netstandard2.0/System.Private.ServiceModel.dll"
+    },
+    "glibc/net/System.Security.Permissions.dll": {
+      "sha256": "74ef3b67960a9b569fed9ac457157769dbfe433b0f4fa13c52167c2246bfed71",
+      "package": "System.Security.Permissions/4.7.0",
+      "member": "lib/netcoreapp3.0/System.Security.Permissions.dll"
+    },
+    "glibc/net/System.ServiceModel.Primitives.dll": {
+      "sha256": "2857baf4a88597ec6d132180aed3e638b3c293281cfc591da1d62c347a21bbe7",
+      "package": "System.ServiceModel.Primitives/4.7.0",
+      "member": "lib/netcoreapp2.1/System.ServiceModel.Primitives.dll"
+    },
+    "glibc/net/System.ServiceModel.dll": {
+      "sha256": "d0db4c719008048df768c7fa2b307bd5b318526f7fc0099dcedca8c225c94d3f",
+      "package": "System.ServiceModel.Primitives/4.7.0",
+      "member": "lib/netstandard2.0/System.ServiceModel.dll"
+    },
+    "glibc/net/net10.0/Microsoft.Extensions.Configuration.Abstractions.dll": {
+      "sha256": "5def68e1c7d9c1fcf56153bb669e00d84c1ae17b35fb09c5a8ccf93e9b934d3e",
+      "package": "Microsoft.Extensions.Configuration.Abstractions/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.Configuration.Abstractions.dll"
+    },
+    "glibc/net/net10.0/Microsoft.Extensions.Configuration.Binder.dll": {
+      "sha256": "0637a0ab2b5a77b000c0d96c46573dae8c04fa86ae1374b5a1f00855a712d6f9",
+      "package": "Microsoft.Extensions.Configuration.Binder/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.Configuration.Binder.dll"
+    },
+    "glibc/net/net10.0/Microsoft.Extensions.Configuration.EnvironmentVariables.dll": {
+      "sha256": "9971a5a6d7b0dc66f22fefa8f785bb8ec54100d8c44569fed2e70f8ab02298dd",
+      "package": "Microsoft.Extensions.Configuration.EnvironmentVariables/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.Configuration.EnvironmentVariables.dll"
+    },
+    "glibc/net/net10.0/Microsoft.Extensions.Configuration.dll": {
+      "sha256": "94c3981084f713a51ad3d266145154d2468f59c4cd3e2bde82941bf84e97fb55",
+      "package": "Microsoft.Extensions.Configuration/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.Configuration.dll"
+    },
+    "glibc/net/net10.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
+      "sha256": "7c97c4463fe0fc11d1f22f4d160b2bd2288981adf1de2717a6ff3fb993ddf294",
+      "package": "Microsoft.Extensions.DependencyInjection.Abstractions/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll"
+    },
+    "glibc/net/net10.0/Microsoft.Extensions.DependencyInjection.dll": {
+      "sha256": "d646a5cca5e8116ae46b43715297083fa8a38db636eab60e66eeef350d74cd5d",
+      "package": "Microsoft.Extensions.DependencyInjection/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.DependencyInjection.dll"
+    },
+    "glibc/net/net10.0/Microsoft.Extensions.Diagnostics.Abstractions.dll": {
+      "sha256": "9702b8737009bb5f6c943cf7a3ba5c0991c7e4eb58a9e952d54835bb596fe563",
+      "package": "Microsoft.Extensions.Diagnostics.Abstractions/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.Diagnostics.Abstractions.dll"
+    },
+    "glibc/net/net10.0/Microsoft.Extensions.Logging.Abstractions.dll": {
+      "sha256": "a76a735b63e6ef3b0bf41ff92423cbd16103b8952e8306140a9bd650346034dc",
+      "package": "Microsoft.Extensions.Logging.Abstractions/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.Logging.Abstractions.dll"
+    },
+    "glibc/net/net10.0/Microsoft.Extensions.Logging.Configuration.dll": {
+      "sha256": "52cbb4793651e6db0f5e9b1300661a8e0a8f76c15c9123e42c39aff35d571e24",
+      "package": "Microsoft.Extensions.Logging.Configuration/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.Logging.Configuration.dll"
+    },
+    "glibc/net/net10.0/Microsoft.Extensions.Logging.dll": {
+      "sha256": "2c034725abd90afe30a1426e6477cb0693bc79170e1dfdb3cef7146e296a1f71",
+      "package": "Microsoft.Extensions.Logging/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.Logging.dll"
+    },
+    "glibc/net/net10.0/Microsoft.Extensions.Options.ConfigurationExtensions.dll": {
+      "sha256": "f5078a206f8d54d03e15b32cbae7bfb2d95348719b1f3cf4a9bea32ced1c8b7b",
+      "package": "Microsoft.Extensions.Options.ConfigurationExtensions/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.Options.ConfigurationExtensions.dll"
+    },
+    "glibc/net/net10.0/Microsoft.Extensions.Options.dll": {
+      "sha256": "58048d710cf2a88d3dea7c933d0b1408464d5aa4245ef736d3d47e6df6ba4db3",
+      "package": "Microsoft.Extensions.Options/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.Options.dll"
+    },
+    "glibc/net/net10.0/Microsoft.Extensions.Primitives.dll": {
+      "sha256": "6aaf929343fd02415d6cb5d903816c2f1c831b194bfe7a15789879093d0fa6b7",
+      "package": "Microsoft.Extensions.Primitives/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.Primitives.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.Api.ProviderBuilderExtensions.dll": {
+      "sha256": "dec906a34dbafcfd2c23b73fd05e58defc7f8c1627890fad4e4461c23b8de989",
+      "package": "OpenTelemetry.Api.ProviderBuilderExtensions/1.19.1",
+      "member": "lib/net10.0/OpenTelemetry.Api.ProviderBuilderExtensions.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.Api.dll": {
+      "sha256": "b92d1b32ba9f7ddf4f06a7efab22c6424beba8760976f0eb5811ed3713d81f4c",
+      "package": "OpenTelemetry.Api/1.19.1",
+      "member": "lib/net10.0/OpenTelemetry.Api.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.Exporter.Console.dll": {
+      "sha256": "40c4d7ceb0355ec0fe0d06cf57563d7f763605835c81eb4dcc50988b8f48f355",
+      "package": "OpenTelemetry.Exporter.Console/1.19.1",
+      "member": "lib/net10.0/OpenTelemetry.Exporter.Console.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll": {
+      "sha256": "be37059eb65a9f4af95081c2d4795afd198a657dbf2e35363cca6444fd75b2ab",
+      "package": "OpenTelemetry.Exporter.OpenTelemetryProtocol/1.19.1",
+      "member": "lib/net10.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.Exporter.Prometheus.HttpListener.dll": {
+      "sha256": "c42ed9790f368093d29681adb82e9fa1f8fcfd03507aa08e8a0b203a7d95d039",
+      "package": "OpenTelemetry.Exporter.Prometheus.HttpListener/1.19.1-beta.1",
+      "member": "lib/net10.0/OpenTelemetry.Exporter.Prometheus.HttpListener.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.Exporter.Zipkin.dll": {
+      "sha256": "6968d102c0469acaa6da2f1c937f56241dd679703b5738ef4ea2d259aea09598",
+      "package": "OpenTelemetry.Exporter.Zipkin/1.19.1",
+      "member": "lib/net10.0/OpenTelemetry.Exporter.Zipkin.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.Extensions.Propagators.dll": {
+      "sha256": "f1c53b5a4f03da98e6153aad974c75131d65fa69f74f0b047ae60cb363b8cc9d",
+      "package": "OpenTelemetry.Extensions.Propagators/1.19.1",
+      "member": "lib/net10.0/OpenTelemetry.Extensions.Propagators.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.Instrumentation.AspNetCore.dll": {
+      "sha256": "61447a9a879187724a73129c61277ef9ff01f360ab5ca6ec3d022413ebc4726d",
+      "package": "OpenTelemetry.Instrumentation.AspNetCore/1.19.0",
+      "member": "lib/net10.0/OpenTelemetry.Instrumentation.AspNetCore.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.Instrumentation.EntityFrameworkCore.dll": {
+      "sha256": "33146ac9043d4c91d9aeaa338b4f3421e998920cca6b524386f89728c4331645",
+      "package": "OpenTelemetry.Instrumentation.EntityFrameworkCore/1.19.0-beta.1",
+      "member": "lib/net10.0/OpenTelemetry.Instrumentation.EntityFrameworkCore.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.Instrumentation.GrpcNetClient.dll": {
+      "sha256": "915abf30b0b236fd1cf2883b2b3a2ea2fc29a25f8f86a152a16cb7d345ef1334",
+      "package": "OpenTelemetry.Instrumentation.GrpcNetClient/1.19.1-beta.1",
+      "member": "lib/net10.0/OpenTelemetry.Instrumentation.GrpcNetClient.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.Instrumentation.Http.dll": {
+      "sha256": "b75143059235ae9cd079bb6c83f4641b39679d599de23dcdc6914fcd447f7d7c",
+      "package": "OpenTelemetry.Instrumentation.Http/1.19.0",
+      "member": "lib/net10.0/OpenTelemetry.Instrumentation.Http.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.Instrumentation.Process.dll": {
+      "sha256": "3a9dcec57b96b752a61c8eef1ad137a2b9b4d58d907fc5e6a620f24ae78e00d5",
+      "package": "OpenTelemetry.Instrumentation.Process/1.19.0-rc.1",
+      "member": "lib/net10.0/OpenTelemetry.Instrumentation.Process.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.Instrumentation.Quartz.dll": {
+      "sha256": "e7e9f27becd0850dc0082b9a03b0db8075d55a77dd82ecfc5c90cf9590dbc5e9",
+      "package": "OpenTelemetry.Instrumentation.Quartz/1.19.0-beta.1",
+      "member": "lib/net10.0/OpenTelemetry.Instrumentation.Quartz.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.Instrumentation.Runtime.dll": {
+      "sha256": "ecc5ab3b910a9f8d05bf20f64293f8eb85b68cbc44345684876621cac706a1dc",
+      "package": "OpenTelemetry.Instrumentation.Runtime/1.19.0",
+      "member": "lib/net10.0/OpenTelemetry.Instrumentation.Runtime.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.Instrumentation.SqlClient.dll": {
+      "sha256": "21e2f6f20a94b62b36b178fad8f135fc5a5e0149234ea6da6f086602bb00768b",
+      "package": "OpenTelemetry.Instrumentation.SqlClient/1.19.0",
+      "member": "lib/net10.0/OpenTelemetry.Instrumentation.SqlClient.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.Instrumentation.StackExchangeRedis.dll": {
+      "sha256": "ebbcf5e5d486ab936e1f4efb276270056edf63ec4a285c8019948e343bb8b886",
+      "package": "OpenTelemetry.Instrumentation.StackExchangeRedis/1.19.0-beta.1",
+      "member": "lib/net10.0/OpenTelemetry.Instrumentation.StackExchangeRedis.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.Instrumentation.Wcf.dll": {
+      "sha256": "8e0f2d9f28e9fdb16d40bc6baf30c078ee18e48a0d6714684439a65bc1a7f1cf",
+      "package": "OpenTelemetry.Instrumentation.Wcf/1.19.1-beta.1",
+      "member": "lib/net10.0/OpenTelemetry.Instrumentation.Wcf.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.OpAmp.Client.dll": {
+      "sha256": "3dc6d8664bd5ad94e7e07e00bebde4030cebe702d15888b30c57223808f96e19",
+      "package": "OpenTelemetry.OpAmp.Client/0.7.0-alpha.2",
+      "member": "lib/net10.0/OpenTelemetry.OpAmp.Client.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.Resources.Azure.dll": {
+      "sha256": "4ef5ed0692b4ee684d11403d2a5fcc94c1b881f6eb3ce56e7b4e4d0d1bc22d60",
+      "package": "OpenTelemetry.Resources.Azure/1.19.1-beta.1",
+      "member": "lib/net10.0/OpenTelemetry.Resources.Azure.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.Resources.Container.dll": {
+      "sha256": "fc9fe7c02ca322a5de40ce5a04ca3a8331b1102c0b20b37b7350ba6e2fda0990",
+      "package": "OpenTelemetry.Resources.Container/1.19.1-beta.1",
+      "member": "lib/net10.0/OpenTelemetry.Resources.Container.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.Resources.Host.dll": {
+      "sha256": "426b99c10e207be4f9b98845954648bd3580b3cefbff6b1a2ee524d2381099c4",
+      "package": "OpenTelemetry.Resources.Host/1.19.1-beta.1",
+      "member": "lib/net10.0/OpenTelemetry.Resources.Host.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.Resources.OperatingSystem.dll": {
+      "sha256": "69f31a84a58545195758cd9d9a018f66f80a8d932bcf5214eb0ac153faf7f141",
+      "package": "OpenTelemetry.Resources.OperatingSystem/1.19.1-beta.1",
+      "member": "lib/net10.0/OpenTelemetry.Resources.OperatingSystem.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.Resources.Process.dll": {
+      "sha256": "a8695131ab8fe51444bfdcddecb5bc298f97b26a9f30bf8c35a2f905565d2dc2",
+      "package": "OpenTelemetry.Resources.Process/1.19.1-rc.1",
+      "member": "lib/net10.0/OpenTelemetry.Resources.Process.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.Resources.ProcessRuntime.dll": {
+      "sha256": "2f3b553c4aeb4c21ead795396a7e7ad57420e61e251e538d49074ec96529be07",
+      "package": "OpenTelemetry.Resources.ProcessRuntime/1.19.1-beta.1",
+      "member": "lib/net10.0/OpenTelemetry.Resources.ProcessRuntime.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.Shims.OpenTracing.dll": {
+      "sha256": "c2837d46a99ea86fb7a87ceb020d2ce98ad868d010358a641efd48a83c8786eb",
+      "package": "OpenTelemetry.Shims.OpenTracing/1.19.1-beta.1",
+      "member": "lib/net10.0/OpenTelemetry.Shims.OpenTracing.dll"
+    },
+    "glibc/net/net10.0/OpenTelemetry.dll": {
+      "sha256": "6623430269ed62f1a8e097e3909b9c8d778ae72b9b69f096140c71d06e0eb043",
+      "package": "OpenTelemetry/1.19.1",
+      "member": "lib/net10.0/OpenTelemetry.dll"
+    },
+    "glibc/net/net8.0/Microsoft.Extensions.Configuration.Abstractions.dll": {
+      "sha256": "fefcdb267a73099cb90e5af56b5ef2bca59bed974339b3a6810352bde23537a6",
+      "package": "Microsoft.Extensions.Configuration.Abstractions/8.0.0",
+      "member": "lib/net8.0/Microsoft.Extensions.Configuration.Abstractions.dll"
+    },
+    "glibc/net/net8.0/Microsoft.Extensions.Configuration.Binder.dll": {
+      "sha256": "beac12f7bba4e22cda2acd9ddfe944a4ed56abec414e084edd147bd5dad3c032",
+      "package": "Microsoft.Extensions.Configuration.Binder/8.0.2",
+      "member": "lib/net8.0/Microsoft.Extensions.Configuration.Binder.dll"
+    },
+    "glibc/net/net8.0/Microsoft.Extensions.Configuration.EnvironmentVariables.dll": {
+      "sha256": "797b3034fd173caff0850cd580428a5f4aeb7da27bf03369ad7f2b0996019399",
+      "package": "Microsoft.Extensions.Configuration.EnvironmentVariables/8.0.0",
+      "member": "lib/net8.0/Microsoft.Extensions.Configuration.EnvironmentVariables.dll"
+    },
+    "glibc/net/net8.0/Microsoft.Extensions.Configuration.dll": {
+      "sha256": "b5cd9da2c3364a5b201cecb0c80e25227d27ba44d96343d2894ff8ef3fd81550",
+      "package": "Microsoft.Extensions.Configuration/8.0.0",
+      "member": "lib/net8.0/Microsoft.Extensions.Configuration.dll"
+    },
+    "glibc/net/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
+      "sha256": "a0106a638facae621f870eda720cb6c980c1d5d49c2f4351134e3fe043b9291b",
+      "package": "Microsoft.Extensions.DependencyInjection.Abstractions/8.0.0",
+      "member": "lib/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll"
+    },
+    "glibc/net/net8.0/Microsoft.Extensions.DependencyInjection.dll": {
+      "sha256": "8d6e7b64cce554f0a0fbdb2ba80745895fa0b4e6cc378b9fedfe8ce86f0d8ae4",
+      "package": "Microsoft.Extensions.DependencyInjection/8.0.0",
+      "member": "lib/net8.0/Microsoft.Extensions.DependencyInjection.dll"
+    },
+    "glibc/net/net8.0/Microsoft.Extensions.Diagnostics.Abstractions.dll": {
+      "sha256": "bea3cf225599b05a521902e12e23de6a2309937dfb3763ccd2cea62ad2c4fe37",
+      "package": "Microsoft.Extensions.Diagnostics.Abstractions/8.0.0",
+      "member": "lib/net8.0/Microsoft.Extensions.Diagnostics.Abstractions.dll"
+    },
+    "glibc/net/net8.0/Microsoft.Extensions.Logging.Abstractions.dll": {
+      "sha256": "29e6bfaf5ce079ad4d70dc547d966038992a7428df6e726084eb9010ec837715",
+      "package": "Microsoft.Extensions.Logging.Abstractions/8.0.0",
+      "member": "lib/net8.0/Microsoft.Extensions.Logging.Abstractions.dll"
+    },
+    "glibc/net/net8.0/Microsoft.Extensions.Logging.Configuration.dll": {
+      "sha256": "4bd1245656bef4eab6b6b503ebff486210f7c05c17097ac247c5a0e824f118b6",
+      "package": "Microsoft.Extensions.Logging.Configuration/8.0.0",
+      "member": "lib/net8.0/Microsoft.Extensions.Logging.Configuration.dll"
+    },
+    "glibc/net/net8.0/Microsoft.Extensions.Logging.dll": {
+      "sha256": "4330a5efe9d110afb7f8e567d5b43eee976e0f7f6802d13a211b65d747529179",
+      "package": "Microsoft.Extensions.Logging/8.0.0",
+      "member": "lib/net8.0/Microsoft.Extensions.Logging.dll"
+    },
+    "glibc/net/net8.0/Microsoft.Extensions.Options.ConfigurationExtensions.dll": {
+      "sha256": "b9ea7bb70bfecf5c649f2559300fce232729257cfdb4221dc96f1ea778227353",
+      "package": "Microsoft.Extensions.Options.ConfigurationExtensions/8.0.0",
+      "member": "lib/net8.0/Microsoft.Extensions.Options.ConfigurationExtensions.dll"
+    },
+    "glibc/net/net8.0/Microsoft.Extensions.Options.dll": {
+      "sha256": "5f9b0e589f1ce9ca656588cd92cc0bd53803fdfad258fb2916aaa14aedce682c",
+      "package": "Microsoft.Extensions.Options/8.0.0",
+      "member": "lib/net8.0/Microsoft.Extensions.Options.dll"
+    },
+    "glibc/net/net8.0/Microsoft.Extensions.Primitives.dll": {
+      "sha256": "446ff16e903e7479558816e213a3adee9a1c1adad65a56d853801b10933e29d7",
+      "package": "Microsoft.Extensions.Primitives/8.0.0",
+      "member": "lib/net8.0/Microsoft.Extensions.Primitives.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.Api.ProviderBuilderExtensions.dll": {
+      "sha256": "80ba30dc2706c858fc79eb7fb784148eacedf3d0338a8d2fd6015c1d955dbb2f",
+      "package": "OpenTelemetry.Api.ProviderBuilderExtensions/1.19.1",
+      "member": "lib/net8.0/OpenTelemetry.Api.ProviderBuilderExtensions.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.Api.dll": {
+      "sha256": "13be234ad40aca923edbfb0d93ef16feaa326d22525d0ca0847a4ba7bf3dacb1",
+      "package": "OpenTelemetry.Api/1.19.1",
+      "member": "lib/net8.0/OpenTelemetry.Api.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.Exporter.Console.dll": {
+      "sha256": "88386f64e3c5bf4e7f552304a05eccbe390345522be314c4c45ef808aac549c2",
+      "package": "OpenTelemetry.Exporter.Console/1.19.1",
+      "member": "lib/net8.0/OpenTelemetry.Exporter.Console.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll": {
+      "sha256": "fade39448fd426e4ba7f48bac739b8ebea3c4055e1340ec683006f3a606e8669",
+      "package": "OpenTelemetry.Exporter.OpenTelemetryProtocol/1.19.1",
+      "member": "lib/net8.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.Exporter.Prometheus.HttpListener.dll": {
+      "sha256": "9598552fa04b63e250fb89828ae58a8bdfd3a25b50345aac227e20956ecf9dea",
+      "package": "OpenTelemetry.Exporter.Prometheus.HttpListener/1.19.1-beta.1",
+      "member": "lib/net8.0/OpenTelemetry.Exporter.Prometheus.HttpListener.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.Exporter.Zipkin.dll": {
+      "sha256": "eda9edd7c3aacccf4eab66060f00b51d02a9622a46a86f6ea8c4557c5900dcd9",
+      "package": "OpenTelemetry.Exporter.Zipkin/1.19.1",
+      "member": "lib/net8.0/OpenTelemetry.Exporter.Zipkin.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.Extensions.Propagators.dll": {
+      "sha256": "2cfbb9460b9d80612523bb5f017e33b1f422a8e82bb4479225c45b52b8cd22a6",
+      "package": "OpenTelemetry.Extensions.Propagators/1.19.1",
+      "member": "lib/net8.0/OpenTelemetry.Extensions.Propagators.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.Instrumentation.AspNetCore.dll": {
+      "sha256": "b7d0a8a1506881b9914ee2a3a4e4253cddf716a94bbe86d7b2fa056cb9037c46",
+      "package": "OpenTelemetry.Instrumentation.AspNetCore/1.19.0",
+      "member": "lib/net8.0/OpenTelemetry.Instrumentation.AspNetCore.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.Instrumentation.EntityFrameworkCore.dll": {
+      "sha256": "a1eaaacf91d8af43f4428bdace56ae99b7c103a1edd189dc7518eb15c207bfc5",
+      "package": "OpenTelemetry.Instrumentation.EntityFrameworkCore/1.19.0-beta.1",
+      "member": "lib/net8.0/OpenTelemetry.Instrumentation.EntityFrameworkCore.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.Instrumentation.GrpcNetClient.dll": {
+      "sha256": "eb6f317f8dc28e28414bacb1eed91ddefa34d50d7c29a11ad8c8200fbdebfb54",
+      "package": "OpenTelemetry.Instrumentation.GrpcNetClient/1.19.1-beta.1",
+      "member": "lib/net8.0/OpenTelemetry.Instrumentation.GrpcNetClient.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.Instrumentation.Http.dll": {
+      "sha256": "af8d8d791d062f1e5adf8bd82110e1bb66ff6791210a3a96a28ef17d82f8e6c8",
+      "package": "OpenTelemetry.Instrumentation.Http/1.19.0",
+      "member": "lib/net8.0/OpenTelemetry.Instrumentation.Http.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.Instrumentation.Process.dll": {
+      "sha256": "c01055f3ca876ed71534d528ebc42f8376ec3ff71ce3f73cac3f16f525406dcf",
+      "package": "OpenTelemetry.Instrumentation.Process/1.19.0-rc.1",
+      "member": "lib/net8.0/OpenTelemetry.Instrumentation.Process.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.Instrumentation.Quartz.dll": {
+      "sha256": "aeee983e9eb387e64234cc7752beedd57d607491813abe53f4c99126fd68406f",
+      "package": "OpenTelemetry.Instrumentation.Quartz/1.19.0-beta.1",
+      "member": "lib/net8.0/OpenTelemetry.Instrumentation.Quartz.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.Instrumentation.Runtime.dll": {
+      "sha256": "f929f6753f63ba1ca8813da9a8ba75ac726bc6af9f10d05d03182171e88b1877",
+      "package": "OpenTelemetry.Instrumentation.Runtime/1.19.0",
+      "member": "lib/net8.0/OpenTelemetry.Instrumentation.Runtime.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.Instrumentation.SqlClient.dll": {
+      "sha256": "dbc50a67167306bdabea81e7d46c47eebb2878b56212cb2e6778c0f0193e615b",
+      "package": "OpenTelemetry.Instrumentation.SqlClient/1.19.0",
+      "member": "lib/net8.0/OpenTelemetry.Instrumentation.SqlClient.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.Instrumentation.StackExchangeRedis.dll": {
+      "sha256": "3e66f4ccb2f8e1fb1be63b87711423a7266a64c5ed53d13dffd04601fafd8da8",
+      "package": "OpenTelemetry.Instrumentation.StackExchangeRedis/1.19.0-beta.1",
+      "member": "lib/net8.0/OpenTelemetry.Instrumentation.StackExchangeRedis.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.Instrumentation.Wcf.dll": {
+      "sha256": "b495ed8b41e68618d7dd9434e20b97fd9a9f7826e8bf817be315a22fb4f00914",
+      "package": "OpenTelemetry.Instrumentation.Wcf/1.19.1-beta.1",
+      "member": "lib/net8.0/OpenTelemetry.Instrumentation.Wcf.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.OpAmp.Client.dll": {
+      "sha256": "896b0e7d657de3514f3fbb721a590d928b958a403d750b4fbed01129099b23fb",
+      "package": "OpenTelemetry.OpAmp.Client/0.7.0-alpha.2",
+      "member": "lib/net8.0/OpenTelemetry.OpAmp.Client.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.Resources.Azure.dll": {
+      "sha256": "c1ee6b7de1682bb4fe062257bfb37189ff99e371f14f09a714d913ca0de09689",
+      "package": "OpenTelemetry.Resources.Azure/1.19.1-beta.1",
+      "member": "lib/net8.0/OpenTelemetry.Resources.Azure.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.Resources.Container.dll": {
+      "sha256": "eab606e97af7edceb8b19bd43c494f7e29a7ca48f8041c59f3f022321a7fdc79",
+      "package": "OpenTelemetry.Resources.Container/1.19.1-beta.1",
+      "member": "lib/net8.0/OpenTelemetry.Resources.Container.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.Resources.Host.dll": {
+      "sha256": "a165a72743c25a5a89b217e9dd825f1679d1c51b3b452fac8cc56ff44625c774",
+      "package": "OpenTelemetry.Resources.Host/1.19.1-beta.1",
+      "member": "lib/net8.0/OpenTelemetry.Resources.Host.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.Resources.OperatingSystem.dll": {
+      "sha256": "abf9c54b7cb4e8155354ff7147fd047faf5604585a72aca787b7642b1cddf500",
+      "package": "OpenTelemetry.Resources.OperatingSystem/1.19.1-beta.1",
+      "member": "lib/net8.0/OpenTelemetry.Resources.OperatingSystem.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.Resources.Process.dll": {
+      "sha256": "56a9048ddade2b93336a2723c321c80022b0ed504c163e6e2c01928744526c87",
+      "package": "OpenTelemetry.Resources.Process/1.19.1-rc.1",
+      "member": "lib/net8.0/OpenTelemetry.Resources.Process.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.Resources.ProcessRuntime.dll": {
+      "sha256": "e33cd72a37b14833852d9fa7dce468a62ef304a43e9427a76fd0acc3afb684f9",
+      "package": "OpenTelemetry.Resources.ProcessRuntime/1.19.1-beta.1",
+      "member": "lib/net8.0/OpenTelemetry.Resources.ProcessRuntime.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.Shims.OpenTracing.dll": {
+      "sha256": "705f649519f7e96173644997a0c3dcb32057e93e823217d01dae77adbbcd7327",
+      "package": "OpenTelemetry.Shims.OpenTracing/1.19.1-beta.1",
+      "member": "lib/net8.0/OpenTelemetry.Shims.OpenTracing.dll"
+    },
+    "glibc/net/net8.0/OpenTelemetry.dll": {
+      "sha256": "2efbbe13204b5b500fbc9b968fd23547d57ecace78e4901ebac615bc46000232",
+      "package": "OpenTelemetry/1.19.1",
+      "member": "lib/net8.0/OpenTelemetry.dll"
+    },
+    "glibc/net/net8.0/System.Diagnostics.DiagnosticSource.dll": {
+      "sha256": "27da0b8683f7539c4b57ce08000dec4242b0e3be23bf4822836080da0ebda971",
+      "package": "System.Diagnostics.DiagnosticSource/10.0.0",
+      "member": "lib/net8.0/System.Diagnostics.DiagnosticSource.dll"
+    },
+    "glibc/net/net9.0/Microsoft.Extensions.Configuration.Abstractions.dll": {
+      "sha256": "e63b332553874087ea3d8d770705e230db0c614a99d571ba64753281ac65b3ae",
+      "package": "Microsoft.Extensions.Configuration.Abstractions/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.Configuration.Abstractions.dll"
+    },
+    "glibc/net/net9.0/Microsoft.Extensions.Configuration.Binder.dll": {
+      "sha256": "231dcfc3042cceb64351f68e59c569eba22226e89fa579b0ae961826339ddcd6",
+      "package": "Microsoft.Extensions.Configuration.Binder/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.Configuration.Binder.dll"
+    },
+    "glibc/net/net9.0/Microsoft.Extensions.Configuration.EnvironmentVariables.dll": {
+      "sha256": "4a27c35f1af0bc6011eda6eb1fcbc3980e3da83daa2d4b28dfa6a803b00922bb",
+      "package": "Microsoft.Extensions.Configuration.EnvironmentVariables/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.Configuration.EnvironmentVariables.dll"
+    },
+    "glibc/net/net9.0/Microsoft.Extensions.Configuration.dll": {
+      "sha256": "d2ba98f7ca6f7ae49e54bb2974b22d62a15695d5a11236a164ae71eac87abcc5",
+      "package": "Microsoft.Extensions.Configuration/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.Configuration.dll"
+    },
+    "glibc/net/net9.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
+      "sha256": "99a08f73aa1568c8a614ac4d76fe1cf9a27e10f7c02f9afd65da2c6e25d6ff04",
+      "package": "Microsoft.Extensions.DependencyInjection.Abstractions/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll"
+    },
+    "glibc/net/net9.0/Microsoft.Extensions.DependencyInjection.dll": {
+      "sha256": "09c80cce213152ced75d791fc4fd57b34f79a2026c69d133b0380f10128096ce",
+      "package": "Microsoft.Extensions.DependencyInjection/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.DependencyInjection.dll"
+    },
+    "glibc/net/net9.0/Microsoft.Extensions.Diagnostics.Abstractions.dll": {
+      "sha256": "1e9f80967afc35a4caca9b8743e1241df6dd17b0c72666cef96e338c10b167b9",
+      "package": "Microsoft.Extensions.Diagnostics.Abstractions/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.Diagnostics.Abstractions.dll"
+    },
+    "glibc/net/net9.0/Microsoft.Extensions.Logging.Abstractions.dll": {
+      "sha256": "7c5e0d3133a4b6f36f500e641b5baa115a747d8c709b4d1b038149b5931f6aae",
+      "package": "Microsoft.Extensions.Logging.Abstractions/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.Logging.Abstractions.dll"
+    },
+    "glibc/net/net9.0/Microsoft.Extensions.Logging.Configuration.dll": {
+      "sha256": "ab309abb90efb69ea92dbe14c7acad3edd3d4088febc3b852b91a82f046c30b6",
+      "package": "Microsoft.Extensions.Logging.Configuration/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.Logging.Configuration.dll"
+    },
+    "glibc/net/net9.0/Microsoft.Extensions.Logging.dll": {
+      "sha256": "faed6cb5c9ca0d6077feaeb2df251251adccf0241f7a80b91c58e014cd5ad48f",
+      "package": "Microsoft.Extensions.Logging/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.Logging.dll"
+    },
+    "glibc/net/net9.0/Microsoft.Extensions.Options.ConfigurationExtensions.dll": {
+      "sha256": "794e9ea487c5c7c17054371c63e61fe5d3636626ff99e5d985172393cdea512d",
+      "package": "Microsoft.Extensions.Options.ConfigurationExtensions/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.Options.ConfigurationExtensions.dll"
+    },
+    "glibc/net/net9.0/Microsoft.Extensions.Options.dll": {
+      "sha256": "1e832bccb1b02d454ff3661b936f057673d38d167533f477334641b9fda29e6f",
+      "package": "Microsoft.Extensions.Options/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.Options.dll"
+    },
+    "glibc/net/net9.0/Microsoft.Extensions.Primitives.dll": {
+      "sha256": "c6d27b3e63d2eb232a2f766a9a9b3a840c97f87b94c9438092c09a10ab0b3c41",
+      "package": "Microsoft.Extensions.Primitives/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.Primitives.dll"
+    },
+    "glibc/net/net9.0/OpenTelemetry.Api.ProviderBuilderExtensions.dll": {
+      "sha256": "23d296a894c3cfe0d2e637d01b6de5e624d9cf2bfd67abc707abdbedb69124a8",
+      "package": "OpenTelemetry.Api.ProviderBuilderExtensions/1.19.1",
+      "member": "lib/net9.0/OpenTelemetry.Api.ProviderBuilderExtensions.dll"
+    },
+    "glibc/net/net9.0/OpenTelemetry.Api.dll": {
+      "sha256": "9f0117eaff7b69e4593c6a3f54efe1a98f57349d09805503e34dd715b482268e",
+      "package": "OpenTelemetry.Api/1.19.1",
+      "member": "lib/net9.0/OpenTelemetry.Api.dll"
+    },
+    "glibc/net/net9.0/OpenTelemetry.Exporter.Console.dll": {
+      "sha256": "5df7a8fa476c51a55094e68430c5cfc8d0a51fac0abc413dd54279c595261e2d",
+      "package": "OpenTelemetry.Exporter.Console/1.19.1",
+      "member": "lib/net9.0/OpenTelemetry.Exporter.Console.dll"
+    },
+    "glibc/net/net9.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll": {
+      "sha256": "1c913ce542913bd46bf1619cc2c09df33af16e5df9f0b59471e7999621e032d1",
+      "package": "OpenTelemetry.Exporter.OpenTelemetryProtocol/1.19.1",
+      "member": "lib/net9.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll"
+    },
+    "glibc/net/net9.0/OpenTelemetry.Exporter.Prometheus.HttpListener.dll": {
+      "sha256": "f46ddc66b49a33988ed2d8c3015f30318cbe97c05876d2dd53b742825bd6fecb",
+      "package": "OpenTelemetry.Exporter.Prometheus.HttpListener/1.19.1-beta.1",
+      "member": "lib/net9.0/OpenTelemetry.Exporter.Prometheus.HttpListener.dll"
+    },
+    "glibc/net/net9.0/OpenTelemetry.Exporter.Zipkin.dll": {
+      "sha256": "2145c223766d63a4d84d12d99f83606ac6b57154b2fdae40fc39d931d6ab284c",
+      "package": "OpenTelemetry.Exporter.Zipkin/1.19.1",
+      "member": "lib/net9.0/OpenTelemetry.Exporter.Zipkin.dll"
+    },
+    "glibc/net/net9.0/OpenTelemetry.Extensions.Propagators.dll": {
+      "sha256": "e83f531130ce734e0ca91605ce62d4c3b2774a1d7384447f429743e357ad9048",
+      "package": "OpenTelemetry.Extensions.Propagators/1.19.1",
+      "member": "lib/net9.0/OpenTelemetry.Extensions.Propagators.dll"
+    },
+    "glibc/net/net9.0/OpenTelemetry.OpAmp.Client.dll": {
+      "sha256": "a5dcbcc4aada6318e0222b5826620f89a835c5c764ee0d008e155859392b1404",
+      "package": "OpenTelemetry.OpAmp.Client/0.7.0-alpha.2",
+      "member": "lib/net9.0/OpenTelemetry.OpAmp.Client.dll"
+    },
+    "glibc/net/net9.0/OpenTelemetry.Shims.OpenTracing.dll": {
+      "sha256": "acd3bfddb038db9a2845ba333e4a9021cd5dcd5b62b8c36fc9e1a95830fc0513",
+      "package": "OpenTelemetry.Shims.OpenTracing/1.19.1-beta.1",
+      "member": "lib/net9.0/OpenTelemetry.Shims.OpenTracing.dll"
+    },
+    "glibc/net/net9.0/OpenTelemetry.dll": {
+      "sha256": "ef2742173671b9c1aa52a37141d5c751a68e00bfb1f1c2ad437f05d4c459dc1d",
+      "package": "OpenTelemetry/1.19.1",
+      "member": "lib/net9.0/OpenTelemetry.dll"
+    },
+    "glibc/net/net9.0/System.Diagnostics.DiagnosticSource.dll": {
+      "sha256": "453ea6da39e00b262b7594576892376027f32f7b5bd5c8d926f641011bc52f1a",
+      "package": "System.Diagnostics.DiagnosticSource/10.0.0",
+      "member": "lib/net9.0/System.Diagnostics.DiagnosticSource.dll"
+    },
+    "musl/net/Google.Protobuf.dll": {
+      "sha256": "0f93ce18692e0b789c41299d0d2af2b477644fc4b13482bd0680b29289603996",
+      "package": "Google.Protobuf/3.36.2",
+      "member": "lib/net8.0/Google.Protobuf.dll"
+    },
+    "musl/net/OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper.dll": {
+      "sha256": "268163d2421c5961ada9cee6e4aea092b3554bf45d21d33519a685de08e7c3fc",
+      "package": "source-project"
+    },
+    "musl/net/OpenTelemetry.AutoInstrumentation.Loader.dll": {
+      "sha256": "760f364b589488d98bec5f07758d8361c1eeeb5084bdb41c7e3aa6ae7562b034",
+      "package": "source-project"
+    },
+    "musl/net/OpenTelemetry.AutoInstrumentation.PluginApi.dll": {
+      "sha256": "c06dc139501b79f22df55e2b81a0e531fa0a451175033df6e01107e72f055e7c",
+      "package": "source-project"
+    },
+    "musl/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll": {
+      "sha256": "de7eddace2b3484c657d35edd1a72b7d196cb81f3fc59533a5dcc152bb9743db",
+      "package": "source-project"
+    },
+    "musl/net/OpenTelemetry.AutoInstrumentation.dll": {
+      "sha256": "29ffe093c949f5acef6f9033f9c71c919de1acc3657b1905893d42af386dbfe6",
+      "package": "source-project"
+    },
+    "musl/net/OpenTracing.dll": {
+      "sha256": "aaedd66ffd728581d25cd57ddab9a14e711a1fc2bceaab9045e35b17a04ccde4",
+      "package": "OpenTracing/0.12.1",
+      "member": "lib/netstandard2.0/OpenTracing.dll"
+    },
+    "musl/net/System.Private.ServiceModel.dll": {
+      "sha256": "8191caef096ca91d79587bc08ba123a805c01997bd15b573ef28a882ea007d6d",
+      "package": "System.Private.ServiceModel/4.7.0",
+      "member": "lib/netstandard2.0/System.Private.ServiceModel.dll"
+    },
+    "musl/net/System.Security.Permissions.dll": {
+      "sha256": "74ef3b67960a9b569fed9ac457157769dbfe433b0f4fa13c52167c2246bfed71",
+      "package": "System.Security.Permissions/4.7.0",
+      "member": "lib/netcoreapp3.0/System.Security.Permissions.dll"
+    },
+    "musl/net/System.ServiceModel.Primitives.dll": {
+      "sha256": "2857baf4a88597ec6d132180aed3e638b3c293281cfc591da1d62c347a21bbe7",
+      "package": "System.ServiceModel.Primitives/4.7.0",
+      "member": "lib/netcoreapp2.1/System.ServiceModel.Primitives.dll"
+    },
+    "musl/net/System.ServiceModel.dll": {
+      "sha256": "d0db4c719008048df768c7fa2b307bd5b318526f7fc0099dcedca8c225c94d3f",
+      "package": "System.ServiceModel.Primitives/4.7.0",
+      "member": "lib/netstandard2.0/System.ServiceModel.dll"
+    },
+    "musl/net/net10.0/Microsoft.Extensions.Configuration.Abstractions.dll": {
+      "sha256": "5def68e1c7d9c1fcf56153bb669e00d84c1ae17b35fb09c5a8ccf93e9b934d3e",
+      "package": "Microsoft.Extensions.Configuration.Abstractions/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.Configuration.Abstractions.dll"
+    },
+    "musl/net/net10.0/Microsoft.Extensions.Configuration.Binder.dll": {
+      "sha256": "0637a0ab2b5a77b000c0d96c46573dae8c04fa86ae1374b5a1f00855a712d6f9",
+      "package": "Microsoft.Extensions.Configuration.Binder/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.Configuration.Binder.dll"
+    },
+    "musl/net/net10.0/Microsoft.Extensions.Configuration.EnvironmentVariables.dll": {
+      "sha256": "9971a5a6d7b0dc66f22fefa8f785bb8ec54100d8c44569fed2e70f8ab02298dd",
+      "package": "Microsoft.Extensions.Configuration.EnvironmentVariables/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.Configuration.EnvironmentVariables.dll"
+    },
+    "musl/net/net10.0/Microsoft.Extensions.Configuration.dll": {
+      "sha256": "94c3981084f713a51ad3d266145154d2468f59c4cd3e2bde82941bf84e97fb55",
+      "package": "Microsoft.Extensions.Configuration/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.Configuration.dll"
+    },
+    "musl/net/net10.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
+      "sha256": "7c97c4463fe0fc11d1f22f4d160b2bd2288981adf1de2717a6ff3fb993ddf294",
+      "package": "Microsoft.Extensions.DependencyInjection.Abstractions/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll"
+    },
+    "musl/net/net10.0/Microsoft.Extensions.DependencyInjection.dll": {
+      "sha256": "d646a5cca5e8116ae46b43715297083fa8a38db636eab60e66eeef350d74cd5d",
+      "package": "Microsoft.Extensions.DependencyInjection/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.DependencyInjection.dll"
+    },
+    "musl/net/net10.0/Microsoft.Extensions.Diagnostics.Abstractions.dll": {
+      "sha256": "9702b8737009bb5f6c943cf7a3ba5c0991c7e4eb58a9e952d54835bb596fe563",
+      "package": "Microsoft.Extensions.Diagnostics.Abstractions/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.Diagnostics.Abstractions.dll"
+    },
+    "musl/net/net10.0/Microsoft.Extensions.Logging.Abstractions.dll": {
+      "sha256": "a76a735b63e6ef3b0bf41ff92423cbd16103b8952e8306140a9bd650346034dc",
+      "package": "Microsoft.Extensions.Logging.Abstractions/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.Logging.Abstractions.dll"
+    },
+    "musl/net/net10.0/Microsoft.Extensions.Logging.Configuration.dll": {
+      "sha256": "52cbb4793651e6db0f5e9b1300661a8e0a8f76c15c9123e42c39aff35d571e24",
+      "package": "Microsoft.Extensions.Logging.Configuration/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.Logging.Configuration.dll"
+    },
+    "musl/net/net10.0/Microsoft.Extensions.Logging.dll": {
+      "sha256": "2c034725abd90afe30a1426e6477cb0693bc79170e1dfdb3cef7146e296a1f71",
+      "package": "Microsoft.Extensions.Logging/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.Logging.dll"
+    },
+    "musl/net/net10.0/Microsoft.Extensions.Options.ConfigurationExtensions.dll": {
+      "sha256": "f5078a206f8d54d03e15b32cbae7bfb2d95348719b1f3cf4a9bea32ced1c8b7b",
+      "package": "Microsoft.Extensions.Options.ConfigurationExtensions/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.Options.ConfigurationExtensions.dll"
+    },
+    "musl/net/net10.0/Microsoft.Extensions.Options.dll": {
+      "sha256": "58048d710cf2a88d3dea7c933d0b1408464d5aa4245ef736d3d47e6df6ba4db3",
+      "package": "Microsoft.Extensions.Options/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.Options.dll"
+    },
+    "musl/net/net10.0/Microsoft.Extensions.Primitives.dll": {
+      "sha256": "6aaf929343fd02415d6cb5d903816c2f1c831b194bfe7a15789879093d0fa6b7",
+      "package": "Microsoft.Extensions.Primitives/10.0.0",
+      "member": "lib/net10.0/Microsoft.Extensions.Primitives.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.Api.ProviderBuilderExtensions.dll": {
+      "sha256": "dec906a34dbafcfd2c23b73fd05e58defc7f8c1627890fad4e4461c23b8de989",
+      "package": "OpenTelemetry.Api.ProviderBuilderExtensions/1.19.1",
+      "member": "lib/net10.0/OpenTelemetry.Api.ProviderBuilderExtensions.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.Api.dll": {
+      "sha256": "b92d1b32ba9f7ddf4f06a7efab22c6424beba8760976f0eb5811ed3713d81f4c",
+      "package": "OpenTelemetry.Api/1.19.1",
+      "member": "lib/net10.0/OpenTelemetry.Api.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.Exporter.Console.dll": {
+      "sha256": "40c4d7ceb0355ec0fe0d06cf57563d7f763605835c81eb4dcc50988b8f48f355",
+      "package": "OpenTelemetry.Exporter.Console/1.19.1",
+      "member": "lib/net10.0/OpenTelemetry.Exporter.Console.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll": {
+      "sha256": "be37059eb65a9f4af95081c2d4795afd198a657dbf2e35363cca6444fd75b2ab",
+      "package": "OpenTelemetry.Exporter.OpenTelemetryProtocol/1.19.1",
+      "member": "lib/net10.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.Exporter.Prometheus.HttpListener.dll": {
+      "sha256": "c42ed9790f368093d29681adb82e9fa1f8fcfd03507aa08e8a0b203a7d95d039",
+      "package": "OpenTelemetry.Exporter.Prometheus.HttpListener/1.19.1-beta.1",
+      "member": "lib/net10.0/OpenTelemetry.Exporter.Prometheus.HttpListener.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.Exporter.Zipkin.dll": {
+      "sha256": "6968d102c0469acaa6da2f1c937f56241dd679703b5738ef4ea2d259aea09598",
+      "package": "OpenTelemetry.Exporter.Zipkin/1.19.1",
+      "member": "lib/net10.0/OpenTelemetry.Exporter.Zipkin.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.Extensions.Propagators.dll": {
+      "sha256": "f1c53b5a4f03da98e6153aad974c75131d65fa69f74f0b047ae60cb363b8cc9d",
+      "package": "OpenTelemetry.Extensions.Propagators/1.19.1",
+      "member": "lib/net10.0/OpenTelemetry.Extensions.Propagators.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.Instrumentation.AspNetCore.dll": {
+      "sha256": "61447a9a879187724a73129c61277ef9ff01f360ab5ca6ec3d022413ebc4726d",
+      "package": "OpenTelemetry.Instrumentation.AspNetCore/1.19.0",
+      "member": "lib/net10.0/OpenTelemetry.Instrumentation.AspNetCore.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.Instrumentation.EntityFrameworkCore.dll": {
+      "sha256": "33146ac9043d4c91d9aeaa338b4f3421e998920cca6b524386f89728c4331645",
+      "package": "OpenTelemetry.Instrumentation.EntityFrameworkCore/1.19.0-beta.1",
+      "member": "lib/net10.0/OpenTelemetry.Instrumentation.EntityFrameworkCore.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.Instrumentation.GrpcNetClient.dll": {
+      "sha256": "915abf30b0b236fd1cf2883b2b3a2ea2fc29a25f8f86a152a16cb7d345ef1334",
+      "package": "OpenTelemetry.Instrumentation.GrpcNetClient/1.19.1-beta.1",
+      "member": "lib/net10.0/OpenTelemetry.Instrumentation.GrpcNetClient.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.Instrumentation.Http.dll": {
+      "sha256": "b75143059235ae9cd079bb6c83f4641b39679d599de23dcdc6914fcd447f7d7c",
+      "package": "OpenTelemetry.Instrumentation.Http/1.19.0",
+      "member": "lib/net10.0/OpenTelemetry.Instrumentation.Http.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.Instrumentation.Process.dll": {
+      "sha256": "3a9dcec57b96b752a61c8eef1ad137a2b9b4d58d907fc5e6a620f24ae78e00d5",
+      "package": "OpenTelemetry.Instrumentation.Process/1.19.0-rc.1",
+      "member": "lib/net10.0/OpenTelemetry.Instrumentation.Process.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.Instrumentation.Quartz.dll": {
+      "sha256": "e7e9f27becd0850dc0082b9a03b0db8075d55a77dd82ecfc5c90cf9590dbc5e9",
+      "package": "OpenTelemetry.Instrumentation.Quartz/1.19.0-beta.1",
+      "member": "lib/net10.0/OpenTelemetry.Instrumentation.Quartz.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.Instrumentation.Runtime.dll": {
+      "sha256": "ecc5ab3b910a9f8d05bf20f64293f8eb85b68cbc44345684876621cac706a1dc",
+      "package": "OpenTelemetry.Instrumentation.Runtime/1.19.0",
+      "member": "lib/net10.0/OpenTelemetry.Instrumentation.Runtime.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.Instrumentation.SqlClient.dll": {
+      "sha256": "21e2f6f20a94b62b36b178fad8f135fc5a5e0149234ea6da6f086602bb00768b",
+      "package": "OpenTelemetry.Instrumentation.SqlClient/1.19.0",
+      "member": "lib/net10.0/OpenTelemetry.Instrumentation.SqlClient.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.Instrumentation.StackExchangeRedis.dll": {
+      "sha256": "ebbcf5e5d486ab936e1f4efb276270056edf63ec4a285c8019948e343bb8b886",
+      "package": "OpenTelemetry.Instrumentation.StackExchangeRedis/1.19.0-beta.1",
+      "member": "lib/net10.0/OpenTelemetry.Instrumentation.StackExchangeRedis.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.Instrumentation.Wcf.dll": {
+      "sha256": "8e0f2d9f28e9fdb16d40bc6baf30c078ee18e48a0d6714684439a65bc1a7f1cf",
+      "package": "OpenTelemetry.Instrumentation.Wcf/1.19.1-beta.1",
+      "member": "lib/net10.0/OpenTelemetry.Instrumentation.Wcf.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.OpAmp.Client.dll": {
+      "sha256": "3dc6d8664bd5ad94e7e07e00bebde4030cebe702d15888b30c57223808f96e19",
+      "package": "OpenTelemetry.OpAmp.Client/0.7.0-alpha.2",
+      "member": "lib/net10.0/OpenTelemetry.OpAmp.Client.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.Resources.Azure.dll": {
+      "sha256": "4ef5ed0692b4ee684d11403d2a5fcc94c1b881f6eb3ce56e7b4e4d0d1bc22d60",
+      "package": "OpenTelemetry.Resources.Azure/1.19.1-beta.1",
+      "member": "lib/net10.0/OpenTelemetry.Resources.Azure.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.Resources.Container.dll": {
+      "sha256": "fc9fe7c02ca322a5de40ce5a04ca3a8331b1102c0b20b37b7350ba6e2fda0990",
+      "package": "OpenTelemetry.Resources.Container/1.19.1-beta.1",
+      "member": "lib/net10.0/OpenTelemetry.Resources.Container.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.Resources.Host.dll": {
+      "sha256": "426b99c10e207be4f9b98845954648bd3580b3cefbff6b1a2ee524d2381099c4",
+      "package": "OpenTelemetry.Resources.Host/1.19.1-beta.1",
+      "member": "lib/net10.0/OpenTelemetry.Resources.Host.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.Resources.OperatingSystem.dll": {
+      "sha256": "69f31a84a58545195758cd9d9a018f66f80a8d932bcf5214eb0ac153faf7f141",
+      "package": "OpenTelemetry.Resources.OperatingSystem/1.19.1-beta.1",
+      "member": "lib/net10.0/OpenTelemetry.Resources.OperatingSystem.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.Resources.Process.dll": {
+      "sha256": "a8695131ab8fe51444bfdcddecb5bc298f97b26a9f30bf8c35a2f905565d2dc2",
+      "package": "OpenTelemetry.Resources.Process/1.19.1-rc.1",
+      "member": "lib/net10.0/OpenTelemetry.Resources.Process.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.Resources.ProcessRuntime.dll": {
+      "sha256": "2f3b553c4aeb4c21ead795396a7e7ad57420e61e251e538d49074ec96529be07",
+      "package": "OpenTelemetry.Resources.ProcessRuntime/1.19.1-beta.1",
+      "member": "lib/net10.0/OpenTelemetry.Resources.ProcessRuntime.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.Shims.OpenTracing.dll": {
+      "sha256": "c2837d46a99ea86fb7a87ceb020d2ce98ad868d010358a641efd48a83c8786eb",
+      "package": "OpenTelemetry.Shims.OpenTracing/1.19.1-beta.1",
+      "member": "lib/net10.0/OpenTelemetry.Shims.OpenTracing.dll"
+    },
+    "musl/net/net10.0/OpenTelemetry.dll": {
+      "sha256": "6623430269ed62f1a8e097e3909b9c8d778ae72b9b69f096140c71d06e0eb043",
+      "package": "OpenTelemetry/1.19.1",
+      "member": "lib/net10.0/OpenTelemetry.dll"
+    },
+    "musl/net/net8.0/Microsoft.Extensions.Configuration.Abstractions.dll": {
+      "sha256": "fefcdb267a73099cb90e5af56b5ef2bca59bed974339b3a6810352bde23537a6",
+      "package": "Microsoft.Extensions.Configuration.Abstractions/8.0.0",
+      "member": "lib/net8.0/Microsoft.Extensions.Configuration.Abstractions.dll"
+    },
+    "musl/net/net8.0/Microsoft.Extensions.Configuration.Binder.dll": {
+      "sha256": "beac12f7bba4e22cda2acd9ddfe944a4ed56abec414e084edd147bd5dad3c032",
+      "package": "Microsoft.Extensions.Configuration.Binder/8.0.2",
+      "member": "lib/net8.0/Microsoft.Extensions.Configuration.Binder.dll"
+    },
+    "musl/net/net8.0/Microsoft.Extensions.Configuration.EnvironmentVariables.dll": {
+      "sha256": "797b3034fd173caff0850cd580428a5f4aeb7da27bf03369ad7f2b0996019399",
+      "package": "Microsoft.Extensions.Configuration.EnvironmentVariables/8.0.0",
+      "member": "lib/net8.0/Microsoft.Extensions.Configuration.EnvironmentVariables.dll"
+    },
+    "musl/net/net8.0/Microsoft.Extensions.Configuration.dll": {
+      "sha256": "b5cd9da2c3364a5b201cecb0c80e25227d27ba44d96343d2894ff8ef3fd81550",
+      "package": "Microsoft.Extensions.Configuration/8.0.0",
+      "member": "lib/net8.0/Microsoft.Extensions.Configuration.dll"
+    },
+    "musl/net/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
+      "sha256": "a0106a638facae621f870eda720cb6c980c1d5d49c2f4351134e3fe043b9291b",
+      "package": "Microsoft.Extensions.DependencyInjection.Abstractions/8.0.0",
+      "member": "lib/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll"
+    },
+    "musl/net/net8.0/Microsoft.Extensions.DependencyInjection.dll": {
+      "sha256": "8d6e7b64cce554f0a0fbdb2ba80745895fa0b4e6cc378b9fedfe8ce86f0d8ae4",
+      "package": "Microsoft.Extensions.DependencyInjection/8.0.0",
+      "member": "lib/net8.0/Microsoft.Extensions.DependencyInjection.dll"
+    },
+    "musl/net/net8.0/Microsoft.Extensions.Diagnostics.Abstractions.dll": {
+      "sha256": "bea3cf225599b05a521902e12e23de6a2309937dfb3763ccd2cea62ad2c4fe37",
+      "package": "Microsoft.Extensions.Diagnostics.Abstractions/8.0.0",
+      "member": "lib/net8.0/Microsoft.Extensions.Diagnostics.Abstractions.dll"
+    },
+    "musl/net/net8.0/Microsoft.Extensions.Logging.Abstractions.dll": {
+      "sha256": "29e6bfaf5ce079ad4d70dc547d966038992a7428df6e726084eb9010ec837715",
+      "package": "Microsoft.Extensions.Logging.Abstractions/8.0.0",
+      "member": "lib/net8.0/Microsoft.Extensions.Logging.Abstractions.dll"
+    },
+    "musl/net/net8.0/Microsoft.Extensions.Logging.Configuration.dll": {
+      "sha256": "4bd1245656bef4eab6b6b503ebff486210f7c05c17097ac247c5a0e824f118b6",
+      "package": "Microsoft.Extensions.Logging.Configuration/8.0.0",
+      "member": "lib/net8.0/Microsoft.Extensions.Logging.Configuration.dll"
+    },
+    "musl/net/net8.0/Microsoft.Extensions.Logging.dll": {
+      "sha256": "4330a5efe9d110afb7f8e567d5b43eee976e0f7f6802d13a211b65d747529179",
+      "package": "Microsoft.Extensions.Logging/8.0.0",
+      "member": "lib/net8.0/Microsoft.Extensions.Logging.dll"
+    },
+    "musl/net/net8.0/Microsoft.Extensions.Options.ConfigurationExtensions.dll": {
+      "sha256": "b9ea7bb70bfecf5c649f2559300fce232729257cfdb4221dc96f1ea778227353",
+      "package": "Microsoft.Extensions.Options.ConfigurationExtensions/8.0.0",
+      "member": "lib/net8.0/Microsoft.Extensions.Options.ConfigurationExtensions.dll"
+    },
+    "musl/net/net8.0/Microsoft.Extensions.Options.dll": {
+      "sha256": "5f9b0e589f1ce9ca656588cd92cc0bd53803fdfad258fb2916aaa14aedce682c",
+      "package": "Microsoft.Extensions.Options/8.0.0",
+      "member": "lib/net8.0/Microsoft.Extensions.Options.dll"
+    },
+    "musl/net/net8.0/Microsoft.Extensions.Primitives.dll": {
+      "sha256": "446ff16e903e7479558816e213a3adee9a1c1adad65a56d853801b10933e29d7",
+      "package": "Microsoft.Extensions.Primitives/8.0.0",
+      "member": "lib/net8.0/Microsoft.Extensions.Primitives.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.Api.ProviderBuilderExtensions.dll": {
+      "sha256": "80ba30dc2706c858fc79eb7fb784148eacedf3d0338a8d2fd6015c1d955dbb2f",
+      "package": "OpenTelemetry.Api.ProviderBuilderExtensions/1.19.1",
+      "member": "lib/net8.0/OpenTelemetry.Api.ProviderBuilderExtensions.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.Api.dll": {
+      "sha256": "13be234ad40aca923edbfb0d93ef16feaa326d22525d0ca0847a4ba7bf3dacb1",
+      "package": "OpenTelemetry.Api/1.19.1",
+      "member": "lib/net8.0/OpenTelemetry.Api.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.Exporter.Console.dll": {
+      "sha256": "88386f64e3c5bf4e7f552304a05eccbe390345522be314c4c45ef808aac549c2",
+      "package": "OpenTelemetry.Exporter.Console/1.19.1",
+      "member": "lib/net8.0/OpenTelemetry.Exporter.Console.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll": {
+      "sha256": "fade39448fd426e4ba7f48bac739b8ebea3c4055e1340ec683006f3a606e8669",
+      "package": "OpenTelemetry.Exporter.OpenTelemetryProtocol/1.19.1",
+      "member": "lib/net8.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.Exporter.Prometheus.HttpListener.dll": {
+      "sha256": "9598552fa04b63e250fb89828ae58a8bdfd3a25b50345aac227e20956ecf9dea",
+      "package": "OpenTelemetry.Exporter.Prometheus.HttpListener/1.19.1-beta.1",
+      "member": "lib/net8.0/OpenTelemetry.Exporter.Prometheus.HttpListener.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.Exporter.Zipkin.dll": {
+      "sha256": "eda9edd7c3aacccf4eab66060f00b51d02a9622a46a86f6ea8c4557c5900dcd9",
+      "package": "OpenTelemetry.Exporter.Zipkin/1.19.1",
+      "member": "lib/net8.0/OpenTelemetry.Exporter.Zipkin.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.Extensions.Propagators.dll": {
+      "sha256": "2cfbb9460b9d80612523bb5f017e33b1f422a8e82bb4479225c45b52b8cd22a6",
+      "package": "OpenTelemetry.Extensions.Propagators/1.19.1",
+      "member": "lib/net8.0/OpenTelemetry.Extensions.Propagators.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.Instrumentation.AspNetCore.dll": {
+      "sha256": "b7d0a8a1506881b9914ee2a3a4e4253cddf716a94bbe86d7b2fa056cb9037c46",
+      "package": "OpenTelemetry.Instrumentation.AspNetCore/1.19.0",
+      "member": "lib/net8.0/OpenTelemetry.Instrumentation.AspNetCore.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.Instrumentation.EntityFrameworkCore.dll": {
+      "sha256": "a1eaaacf91d8af43f4428bdace56ae99b7c103a1edd189dc7518eb15c207bfc5",
+      "package": "OpenTelemetry.Instrumentation.EntityFrameworkCore/1.19.0-beta.1",
+      "member": "lib/net8.0/OpenTelemetry.Instrumentation.EntityFrameworkCore.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.Instrumentation.GrpcNetClient.dll": {
+      "sha256": "eb6f317f8dc28e28414bacb1eed91ddefa34d50d7c29a11ad8c8200fbdebfb54",
+      "package": "OpenTelemetry.Instrumentation.GrpcNetClient/1.19.1-beta.1",
+      "member": "lib/net8.0/OpenTelemetry.Instrumentation.GrpcNetClient.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.Instrumentation.Http.dll": {
+      "sha256": "af8d8d791d062f1e5adf8bd82110e1bb66ff6791210a3a96a28ef17d82f8e6c8",
+      "package": "OpenTelemetry.Instrumentation.Http/1.19.0",
+      "member": "lib/net8.0/OpenTelemetry.Instrumentation.Http.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.Instrumentation.Process.dll": {
+      "sha256": "c01055f3ca876ed71534d528ebc42f8376ec3ff71ce3f73cac3f16f525406dcf",
+      "package": "OpenTelemetry.Instrumentation.Process/1.19.0-rc.1",
+      "member": "lib/net8.0/OpenTelemetry.Instrumentation.Process.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.Instrumentation.Quartz.dll": {
+      "sha256": "aeee983e9eb387e64234cc7752beedd57d607491813abe53f4c99126fd68406f",
+      "package": "OpenTelemetry.Instrumentation.Quartz/1.19.0-beta.1",
+      "member": "lib/net8.0/OpenTelemetry.Instrumentation.Quartz.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.Instrumentation.Runtime.dll": {
+      "sha256": "f929f6753f63ba1ca8813da9a8ba75ac726bc6af9f10d05d03182171e88b1877",
+      "package": "OpenTelemetry.Instrumentation.Runtime/1.19.0",
+      "member": "lib/net8.0/OpenTelemetry.Instrumentation.Runtime.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.Instrumentation.SqlClient.dll": {
+      "sha256": "dbc50a67167306bdabea81e7d46c47eebb2878b56212cb2e6778c0f0193e615b",
+      "package": "OpenTelemetry.Instrumentation.SqlClient/1.19.0",
+      "member": "lib/net8.0/OpenTelemetry.Instrumentation.SqlClient.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.Instrumentation.StackExchangeRedis.dll": {
+      "sha256": "3e66f4ccb2f8e1fb1be63b87711423a7266a64c5ed53d13dffd04601fafd8da8",
+      "package": "OpenTelemetry.Instrumentation.StackExchangeRedis/1.19.0-beta.1",
+      "member": "lib/net8.0/OpenTelemetry.Instrumentation.StackExchangeRedis.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.Instrumentation.Wcf.dll": {
+      "sha256": "b495ed8b41e68618d7dd9434e20b97fd9a9f7826e8bf817be315a22fb4f00914",
+      "package": "OpenTelemetry.Instrumentation.Wcf/1.19.1-beta.1",
+      "member": "lib/net8.0/OpenTelemetry.Instrumentation.Wcf.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.OpAmp.Client.dll": {
+      "sha256": "896b0e7d657de3514f3fbb721a590d928b958a403d750b4fbed01129099b23fb",
+      "package": "OpenTelemetry.OpAmp.Client/0.7.0-alpha.2",
+      "member": "lib/net8.0/OpenTelemetry.OpAmp.Client.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.Resources.Azure.dll": {
+      "sha256": "c1ee6b7de1682bb4fe062257bfb37189ff99e371f14f09a714d913ca0de09689",
+      "package": "OpenTelemetry.Resources.Azure/1.19.1-beta.1",
+      "member": "lib/net8.0/OpenTelemetry.Resources.Azure.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.Resources.Container.dll": {
+      "sha256": "eab606e97af7edceb8b19bd43c494f7e29a7ca48f8041c59f3f022321a7fdc79",
+      "package": "OpenTelemetry.Resources.Container/1.19.1-beta.1",
+      "member": "lib/net8.0/OpenTelemetry.Resources.Container.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.Resources.Host.dll": {
+      "sha256": "a165a72743c25a5a89b217e9dd825f1679d1c51b3b452fac8cc56ff44625c774",
+      "package": "OpenTelemetry.Resources.Host/1.19.1-beta.1",
+      "member": "lib/net8.0/OpenTelemetry.Resources.Host.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.Resources.OperatingSystem.dll": {
+      "sha256": "abf9c54b7cb4e8155354ff7147fd047faf5604585a72aca787b7642b1cddf500",
+      "package": "OpenTelemetry.Resources.OperatingSystem/1.19.1-beta.1",
+      "member": "lib/net8.0/OpenTelemetry.Resources.OperatingSystem.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.Resources.Process.dll": {
+      "sha256": "56a9048ddade2b93336a2723c321c80022b0ed504c163e6e2c01928744526c87",
+      "package": "OpenTelemetry.Resources.Process/1.19.1-rc.1",
+      "member": "lib/net8.0/OpenTelemetry.Resources.Process.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.Resources.ProcessRuntime.dll": {
+      "sha256": "e33cd72a37b14833852d9fa7dce468a62ef304a43e9427a76fd0acc3afb684f9",
+      "package": "OpenTelemetry.Resources.ProcessRuntime/1.19.1-beta.1",
+      "member": "lib/net8.0/OpenTelemetry.Resources.ProcessRuntime.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.Shims.OpenTracing.dll": {
+      "sha256": "705f649519f7e96173644997a0c3dcb32057e93e823217d01dae77adbbcd7327",
+      "package": "OpenTelemetry.Shims.OpenTracing/1.19.1-beta.1",
+      "member": "lib/net8.0/OpenTelemetry.Shims.OpenTracing.dll"
+    },
+    "musl/net/net8.0/OpenTelemetry.dll": {
+      "sha256": "2efbbe13204b5b500fbc9b968fd23547d57ecace78e4901ebac615bc46000232",
+      "package": "OpenTelemetry/1.19.1",
+      "member": "lib/net8.0/OpenTelemetry.dll"
+    },
+    "musl/net/net8.0/System.Diagnostics.DiagnosticSource.dll": {
+      "sha256": "27da0b8683f7539c4b57ce08000dec4242b0e3be23bf4822836080da0ebda971",
+      "package": "System.Diagnostics.DiagnosticSource/10.0.0",
+      "member": "lib/net8.0/System.Diagnostics.DiagnosticSource.dll"
+    },
+    "musl/net/net9.0/Microsoft.Extensions.Configuration.Abstractions.dll": {
+      "sha256": "e63b332553874087ea3d8d770705e230db0c614a99d571ba64753281ac65b3ae",
+      "package": "Microsoft.Extensions.Configuration.Abstractions/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.Configuration.Abstractions.dll"
+    },
+    "musl/net/net9.0/Microsoft.Extensions.Configuration.Binder.dll": {
+      "sha256": "231dcfc3042cceb64351f68e59c569eba22226e89fa579b0ae961826339ddcd6",
+      "package": "Microsoft.Extensions.Configuration.Binder/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.Configuration.Binder.dll"
+    },
+    "musl/net/net9.0/Microsoft.Extensions.Configuration.EnvironmentVariables.dll": {
+      "sha256": "4a27c35f1af0bc6011eda6eb1fcbc3980e3da83daa2d4b28dfa6a803b00922bb",
+      "package": "Microsoft.Extensions.Configuration.EnvironmentVariables/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.Configuration.EnvironmentVariables.dll"
+    },
+    "musl/net/net9.0/Microsoft.Extensions.Configuration.dll": {
+      "sha256": "d2ba98f7ca6f7ae49e54bb2974b22d62a15695d5a11236a164ae71eac87abcc5",
+      "package": "Microsoft.Extensions.Configuration/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.Configuration.dll"
+    },
+    "musl/net/net9.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
+      "sha256": "99a08f73aa1568c8a614ac4d76fe1cf9a27e10f7c02f9afd65da2c6e25d6ff04",
+      "package": "Microsoft.Extensions.DependencyInjection.Abstractions/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll"
+    },
+    "musl/net/net9.0/Microsoft.Extensions.DependencyInjection.dll": {
+      "sha256": "09c80cce213152ced75d791fc4fd57b34f79a2026c69d133b0380f10128096ce",
+      "package": "Microsoft.Extensions.DependencyInjection/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.DependencyInjection.dll"
+    },
+    "musl/net/net9.0/Microsoft.Extensions.Diagnostics.Abstractions.dll": {
+      "sha256": "1e9f80967afc35a4caca9b8743e1241df6dd17b0c72666cef96e338c10b167b9",
+      "package": "Microsoft.Extensions.Diagnostics.Abstractions/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.Diagnostics.Abstractions.dll"
+    },
+    "musl/net/net9.0/Microsoft.Extensions.Logging.Abstractions.dll": {
+      "sha256": "7c5e0d3133a4b6f36f500e641b5baa115a747d8c709b4d1b038149b5931f6aae",
+      "package": "Microsoft.Extensions.Logging.Abstractions/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.Logging.Abstractions.dll"
+    },
+    "musl/net/net9.0/Microsoft.Extensions.Logging.Configuration.dll": {
+      "sha256": "ab309abb90efb69ea92dbe14c7acad3edd3d4088febc3b852b91a82f046c30b6",
+      "package": "Microsoft.Extensions.Logging.Configuration/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.Logging.Configuration.dll"
+    },
+    "musl/net/net9.0/Microsoft.Extensions.Logging.dll": {
+      "sha256": "faed6cb5c9ca0d6077feaeb2df251251adccf0241f7a80b91c58e014cd5ad48f",
+      "package": "Microsoft.Extensions.Logging/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.Logging.dll"
+    },
+    "musl/net/net9.0/Microsoft.Extensions.Options.ConfigurationExtensions.dll": {
+      "sha256": "794e9ea487c5c7c17054371c63e61fe5d3636626ff99e5d985172393cdea512d",
+      "package": "Microsoft.Extensions.Options.ConfigurationExtensions/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.Options.ConfigurationExtensions.dll"
+    },
+    "musl/net/net9.0/Microsoft.Extensions.Options.dll": {
+      "sha256": "1e832bccb1b02d454ff3661b936f057673d38d167533f477334641b9fda29e6f",
+      "package": "Microsoft.Extensions.Options/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.Options.dll"
+    },
+    "musl/net/net9.0/Microsoft.Extensions.Primitives.dll": {
+      "sha256": "c6d27b3e63d2eb232a2f766a9a9b3a840c97f87b94c9438092c09a10ab0b3c41",
+      "package": "Microsoft.Extensions.Primitives/9.0.0",
+      "member": "lib/net9.0/Microsoft.Extensions.Primitives.dll"
+    },
+    "musl/net/net9.0/OpenTelemetry.Api.ProviderBuilderExtensions.dll": {
+      "sha256": "23d296a894c3cfe0d2e637d01b6de5e624d9cf2bfd67abc707abdbedb69124a8",
+      "package": "OpenTelemetry.Api.ProviderBuilderExtensions/1.19.1",
+      "member": "lib/net9.0/OpenTelemetry.Api.ProviderBuilderExtensions.dll"
+    },
+    "musl/net/net9.0/OpenTelemetry.Api.dll": {
+      "sha256": "9f0117eaff7b69e4593c6a3f54efe1a98f57349d09805503e34dd715b482268e",
+      "package": "OpenTelemetry.Api/1.19.1",
+      "member": "lib/net9.0/OpenTelemetry.Api.dll"
+    },
+    "musl/net/net9.0/OpenTelemetry.Exporter.Console.dll": {
+      "sha256": "5df7a8fa476c51a55094e68430c5cfc8d0a51fac0abc413dd54279c595261e2d",
+      "package": "OpenTelemetry.Exporter.Console/1.19.1",
+      "member": "lib/net9.0/OpenTelemetry.Exporter.Console.dll"
+    },
+    "musl/net/net9.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll": {
+      "sha256": "1c913ce542913bd46bf1619cc2c09df33af16e5df9f0b59471e7999621e032d1",
+      "package": "OpenTelemetry.Exporter.OpenTelemetryProtocol/1.19.1",
+      "member": "lib/net9.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll"
+    },
+    "musl/net/net9.0/OpenTelemetry.Exporter.Prometheus.HttpListener.dll": {
+      "sha256": "f46ddc66b49a33988ed2d8c3015f30318cbe97c05876d2dd53b742825bd6fecb",
+      "package": "OpenTelemetry.Exporter.Prometheus.HttpListener/1.19.1-beta.1",
+      "member": "lib/net9.0/OpenTelemetry.Exporter.Prometheus.HttpListener.dll"
+    },
+    "musl/net/net9.0/OpenTelemetry.Exporter.Zipkin.dll": {
+      "sha256": "2145c223766d63a4d84d12d99f83606ac6b57154b2fdae40fc39d931d6ab284c",
+      "package": "OpenTelemetry.Exporter.Zipkin/1.19.1",
+      "member": "lib/net9.0/OpenTelemetry.Exporter.Zipkin.dll"
+    },
+    "musl/net/net9.0/OpenTelemetry.Extensions.Propagators.dll": {
+      "sha256": "e83f531130ce734e0ca91605ce62d4c3b2774a1d7384447f429743e357ad9048",
+      "package": "OpenTelemetry.Extensions.Propagators/1.19.1",
+      "member": "lib/net9.0/OpenTelemetry.Extensions.Propagators.dll"
+    },
+    "musl/net/net9.0/OpenTelemetry.OpAmp.Client.dll": {
+      "sha256": "a5dcbcc4aada6318e0222b5826620f89a835c5c764ee0d008e155859392b1404",
+      "package": "OpenTelemetry.OpAmp.Client/0.7.0-alpha.2",
+      "member": "lib/net9.0/OpenTelemetry.OpAmp.Client.dll"
+    },
+    "musl/net/net9.0/OpenTelemetry.Shims.OpenTracing.dll": {
+      "sha256": "acd3bfddb038db9a2845ba333e4a9021cd5dcd5b62b8c36fc9e1a95830fc0513",
+      "package": "OpenTelemetry.Shims.OpenTracing/1.19.1-beta.1",
+      "member": "lib/net9.0/OpenTelemetry.Shims.OpenTracing.dll"
+    },
+    "musl/net/net9.0/OpenTelemetry.dll": {
+      "sha256": "ef2742173671b9c1aa52a37141d5c751a68e00bfb1f1c2ad437f05d4c459dc1d",
+      "package": "OpenTelemetry/1.19.1",
+      "member": "lib/net9.0/OpenTelemetry.dll"
+    },
+    "musl/net/net9.0/System.Diagnostics.DiagnosticSource.dll": {
+      "sha256": "453ea6da39e00b262b7594576892376027f32f7b5bd5c8d926f641011bc52f1a",
+      "package": "System.Diagnostics.DiagnosticSource/10.0.0",
+      "member": "lib/net9.0/System.Diagnostics.DiagnosticSource.dll"
+    }
+  },
+  "materials": {
+    "0173db220309a689e149acb26d9d1ae006b7ca9c79d44ea6bfc091fe11a280e4.txt": {
+      "sha256": "0173db220309a689e149acb26d9d1ae006b7ca9c79d44ea6bfc091fe11a280e4",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.resources.azure/1.19.1-beta.1/opentelemetry.resources.azure.1.19.1-beta.1.nupkg",
+          "package_sha256": "a4f7e9fc675a2d9571ae567d40261ccff13bd844fb9cd83e2765d08a33a23207",
+          "member": "OpenTelemetry.Resources.Azure.nuspec"
+        }
+      ]
+    },
+    "01892e3b694e60d0fbbc2920f600a3344be647bdf9c046f7acf69272e4fa968f.txt": {
+      "sha256": "01892e3b694e60d0fbbc2920f600a3344be647bdf9c046f7acf69272e4fa968f",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.primitives/10.0.0/microsoft.extensions.primitives.10.0.0.nupkg",
+          "package_sha256": "0eea74f0a729b4b8e59e9379b79ffffa9e27f0551381102ae27ff0d6ceaeb3e2",
+          "member": "Microsoft.Extensions.Primitives.nuspec"
+        }
+      ]
+    },
+    "03ef580a813afcc6f5f017f74520897238d67f866e22e3f04f7d51ff4d35d5dd.txt": {
+      "sha256": "03ef580a813afcc6f5f017f74520897238d67f866e22e3f04f7d51ff4d35d5dd",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.exporter.zipkin/1.19.1/opentelemetry.exporter.zipkin.1.19.1.nupkg",
+          "package_sha256": "2376b97910f66743cfaaf918836e9f6074c06d17fd7ea0f67cad7b7713789c94",
+          "member": "OpenTelemetry.Exporter.Zipkin.nuspec"
+        }
+      ]
+    },
+    "0f3b7bc57edb81ae05a1c59b0828d99cd2c1bd6b5de34dcce9b7519081461904.txt": {
+      "sha256": "0f3b7bc57edb81ae05a1c59b0828d99cd2c1bd6b5de34dcce9b7519081461904",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.dependencyinjection/10.0.0/microsoft.extensions.dependencyinjection.10.0.0.nupkg",
+          "package_sha256": "2d89bd855968fd1f5cd9a00a1ec0d8279bd8f54d3edc9bdc9667b7a2edc1b6f4",
+          "member": "Microsoft.Extensions.DependencyInjection.nuspec"
+        }
+      ]
+    },
+    "10a186eb097268352bfaa01d9e78256557f8c3ef7fc0a370d05fc8952b03dca4.txt": {
+      "sha256": "10a186eb097268352bfaa01d9e78256557f8c3ef7fc0a370d05fc8952b03dca4",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.binder/10.0.0/microsoft.extensions.configuration.binder.10.0.0.nupkg",
+          "package_sha256": "612896a00dd5411db693af9b484014a9e1bb503cd99497c75834ee6d43b957c5",
+          "member": "Microsoft.Extensions.Configuration.Binder.nuspec"
+        }
+      ]
+    },
+    "126d33e134dcbe6a65a969b93e2faa3dcf73dbc460c307e783b4f719eed12688.txt": {
+      "sha256": "126d33e134dcbe6a65a969b93e2faa3dcf73dbc460c307e783b4f719eed12688",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.abstractions/10.0.0/microsoft.extensions.logging.abstractions.10.0.0.nupkg",
+          "package_sha256": "067860199734d47c134b1a206afabb51eab857b88c037c0f9db7d1c10e118469",
+          "member": "Microsoft.Extensions.Logging.Abstractions.nuspec"
+        }
+      ]
+    },
+    "1403d85fb38b093d7afd76954c768dc60d274159ae10978a2781536dd8655f54.txt": {
+      "sha256": "1403d85fb38b093d7afd76954c768dc60d274159ae10978a2781536dd8655f54",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.resources.processruntime/1.19.1-beta.1/opentelemetry.resources.processruntime.1.19.1-beta.1.nupkg",
+          "package_sha256": "9de243ada073a431e83efb6d0dec61e63b53dfe4fcd2a219ccf3249feaf0f5c3",
+          "member": "OpenTelemetry.Resources.ProcessRuntime.nuspec"
+        }
+      ]
+    },
+    "16a1d6fc2dad2f3eacdf24b808d3a77ce09b2a67513f083c6a6f6beb25cb2b15.txt": {
+      "sha256": "16a1d6fc2dad2f3eacdf24b808d3a77ce09b2a67513f083c6a6f6beb25cb2b15",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.shims.opentracing/1.19.1-beta.1/opentelemetry.shims.opentracing.1.19.1-beta.1.nupkg",
+          "package_sha256": "70d6ef89b3676e40396eade7bb797f9a8a885edbe137334ca304c696a8affdb6",
+          "member": "OpenTelemetry.Shims.OpenTracing.nuspec"
+        }
+      ]
+    },
+    "188d3b58873a852b22527a663a107838f09de7bff0194e9b43a62a720967e500.txt": {
+      "sha256": "188d3b58873a852b22527a663a107838f09de7bff0194e9b43a62a720967e500",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.resources.container/1.19.1-beta.1/opentelemetry.resources.container.1.19.1-beta.1.nupkg",
+          "package_sha256": "c8833f2feb3e350631f98d644b3f5134ab6adbf6e956c2b61e4d4655e4f5c5be",
+          "member": "OpenTelemetry.Resources.Container.nuspec"
+        }
+      ]
+    },
+    "19c19dcac9f3ee6302cfbc6745bb8e79f08efc4c933eb8dc5509bf14b88347ec.txt": {
+      "sha256": "19c19dcac9f3ee6302cfbc6745bb8e79f08efc4c933eb8dc5509bf14b88347ec",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration/8.0.0/microsoft.extensions.configuration.8.0.0.nupkg",
+          "package_sha256": "f413ec012971ad5f229663028dd6f74e251c9b9bc56719019c023f7cd0521320",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.abstractions/8.0.0/microsoft.extensions.configuration.abstractions.8.0.0.nupkg",
+          "package_sha256": "e1e0690e47fb309a334d99cec10bf071f81129019c3577b42bf905fa1e5197ca",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.environmentvariables/8.0.0/microsoft.extensions.configuration.environmentvariables.8.0.0.nupkg",
+          "package_sha256": "f9b8c566fa82b0c7f6151336a25ab1fdfb9bf90c1f335901863195393e470b8f",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.dependencyinjection/8.0.0/microsoft.extensions.dependencyinjection.8.0.0.nupkg",
+          "package_sha256": "faa20347c851ceb7821cd103b5470f7d51d076eaf358fa3f9aabe2087efcf844",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.dependencyinjection.abstractions/8.0.0/microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg",
+          "package_sha256": "ef92b31065a36d110b7332690a226e6fe96d35430c6f3e40ff529053ee5d80ff",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.diagnostics.abstractions/8.0.0/microsoft.extensions.diagnostics.abstractions.8.0.0.nupkg",
+          "package_sha256": "5120f9b9939a6a132a8babbba30356c7f2d1e040eb3b0a8fac00229bb891a496",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging/8.0.0/microsoft.extensions.logging.8.0.0.nupkg",
+          "package_sha256": "31e8746745fb2b23841b897445605cb871e285c00172f0b27d45e06ac990f75a",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.abstractions/8.0.0/microsoft.extensions.logging.abstractions.8.0.0.nupkg",
+          "package_sha256": "26675d8de83c5394be8814f046554054b7881f1738cabacd82a54c381ec48cce",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.configuration/8.0.0/microsoft.extensions.logging.configuration.8.0.0.nupkg",
+          "package_sha256": "9b39acb4db158ca4f412d41c740ba419189f0f7d13f3604c198952bbc9382bb5",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options/8.0.0/microsoft.extensions.options.8.0.0.nupkg",
+          "package_sha256": "9f69b82527a040a51394eb0a2d95141c728cabddba789d30f4df46f88dc5a05c",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options.configurationextensions/8.0.0/microsoft.extensions.options.configurationextensions.8.0.0.nupkg",
+          "package_sha256": "03905bcf0d6488d9208ab939c7c932c7083d94b4dc4a78288de0fea1ca46d512",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.primitives/8.0.0/microsoft.extensions.primitives.8.0.0.nupkg",
+          "package_sha256": "154f2a8f70d1f1b0dd73573e59e199c7f3c265eaaa9ddc1e64cf5ea5ca578d2a",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        }
+      ]
+    },
+    "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6.txt": {
+      "sha256": "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry/1.19.1/opentelemetry.1.19.1.nupkg",
+          "package_sha256": "d447b5be4a21bbb674e398660eae08270836d1ce13eabddc83beb0f0b29936ab",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.api/1.19.1/opentelemetry.api.1.19.1.nupkg",
+          "package_sha256": "714680742653abe2c3bfac673b658309cbefc4f01b65659cb0abb0db9e4bb1ae",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.api.providerbuilderextensions/1.19.1/opentelemetry.api.providerbuilderextensions.1.19.1.nupkg",
+          "package_sha256": "25b04ab6e18321ab6773e0cfaf0add63c17b5b7200d95bf4e688269e2eab3950",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.exporter.console/1.19.1/opentelemetry.exporter.console.1.19.1.nupkg",
+          "package_sha256": "39c71ea3b08f5b62739c0d5d3de251d7c8a31e6657315df8fa07ef98ec799764",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.exporter.opentelemetryprotocol/1.19.1/opentelemetry.exporter.opentelemetryprotocol.1.19.1.nupkg",
+          "package_sha256": "08a4239de643584517a008928f91b92552ebd37060e42287d2191a8129fc1c81",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.exporter.prometheus.httplistener/1.19.1-beta.1/opentelemetry.exporter.prometheus.httplistener.1.19.1-beta.1.nupkg",
+          "package_sha256": "4061368ddef34d9c330717314e37375295a309507be775bf2f850636238e3ffb",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.exporter.zipkin/1.19.1/opentelemetry.exporter.zipkin.1.19.1.nupkg",
+          "package_sha256": "2376b97910f66743cfaaf918836e9f6074c06d17fd7ea0f67cad7b7713789c94",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.extensions.propagators/1.19.1/opentelemetry.extensions.propagators.1.19.1.nupkg",
+          "package_sha256": "89ec36f6a16ce07a3e40d4b03c65c3ad391524102e02180ec817d9ba44d8a929",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.aspnetcore/1.19.0/opentelemetry.instrumentation.aspnetcore.1.19.0.nupkg",
+          "package_sha256": "dff21b4f29561592407d85b3277df5fcee241c18e8325482c3145481bec74aa6",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.entityframeworkcore/1.19.0-beta.1/opentelemetry.instrumentation.entityframeworkcore.1.19.0-beta.1.nupkg",
+          "package_sha256": "b13703252a547cde1e8b3eba703ba0d30b52994834b39a8ec01bd5ea1bb3d84e",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.grpcnetclient/1.19.1-beta.1/opentelemetry.instrumentation.grpcnetclient.1.19.1-beta.1.nupkg",
+          "package_sha256": "d1c352dc9ab701965205ceaa400fcf3a0648adabc86787782db81ac96ccde0d4",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.http/1.19.0/opentelemetry.instrumentation.http.1.19.0.nupkg",
+          "package_sha256": "4d76ab0f040f8202ce727c5fac9a4460e9c703520fd1237aa62717a1666edce4",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.process/1.19.0-rc.1/opentelemetry.instrumentation.process.1.19.0-rc.1.nupkg",
+          "package_sha256": "9597f50522afd786716199755b9be158c21a2eca1709dcba99c48a5a05f241d2",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.quartz/1.19.0-beta.1/opentelemetry.instrumentation.quartz.1.19.0-beta.1.nupkg",
+          "package_sha256": "852ae86a652115dd5eb648b4def782e22d5666f1492ebb96bf28fccdf7e8999a",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.runtime/1.19.0/opentelemetry.instrumentation.runtime.1.19.0.nupkg",
+          "package_sha256": "65c6475c5038394934530a992915d4346c57d78b0ae8f372b664339b752f505c",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.sqlclient/1.19.0/opentelemetry.instrumentation.sqlclient.1.19.0.nupkg",
+          "package_sha256": "4fc3dd015b284fd490be01eb2bbb3b21a1d78215377fa14ad06c9ac16e8bb789",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.stackexchangeredis/1.19.0-beta.1/opentelemetry.instrumentation.stackexchangeredis.1.19.0-beta.1.nupkg",
+          "package_sha256": "542331134dd026f47b49eee9f258d40cbbe5db5a99e801afef8a0ca0d9c0f5b6",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.wcf/1.19.1-beta.1/opentelemetry.instrumentation.wcf.1.19.1-beta.1.nupkg",
+          "package_sha256": "1892f90192986cec76efba96d435d0e1e033eec9d02e48df1677bedbd8b33faa",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.opamp.client/0.7.0-alpha.2/opentelemetry.opamp.client.0.7.0-alpha.2.nupkg",
+          "package_sha256": "8e81ce388ce59efe9401d383580a79c8fb46faf878dfbab576c04f36ebee8fe2",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.resources.azure/1.19.1-beta.1/opentelemetry.resources.azure.1.19.1-beta.1.nupkg",
+          "package_sha256": "a4f7e9fc675a2d9571ae567d40261ccff13bd844fb9cd83e2765d08a33a23207",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.resources.container/1.19.1-beta.1/opentelemetry.resources.container.1.19.1-beta.1.nupkg",
+          "package_sha256": "c8833f2feb3e350631f98d644b3f5134ab6adbf6e956c2b61e4d4655e4f5c5be",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.resources.host/1.19.1-beta.1/opentelemetry.resources.host.1.19.1-beta.1.nupkg",
+          "package_sha256": "d3692f3de293f7cf77df740c7a5fd4bf57dffffa5f8369e4c8af23c36646170c",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.resources.operatingsystem/1.19.1-beta.1/opentelemetry.resources.operatingsystem.1.19.1-beta.1.nupkg",
+          "package_sha256": "2f6772df1ad397f7fc963b9f5920792aed8367f9dd84df08c597da55a0dc9cf7",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.resources.process/1.19.1-rc.1/opentelemetry.resources.process.1.19.1-rc.1.nupkg",
+          "package_sha256": "0e78b8c9e6a74525abd0b65da890e57ede72ede2bf6751f2c471a1573363e3e2",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.resources.processruntime/1.19.1-beta.1/opentelemetry.resources.processruntime.1.19.1-beta.1.nupkg",
+          "package_sha256": "9de243ada073a431e83efb6d0dec61e63b53dfe4fcd2a219ccf3249feaf0f5c3",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.shims.opentracing/1.19.1-beta.1/opentelemetry.shims.opentracing.1.19.1-beta.1.nupkg",
+          "package_sha256": "70d6ef89b3676e40396eade7bb797f9a8a885edbe137334ca304c696a8affdb6",
+          "member": "LICENSE.TXT"
+        }
+      ]
+    },
+    "208d31ba373d2017a0bad0a5593f3050952abd3a1f6a29df85c33494c48d2885.txt": {
+      "sha256": "208d31ba373d2017a0bad0a5593f3050952abd3a1f6a29df85c33494c48d2885",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/system.private.servicemodel/4.7.0/system.private.servicemodel.4.7.0.nupkg",
+          "package_sha256": "6318d59c11044529bad5c0581e695f78f1de8cdaee1a5ba1c41f12f63fee22db",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/system.servicemodel.primitives/4.7.0/system.servicemodel.primitives.4.7.0.nupkg",
+          "package_sha256": "41eb57444d943d299c7b4cf34a58a648408489d78b44c1994e89383361f5d3a5",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        }
+      ]
+    },
+    "20ecb63a6ea2b403f1e454a8e683130c060f42b89b991d21d8a2ecb00a744d04.txt": {
+      "sha256": "20ecb63a6ea2b403f1e454a8e683130c060f42b89b991d21d8a2ecb00a744d04",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.exporter.opentelemetryprotocol/1.19.1/opentelemetry.exporter.opentelemetryprotocol.1.19.1.nupkg",
+          "package_sha256": "08a4239de643584517a008928f91b92552ebd37060e42287d2191a8129fc1c81",
+          "member": "OpenTelemetry.Exporter.OpenTelemetryProtocol.nuspec"
+        }
+      ]
+    },
+    "2819c2e9c646fd6c214bf2afd6478d59772bd6beefa8081af29159fe1f1f7d3a.txt": {
+      "sha256": "2819c2e9c646fd6c214bf2afd6478d59772bd6beefa8081af29159fe1f1f7d3a",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.environmentvariables/8.0.0/microsoft.extensions.configuration.environmentvariables.8.0.0.nupkg",
+          "package_sha256": "f9b8c566fa82b0c7f6151336a25ab1fdfb9bf90c1f335901863195393e470b8f",
+          "member": "Microsoft.Extensions.Configuration.EnvironmentVariables.nuspec"
+        }
+      ]
+    },
+    "2d403a76e1f0fda6825cb94067dc27e4eb2ffb5972f9f79e8b7c1ef8999b8280.txt": {
+      "sha256": "2d403a76e1f0fda6825cb94067dc27e4eb2ffb5972f9f79e8b7c1ef8999b8280",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.extensions.propagators/1.19.1/opentelemetry.extensions.propagators.1.19.1.nupkg",
+          "package_sha256": "89ec36f6a16ce07a3e40d4b03c65c3ad391524102e02180ec817d9ba44d8a929",
+          "member": "OpenTelemetry.Extensions.Propagators.nuspec"
+        }
+      ]
+    },
+    "2fe42588885a138c915a7f227a1b68edc232bbed83139c899fde40dc9db6597d.txt": {
+      "sha256": "2fe42588885a138c915a7f227a1b68edc232bbed83139c899fde40dc9db6597d",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging/9.0.0/microsoft.extensions.logging.9.0.0.nupkg",
+          "package_sha256": "911d7a73e37c9d0ad67982da8ea9d73e0ed18978d931214b9ca2c4b3855f8dc3",
+          "member": "Microsoft.Extensions.Logging.nuspec"
+        }
+      ]
+    },
+    "30ba601042f9ea75eef8de3826fa8fbdd41f1bd935c38c76dc0ebc74d828cb07.txt": {
+      "sha256": "30ba601042f9ea75eef8de3826fa8fbdd41f1bd935c38c76dc0ebc74d828cb07",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options.configurationextensions/10.0.0/microsoft.extensions.options.configurationextensions.10.0.0.nupkg",
+          "package_sha256": "5c602ce43c4cbd69e68d7f1da91c0a634becb92e34487bec7c9a81d6b3b82fb9",
+          "member": "Microsoft.Extensions.Options.ConfigurationExtensions.nuspec"
+        }
+      ]
+    },
+    "330787f1973144e46186e8d72b4d393620220f57c8f87ff4e8e7d8781bda69a1.txt": {
+      "sha256": "330787f1973144e46186e8d72b4d393620220f57c8f87ff4e8e7d8781bda69a1",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.resources.host/1.19.1-beta.1/opentelemetry.resources.host.1.19.1-beta.1.nupkg",
+          "package_sha256": "d3692f3de293f7cf77df740c7a5fd4bf57dffffa5f8369e4c8af23c36646170c",
+          "member": "OpenTelemetry.Resources.Host.nuspec"
+        }
+      ]
+    },
+    "341c0a1750db316a932c601ec1282596eae2c478fd39ed877eeb1f3802cad23f.txt": {
+      "sha256": "341c0a1750db316a932c601ec1282596eae2c478fd39ed877eeb1f3802cad23f",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.diagnostics.abstractions/10.0.0/microsoft.extensions.diagnostics.abstractions.10.0.0.nupkg",
+          "package_sha256": "722c7b43143f837b23eab797bb78e7d1c46fd918a3cdc79a2cb91c844193b791",
+          "member": "Microsoft.Extensions.Diagnostics.Abstractions.nuspec"
+        }
+      ]
+    },
+    "34693997ad3738ce76702051669f5380fb7c6614804804102b10ec7a704a6ca1.txt": {
+      "sha256": "34693997ad3738ce76702051669f5380fb7c6614804804102b10ec7a704a6ca1",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration/10.0.0/microsoft.extensions.configuration.10.0.0.nupkg",
+          "package_sha256": "32c2ec9153e9902be8bf9f835886802c2b75a9f4515f8bb6dbc787c6fa44d1d8",
+          "member": "Microsoft.Extensions.Configuration.nuspec"
+        }
+      ]
+    },
+    "388c07f579998286e5df706a2e68bf6e01100187ccb0ff0310e26c3383f7b2b2.txt": {
+      "sha256": "388c07f579998286e5df706a2e68bf6e01100187ccb0ff0310e26c3383f7b2b2",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/system.security.permissions/4.7.0/system.security.permissions.4.7.0.nupkg",
+          "package_sha256": "04681730b522e6bc559a60a18c885c5d4c62b098ef94d4e85e5c9a21b531c38d",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        }
+      ]
+    },
+    "39ecb7278016dd45909999f53d941d144547a728bb618f1d8e675581ff08a226.txt": {
+      "sha256": "39ecb7278016dd45909999f53d941d144547a728bb618f1d8e675581ff08a226",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentracing/0.12.1/opentracing.0.12.1.nupkg",
+          "package_sha256": "973d0d348a4a268aa3e49ba6592da146ebcb9c47d91cf35ca3c1e2f5cb343fe2",
+          "member": "OpenTracing.nuspec"
+        }
+      ]
+    },
+    "3e8336cb4ab3ad8ecd2433c871648df7da03a2a7d62311896b25a0226a309fd3.txt": {
+      "sha256": "3e8336cb4ab3ad8ecd2433c871648df7da03a2a7d62311896b25a0226a309fd3",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry/1.19.1/opentelemetry.1.19.1.nupkg",
+          "package_sha256": "d447b5be4a21bbb674e398660eae08270836d1ce13eabddc83beb0f0b29936ab",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.api/1.19.1/opentelemetry.api.1.19.1.nupkg",
+          "package_sha256": "714680742653abe2c3bfac673b658309cbefc4f01b65659cb0abb0db9e4bb1ae",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.api.providerbuilderextensions/1.19.1/opentelemetry.api.providerbuilderextensions.1.19.1.nupkg",
+          "package_sha256": "25b04ab6e18321ab6773e0cfaf0add63c17b5b7200d95bf4e688269e2eab3950",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.exporter.console/1.19.1/opentelemetry.exporter.console.1.19.1.nupkg",
+          "package_sha256": "39c71ea3b08f5b62739c0d5d3de251d7c8a31e6657315df8fa07ef98ec799764",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.exporter.opentelemetryprotocol/1.19.1/opentelemetry.exporter.opentelemetryprotocol.1.19.1.nupkg",
+          "package_sha256": "08a4239de643584517a008928f91b92552ebd37060e42287d2191a8129fc1c81",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.exporter.prometheus.httplistener/1.19.1-beta.1/opentelemetry.exporter.prometheus.httplistener.1.19.1-beta.1.nupkg",
+          "package_sha256": "4061368ddef34d9c330717314e37375295a309507be775bf2f850636238e3ffb",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.exporter.zipkin/1.19.1/opentelemetry.exporter.zipkin.1.19.1.nupkg",
+          "package_sha256": "2376b97910f66743cfaaf918836e9f6074c06d17fd7ea0f67cad7b7713789c94",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.extensions.propagators/1.19.1/opentelemetry.extensions.propagators.1.19.1.nupkg",
+          "package_sha256": "89ec36f6a16ce07a3e40d4b03c65c3ad391524102e02180ec817d9ba44d8a929",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.shims.opentracing/1.19.1-beta.1/opentelemetry.shims.opentracing.1.19.1-beta.1.nupkg",
+          "package_sha256": "70d6ef89b3676e40396eade7bb797f9a8a885edbe137334ca304c696a8affdb6",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        }
+      ]
+    },
+    "4045fa8f5cf63fca91cb0da0cea90b2a00236ad50796da7ac5dc65984cf253e1.txt": {
+      "sha256": "4045fa8f5cf63fca91cb0da0cea90b2a00236ad50796da7ac5dc65984cf253e1",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.primitives/8.0.0/microsoft.extensions.primitives.8.0.0.nupkg",
+          "package_sha256": "154f2a8f70d1f1b0dd73573e59e199c7f3c265eaaa9ddc1e64cf5ea5ca578d2a",
+          "member": "Microsoft.Extensions.Primitives.nuspec"
+        }
+      ]
+    },
+    "40686c6447a7d5b5d3693068e4571b5f483d7ed335aeee773ef662440de4c5d5.txt": {
+      "sha256": "40686c6447a7d5b5d3693068e4571b5f483d7ed335aeee773ef662440de4c5d5",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration/9.0.0/microsoft.extensions.configuration.9.0.0.nupkg",
+          "package_sha256": "b812de6f8cfad32f33ecd7a51ecf6e4f770b0fac0e0e4770c9f266ebf6192c33",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.abstractions/9.0.0/microsoft.extensions.configuration.abstractions.9.0.0.nupkg",
+          "package_sha256": "c6d1b65120bd426d1fd8d9fa8e4724969c840d3de170464ec4ec137347a9eee7",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.binder/9.0.0/microsoft.extensions.configuration.binder.9.0.0.nupkg",
+          "package_sha256": "e9a8d859c34e417d96a9fb609e852656dcaf0b59243ceb530a27f80222847df5",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.environmentvariables/9.0.0/microsoft.extensions.configuration.environmentvariables.9.0.0.nupkg",
+          "package_sha256": "b43271da9ad8669af444a4b09897ec2bd165506c1a0e6cae4b3da4a90c6c5a82",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.dependencyinjection/9.0.0/microsoft.extensions.dependencyinjection.9.0.0.nupkg",
+          "package_sha256": "7401f9d8f3e54cb9fb5fed5a23fee7a5dac3ccc1053cc5d1bf88ac5756bed789",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.dependencyinjection.abstractions/9.0.0/microsoft.extensions.dependencyinjection.abstractions.9.0.0.nupkg",
+          "package_sha256": "0a7715c24299e42b081b63b4f8e33da97b985e1de9e941b2b9e4c748b0d52fe7",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.diagnostics.abstractions/9.0.0/microsoft.extensions.diagnostics.abstractions.9.0.0.nupkg",
+          "package_sha256": "c06d4b7044fe30f46351dcf71c83931d51276c6fc8345254ab33c4ac233bf5e6",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging/9.0.0/microsoft.extensions.logging.9.0.0.nupkg",
+          "package_sha256": "911d7a73e37c9d0ad67982da8ea9d73e0ed18978d931214b9ca2c4b3855f8dc3",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.abstractions/9.0.0/microsoft.extensions.logging.abstractions.9.0.0.nupkg",
+          "package_sha256": "8814ecf6dc2359715e111b78084ae42087282595358eb775456088f15e63eca5",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.configuration/9.0.0/microsoft.extensions.logging.configuration.9.0.0.nupkg",
+          "package_sha256": "cac3e306aeb8a7a24ce0499e56776bc979e12d61d862ccf3955a4fc515a4524c",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options/9.0.0/microsoft.extensions.options.9.0.0.nupkg",
+          "package_sha256": "0d3e5eb80418fc8b41e4b3c8f16229e839ddd254af0513f7e6f1643970baf1c9",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options.configurationextensions/9.0.0/microsoft.extensions.options.configurationextensions.9.0.0.nupkg",
+          "package_sha256": "af5677b04552223787d942a3f8a323f3a85aafaf20ff3c9b4aaa128c44817280",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.primitives/9.0.0/microsoft.extensions.primitives.9.0.0.nupkg",
+          "package_sha256": "64d2eeb0ad4246eab9059619303a9acf4e0f20a49c13667bb12dad7a153b109b",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        }
+      ]
+    },
+    "48656b0b0004dade4132e7c19a47a4d9bc011bb09e90c994a1491d3b389afab8.txt": {
+      "sha256": "48656b0b0004dade4132e7c19a47a4d9bc011bb09e90c994a1491d3b389afab8",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration/9.0.0/microsoft.extensions.configuration.9.0.0.nupkg",
+          "package_sha256": "b812de6f8cfad32f33ecd7a51ecf6e4f770b0fac0e0e4770c9f266ebf6192c33",
+          "member": "Microsoft.Extensions.Configuration.nuspec"
+        }
+      ]
+    },
+    "4a01e447dc22bd11fe009f4f3d50ad36e2d140c69d523dbc0ad9d4adddceba78.txt": {
+      "sha256": "4a01e447dc22bd11fe009f4f3d50ad36e2d140c69d523dbc0ad9d4adddceba78",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/system.servicemodel.primitives/4.7.0/system.servicemodel.primitives.4.7.0.nupkg",
+          "package_sha256": "41eb57444d943d299c7b4cf34a58a648408489d78b44c1994e89383361f5d3a5",
+          "member": "System.ServiceModel.Primitives.nuspec"
+        }
+      ]
+    },
+    "53634709a58159c8387a7bd77f1849d5d6f7d6a913c28e087e5dbd83a6687bb0.txt": {
+      "sha256": "53634709a58159c8387a7bd77f1849d5d6f7d6a913c28e087e5dbd83a6687bb0",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.dependencyinjection/9.0.0/microsoft.extensions.dependencyinjection.9.0.0.nupkg",
+          "package_sha256": "7401f9d8f3e54cb9fb5fed5a23fee7a5dac3ccc1053cc5d1bf88ac5756bed789",
+          "member": "Microsoft.Extensions.DependencyInjection.nuspec"
+        }
+      ]
+    },
+    "58bf5d5d51441edd347859a910ea57f5e2526741ddd6d72734ac61cdcebfcd85.txt": {
+      "sha256": "58bf5d5d51441edd347859a910ea57f5e2526741ddd6d72734ac61cdcebfcd85",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options.configurationextensions/8.0.0/microsoft.extensions.options.configurationextensions.8.0.0.nupkg",
+          "package_sha256": "03905bcf0d6488d9208ab939c7c932c7083d94b4dc4a78288de0fea1ca46d512",
+          "member": "Microsoft.Extensions.Options.ConfigurationExtensions.nuspec"
+        }
+      ]
+    },
+    "5cc3472c611f8ea18d8382e04fb79316439545c1181183e77360a9266a2c222e.txt": {
+      "sha256": "5cc3472c611f8ea18d8382e04fb79316439545c1181183e77360a9266a2c222e",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.aspnetcore/1.19.0/opentelemetry.instrumentation.aspnetcore.1.19.0.nupkg",
+          "package_sha256": "dff21b4f29561592407d85b3277df5fcee241c18e8325482c3145481bec74aa6",
+          "member": "OpenTelemetry.Instrumentation.AspNetCore.nuspec"
+        }
+      ]
+    },
+    "5e666a909af764ae8ab3faeeccc2773187d4ca4155d5d756356cad6766443f51.txt": {
+      "sha256": "5e666a909af764ae8ab3faeeccc2773187d4ca4155d5d756356cad6766443f51",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.dependencyinjection.abstractions/8.0.0/microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg",
+          "package_sha256": "ef92b31065a36d110b7332690a226e6fe96d35430c6f3e40ff529053ee5d80ff",
+          "member": "Microsoft.Extensions.DependencyInjection.Abstractions.nuspec"
+        }
+      ]
+    },
+    "635f2f0ca6f89a8d7477be9150fc251d35fe6c53fa94024e379227ae9f0f63d0.txt": {
+      "sha256": "635f2f0ca6f89a8d7477be9150fc251d35fe6c53fa94024e379227ae9f0f63d0",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options/9.0.0/microsoft.extensions.options.9.0.0.nupkg",
+          "package_sha256": "0d3e5eb80418fc8b41e4b3c8f16229e839ddd254af0513f7e6f1643970baf1c9",
+          "member": "Microsoft.Extensions.Options.nuspec"
+        }
+      ]
+    },
+    "64f0a4e16ce4e61ff48799142c64d75dced40d2bc7e387e765af0966cf20759d.txt": {
+      "sha256": "64f0a4e16ce4e61ff48799142c64d75dced40d2bc7e387e765af0966cf20759d",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.abstractions/9.0.0/microsoft.extensions.configuration.abstractions.9.0.0.nupkg",
+          "package_sha256": "c6d1b65120bd426d1fd8d9fa8e4724969c840d3de170464ec4ec137347a9eee7",
+          "member": "Microsoft.Extensions.Configuration.Abstractions.nuspec"
+        }
+      ]
+    },
+    "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21.txt": {
+      "sha256": "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration/10.0.0/microsoft.extensions.configuration.10.0.0.nupkg",
+          "package_sha256": "32c2ec9153e9902be8bf9f835886802c2b75a9f4515f8bb6dbc787c6fa44d1d8",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.abstractions/10.0.0/microsoft.extensions.configuration.abstractions.10.0.0.nupkg",
+          "package_sha256": "19c82b9d302278257b0154f5df3c8e8dfc302fce9ef7d8a23bf32230ec4f186d",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.binder/10.0.0/microsoft.extensions.configuration.binder.10.0.0.nupkg",
+          "package_sha256": "612896a00dd5411db693af9b484014a9e1bb503cd99497c75834ee6d43b957c5",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.environmentvariables/10.0.0/microsoft.extensions.configuration.environmentvariables.10.0.0.nupkg",
+          "package_sha256": "51ac9f7aaac098dc9f3a4ba170129f8fc5298d0a95fd932a5ab0f2c42486d4c0",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.dependencyinjection/10.0.0/microsoft.extensions.dependencyinjection.10.0.0.nupkg",
+          "package_sha256": "2d89bd855968fd1f5cd9a00a1ec0d8279bd8f54d3edc9bdc9667b7a2edc1b6f4",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.dependencyinjection.abstractions/10.0.0/microsoft.extensions.dependencyinjection.abstractions.10.0.0.nupkg",
+          "package_sha256": "f62a1d5cfdfd62a831a269ce3cec5dfe6cdb1b425f3925f3168354de8993d8fb",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.diagnostics.abstractions/10.0.0/microsoft.extensions.diagnostics.abstractions.10.0.0.nupkg",
+          "package_sha256": "722c7b43143f837b23eab797bb78e7d1c46fd918a3cdc79a2cb91c844193b791",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging/10.0.0/microsoft.extensions.logging.10.0.0.nupkg",
+          "package_sha256": "3feccf01a74b2fade4fc6a8adf8fea0a1a908d8f5a211c597f1941f65aac4abb",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.abstractions/10.0.0/microsoft.extensions.logging.abstractions.10.0.0.nupkg",
+          "package_sha256": "067860199734d47c134b1a206afabb51eab857b88c037c0f9db7d1c10e118469",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.configuration/10.0.0/microsoft.extensions.logging.configuration.10.0.0.nupkg",
+          "package_sha256": "eff4d63b56aaf217606dc4c42830562238120bd2a914dde4467317fb5d9b3a45",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options/10.0.0/microsoft.extensions.options.10.0.0.nupkg",
+          "package_sha256": "8f930ea9948a794b71c739998f364c1b2d2f10b1ddbcfadaab04d0410355b180",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options.configurationextensions/10.0.0/microsoft.extensions.options.configurationextensions.10.0.0.nupkg",
+          "package_sha256": "5c602ce43c4cbd69e68d7f1da91c0a634becb92e34487bec7c9a81d6b3b82fb9",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.primitives/10.0.0/microsoft.extensions.primitives.10.0.0.nupkg",
+          "package_sha256": "0eea74f0a729b4b8e59e9379b79ffffa9e27f0551381102ae27ff0d6ceaeb3e2",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/system.diagnostics.diagnosticsource/10.0.0/system.diagnostics.diagnosticsource.10.0.0.nupkg",
+          "package_sha256": "b7b35a92604d4996cc214f34d84a5f3f03541f04bb49df4695e6ce1ef62dcbe3",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        }
+      ]
+    },
+    "6e5e117324afd944dcf67f36cf329843bc1a92229a8cd9bb573d7a83130fea7d.txt": {
+      "sha256": "6e5e117324afd944dcf67f36cf329843bc1a92229a8cd9bb573d7a83130fea7d",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/protocolbuffers/protobuf/2c74169b34066ceb8ddb6b882fcb3fb32d737a55/LICENSE"
+        }
+      ]
+    },
+    "7209d42974a0de402e1eec4c5099c48c6f1f83d08b36016c710e8dc23c9e1eff.txt": {
+      "sha256": "7209d42974a0de402e1eec4c5099c48c6f1f83d08b36016c710e8dc23c9e1eff",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options/10.0.0/microsoft.extensions.options.10.0.0.nupkg",
+          "package_sha256": "8f930ea9948a794b71c739998f364c1b2d2f10b1ddbcfadaab04d0410355b180",
+          "member": "Microsoft.Extensions.Options.nuspec"
+        }
+      ]
+    },
+    "72ece9dfb0adae73b18a8bc412a776b45d58e1595486f7c3de0c2c712ba84c66.txt": {
+      "sha256": "72ece9dfb0adae73b18a8bc412a776b45d58e1595486f7c3de0c2c712ba84c66",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.environmentvariables/9.0.0/microsoft.extensions.configuration.environmentvariables.9.0.0.nupkg",
+          "package_sha256": "b43271da9ad8669af444a4b09897ec2bd165506c1a0e6cae4b3da4a90c6c5a82",
+          "member": "Microsoft.Extensions.Configuration.EnvironmentVariables.nuspec"
+        }
+      ]
+    },
+    "75aca24d6498cd668358303b022c14938bb2345f11cc04389cf25ab014e65519.txt": {
+      "sha256": "75aca24d6498cd668358303b022c14938bb2345f11cc04389cf25ab014e65519",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.quartz/1.19.0-beta.1/opentelemetry.instrumentation.quartz.1.19.0-beta.1.nupkg",
+          "package_sha256": "852ae86a652115dd5eb648b4def782e22d5666f1492ebb96bf28fccdf7e8999a",
+          "member": "OpenTelemetry.Instrumentation.Quartz.nuspec"
+        }
+      ]
+    },
+    "78677b02272827751b74161d376b9d0b36b3280211c9e594818be7030ae1651a.txt": {
+      "sha256": "78677b02272827751b74161d376b9d0b36b3280211c9e594818be7030ae1651a",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.entityframeworkcore/1.19.0-beta.1/opentelemetry.instrumentation.entityframeworkcore.1.19.0-beta.1.nupkg",
+          "package_sha256": "b13703252a547cde1e8b3eba703ba0d30b52994834b39a8ec01bd5ea1bb3d84e",
+          "member": "OpenTelemetry.Instrumentation.EntityFrameworkCore.nuspec"
+        }
+      ]
+    },
+    "7d023edd365397263d06a654a568ea6df9a3034903cf8ecd3e378a31d4a65dfe.txt": {
+      "sha256": "7d023edd365397263d06a654a568ea6df9a3034903cf8ecd3e378a31d4a65dfe",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.configuration/9.0.0/microsoft.extensions.logging.configuration.9.0.0.nupkg",
+          "package_sha256": "cac3e306aeb8a7a24ce0499e56776bc979e12d61d862ccf3955a4fc515a4524c",
+          "member": "Microsoft.Extensions.Logging.Configuration.nuspec"
+        }
+      ]
+    },
+    "83a95a76a612de7cea4fdc55f5d10d0a1b910ef828361c7bda88cc3294bde64d.txt": {
+      "sha256": "83a95a76a612de7cea4fdc55f5d10d0a1b910ef828361c7bda88cc3294bde64d",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.resources.process/1.19.1-rc.1/opentelemetry.resources.process.1.19.1-rc.1.nupkg",
+          "package_sha256": "0e78b8c9e6a74525abd0b65da890e57ede72ede2bf6751f2c471a1573363e3e2",
+          "member": "OpenTelemetry.Resources.Process.nuspec"
+        }
+      ]
+    },
+    "85e9c3963962646d7ceaa39eae0ed434978d37a9df5d7a5a3ba19f33e32ddc70.txt": {
+      "sha256": "85e9c3963962646d7ceaa39eae0ed434978d37a9df5d7a5a3ba19f33e32ddc70",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.binder/9.0.0/microsoft.extensions.configuration.binder.9.0.0.nupkg",
+          "package_sha256": "e9a8d859c34e417d96a9fb609e852656dcaf0b59243ceb530a27f80222847df5",
+          "member": "Microsoft.Extensions.Configuration.Binder.nuspec"
+        }
+      ]
+    },
+    "869445788d625f9c1499f708a42048cbac0da510182efab10695d0596299ad0f.txt": {
+      "sha256": "869445788d625f9c1499f708a42048cbac0da510182efab10695d0596299ad0f",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.wcf/1.19.1-beta.1/opentelemetry.instrumentation.wcf.1.19.1-beta.1.nupkg",
+          "package_sha256": "1892f90192986cec76efba96d435d0e1e033eec9d02e48df1677bedbd8b33faa",
+          "member": "OpenTelemetry.Instrumentation.Wcf.nuspec"
+        }
+      ]
+    },
+    "8aad4287281e1b5db08cbb0ffcf907567a5052a38a032a31db36e12776bf931d.txt": {
+      "sha256": "8aad4287281e1b5db08cbb0ffcf907567a5052a38a032a31db36e12776bf931d",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.http/1.19.0/opentelemetry.instrumentation.http.1.19.0.nupkg",
+          "package_sha256": "4d76ab0f040f8202ce727c5fac9a4460e9c703520fd1237aa62717a1666edce4",
+          "member": "OpenTelemetry.Instrumentation.Http.nuspec"
+        }
+      ]
+    },
+    "92d994ee380c3621dd1cc9bf71707e46be7b38ffc6f0aa2094efb489c6127b98.txt": {
+      "sha256": "92d994ee380c3621dd1cc9bf71707e46be7b38ffc6f0aa2094efb489c6127b98",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.diagnostics.abstractions/8.0.0/microsoft.extensions.diagnostics.abstractions.8.0.0.nupkg",
+          "package_sha256": "5120f9b9939a6a132a8babbba30356c7f2d1e040eb3b0a8fac00229bb891a496",
+          "member": "Microsoft.Extensions.Diagnostics.Abstractions.nuspec"
+        }
+      ]
+    },
+    "93dee1a923d8435a77fb5020f0de7c2949b678f65b7d354f82190ad06a084eb1.txt": {
+      "sha256": "93dee1a923d8435a77fb5020f0de7c2949b678f65b7d354f82190ad06a084eb1",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.abstractions/8.0.0/microsoft.extensions.configuration.abstractions.8.0.0.nupkg",
+          "package_sha256": "e1e0690e47fb309a334d99cec10bf071f81129019c3577b42bf905fa1e5197ca",
+          "member": "Microsoft.Extensions.Configuration.Abstractions.nuspec"
+        }
+      ]
+    },
+    "94b7bad0a3f4e43b9821e7f6e80c8c9bf1859200844025cfc0137f206c56ba2c.txt": {
+      "sha256": "94b7bad0a3f4e43b9821e7f6e80c8c9bf1859200844025cfc0137f206c56ba2c",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry/1.19.1/opentelemetry.1.19.1.nupkg",
+          "package_sha256": "d447b5be4a21bbb674e398660eae08270836d1ce13eabddc83beb0f0b29936ab",
+          "member": "OpenTelemetry.nuspec"
+        }
+      ]
+    },
+    "96c8bd6685f3437fa3c99669489a92ef9794475b21078b40ce125d5ead6142f3.txt": {
+      "sha256": "96c8bd6685f3437fa3c99669489a92ef9794475b21078b40ce125d5ead6142f3",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.grpcnetclient/1.19.1-beta.1/opentelemetry.instrumentation.grpcnetclient.1.19.1-beta.1.nupkg",
+          "package_sha256": "d1c352dc9ab701965205ceaa400fcf3a0648adabc86787782db81ac96ccde0d4",
+          "member": "OpenTelemetry.Instrumentation.GrpcNetClient.nuspec"
+        }
+      ]
+    },
+    "98b623149a4f5cc2eb5141bcae2e668d690552cbeeea66ce27337021e80a95e5.txt": {
+      "sha256": "98b623149a4f5cc2eb5141bcae2e668d690552cbeeea66ce27337021e80a95e5",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/system.diagnostics.diagnosticsource/10.0.0/system.diagnostics.diagnosticsource.10.0.0.nupkg",
+          "package_sha256": "b7b35a92604d4996cc214f34d84a5f3f03541f04bb49df4695e6ce1ef62dcbe3",
+          "member": "System.Diagnostics.DiagnosticSource.nuspec"
+        }
+      ]
+    },
+    "9ac839e1e8bda4d8b68d2d624dc3820e34fbd426dbd217f9c25d1ca925de818c.txt": {
+      "sha256": "9ac839e1e8bda4d8b68d2d624dc3820e34fbd426dbd217f9c25d1ca925de818c",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.resources.operatingsystem/1.19.1-beta.1/opentelemetry.resources.operatingsystem.1.19.1-beta.1.nupkg",
+          "package_sha256": "2f6772df1ad397f7fc963b9f5920792aed8367f9dd84df08c597da55a0dc9cf7",
+          "member": "OpenTelemetry.Resources.OperatingSystem.nuspec"
+        }
+      ]
+    },
+    "9e13d9b543405e86955f6b047a1d7680684fa37f4ec094f4bad6e33ba775c0db.txt": {
+      "sha256": "9e13d9b543405e86955f6b047a1d7680684fa37f4ec094f4bad6e33ba775c0db",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.dependencyinjection.abstractions/10.0.0/microsoft.extensions.dependencyinjection.abstractions.10.0.0.nupkg",
+          "package_sha256": "f62a1d5cfdfd62a831a269ce3cec5dfe6cdb1b425f3925f3168354de8993d8fb",
+          "member": "Microsoft.Extensions.DependencyInjection.Abstractions.nuspec"
+        }
+      ]
+    },
+    "9ffb2cd3eb19b9438731b8ecbeea51a6d816c00f73f7669c532c28476fcf5000.txt": {
+      "sha256": "9ffb2cd3eb19b9438731b8ecbeea51a6d816c00f73f7669c532c28476fcf5000",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.diagnostics.abstractions/9.0.0/microsoft.extensions.diagnostics.abstractions.9.0.0.nupkg",
+          "package_sha256": "c06d4b7044fe30f46351dcf71c83931d51276c6fc8345254ab33c4ac233bf5e6",
+          "member": "Microsoft.Extensions.Diagnostics.Abstractions.nuspec"
+        }
+      ]
+    },
+    "a6cd8013a1b8a0cc2320d1d174f6f07815f803f752c2e301800d7d983e039d08.txt": {
+      "sha256": "a6cd8013a1b8a0cc2320d1d174f6f07815f803f752c2e301800d7d983e039d08",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.api/1.19.1/opentelemetry.api.1.19.1.nupkg",
+          "package_sha256": "714680742653abe2c3bfac673b658309cbefc4f01b65659cb0abb0db9e4bb1ae",
+          "member": "OpenTelemetry.Api.nuspec"
+        }
+      ]
+    },
+    "a810b27a73254dae1de716c30cea9ffd6b6754d561ad5ce2ce4564c17ecd512f.txt": {
+      "sha256": "a810b27a73254dae1de716c30cea9ffd6b6754d561ad5ce2ce4564c17ecd512f",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/google.protobuf/3.36.2/google.protobuf.3.36.2.nupkg",
+          "package_sha256": "1182590db175f9057707857a1df48b217226d0732716cd353fa4aa4683d38dcb",
+          "member": "Google.Protobuf.nuspec"
+        }
+      ]
+    },
+    "a89b8bce497060341cd7c82c5dcc7510df01737fd86f75fbb548d162fe582e07.txt": {
+      "sha256": "a89b8bce497060341cd7c82c5dcc7510df01737fd86f75fbb548d162fe582e07",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.runtime/1.19.0/opentelemetry.instrumentation.runtime.1.19.0.nupkg",
+          "package_sha256": "65c6475c5038394934530a992915d4346c57d78b0ae8f372b664339b752f505c",
+          "member": "OpenTelemetry.Instrumentation.Runtime.nuspec"
+        }
+      ]
+    },
+    "a98260030de003de5c14cb84e56a8bbc9937df42e3174e627e683fe64beace23.txt": {
+      "sha256": "a98260030de003de5c14cb84e56a8bbc9937df42e3174e627e683fe64beace23",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging/10.0.0/microsoft.extensions.logging.10.0.0.nupkg",
+          "package_sha256": "3feccf01a74b2fade4fc6a8adf8fea0a1a908d8f5a211c597f1941f65aac4abb",
+          "member": "Microsoft.Extensions.Logging.nuspec"
+        }
+      ]
+    },
+    "ace7e08aca0a6d9c9d77c3543a870071033a6d694d674b86f858446bf973a251.txt": {
+      "sha256": "ace7e08aca0a6d9c9d77c3543a870071033a6d694d674b86f858446bf973a251",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.stackexchangeredis/1.19.0-beta.1/opentelemetry.instrumentation.stackexchangeredis.1.19.0-beta.1.nupkg",
+          "package_sha256": "542331134dd026f47b49eee9f258d40cbbe5db5a99e801afef8a0ca0d9c0f5b6",
+          "member": "OpenTelemetry.Instrumentation.StackExchangeRedis.nuspec"
+        }
+      ]
+    },
+    "b05a2502982c92df422bd6e75b6383d66aa323c2014d9efc70c1a1432c61ad61.txt": {
+      "sha256": "b05a2502982c92df422bd6e75b6383d66aa323c2014d9efc70c1a1432c61ad61",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.exporter.console/1.19.1/opentelemetry.exporter.console.1.19.1.nupkg",
+          "package_sha256": "39c71ea3b08f5b62739c0d5d3de251d7c8a31e6657315df8fa07ef98ec799764",
+          "member": "OpenTelemetry.Exporter.Console.nuspec"
+        }
+      ]
+    },
+    "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1.txt": {
+      "sha256": "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/opentracing/opentracing-csharp/e727e731cde70ec39a638cbf33ab6d91d12e2b16/LICENSE"
+        }
+      ]
+    },
+    "b60b2912da28eaa6518593c9e2efb5334ee062d3c42e80d8fdfa806b3dc52977.txt": {
+      "sha256": "b60b2912da28eaa6518593c9e2efb5334ee062d3c42e80d8fdfa806b3dc52977",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.binder/8.0.2/microsoft.extensions.configuration.binder.8.0.2.nupkg",
+          "package_sha256": "68607456ea02df861a74012aaf0a1a5cb739aa56b9e69b300d5db12d2991ed21",
+          "member": "THIRD-PARTY-NOTICES.TXT"
+        }
+      ]
+    },
+    "bb77a7c63314cbf4832135ca4dce13dd6ee55528b1afb5f8d33d98ab4d75c570.txt": {
+      "sha256": "bb77a7c63314cbf4832135ca4dce13dd6ee55528b1afb5f8d33d98ab4d75c570",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.sqlclient/1.19.0/opentelemetry.instrumentation.sqlclient.1.19.0.nupkg",
+          "package_sha256": "4fc3dd015b284fd490be01eb2bbb3b21a1d78215377fa14ad06c9ac16e8bb789",
+          "member": "OpenTelemetry.Instrumentation.SqlClient.nuspec"
+        }
+      ]
+    },
+    "c41eec0a3e1314bf25d0d403e50ea4ff6d4464000444ad8d491faf4563fef421.txt": {
+      "sha256": "c41eec0a3e1314bf25d0d403e50ea4ff6d4464000444ad8d491faf4563fef421",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/system.private.servicemodel/4.7.0/system.private.servicemodel.4.7.0.nupkg",
+          "package_sha256": "6318d59c11044529bad5c0581e695f78f1de8cdaee1a5ba1c41f12f63fee22db",
+          "member": "System.Private.ServiceModel.nuspec"
+        }
+      ]
+    },
+    "cb12025ac9f22cc8f19028bc68a02f89507580ab390c6dd9e65e052c3bcdcd53.txt": {
+      "sha256": "cb12025ac9f22cc8f19028bc68a02f89507580ab390c6dd9e65e052c3bcdcd53",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.dependencyinjection/8.0.0/microsoft.extensions.dependencyinjection.8.0.0.nupkg",
+          "package_sha256": "faa20347c851ceb7821cd103b5470f7d51d076eaf358fa3f9aabe2087efcf844",
+          "member": "Microsoft.Extensions.DependencyInjection.nuspec"
+        }
+      ]
+    },
+    "cb3ba2eb442f5ff287760460ceb6264f6d214114f7b04f751a22e1b46e371853.txt": {
+      "sha256": "cb3ba2eb442f5ff287760460ceb6264f6d214114f7b04f751a22e1b46e371853",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.instrumentation.process/1.19.0-rc.1/opentelemetry.instrumentation.process.1.19.0-rc.1.nupkg",
+          "package_sha256": "9597f50522afd786716199755b9be158c21a2eca1709dcba99c48a5a05f241d2",
+          "member": "OpenTelemetry.Instrumentation.Process.nuspec"
+        }
+      ]
+    },
+    "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310.txt": {
+      "sha256": "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/dotnet/dotnet/b0f34d51fccc69fd334253924abd8d6853fad7aa/src/runtime/LICENSE.TXT"
+        }
+      ]
+    },
+    "d0ce26f2700ff95f522f5f4d7d388cc388744bcb6eafccf49309824b4ed6e920.txt": {
+      "sha256": "d0ce26f2700ff95f522f5f4d7d388cc388744bcb6eafccf49309824b4ed6e920",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.binder/8.0.2/microsoft.extensions.configuration.binder.8.0.2.nupkg",
+          "package_sha256": "68607456ea02df861a74012aaf0a1a5cb739aa56b9e69b300d5db12d2991ed21",
+          "member": "Microsoft.Extensions.Configuration.Binder.nuspec"
+        }
+      ]
+    },
+    "d19e44fe80416905850f91045907bcfb23de39a8cb9b96b9d6a55a795ddf3807.txt": {
+      "sha256": "d19e44fe80416905850f91045907bcfb23de39a8cb9b96b9d6a55a795ddf3807",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.configuration/10.0.0/microsoft.extensions.logging.configuration.10.0.0.nupkg",
+          "package_sha256": "eff4d63b56aaf217606dc4c42830562238120bd2a914dde4467317fb5d9b3a45",
+          "member": "Microsoft.Extensions.Logging.Configuration.nuspec"
+        }
+      ]
+    },
+    "d2031d205a8b0653a1aee7c63d9cd021c249f3611934e02da8968c0839095e0a.txt": {
+      "sha256": "d2031d205a8b0653a1aee7c63d9cd021c249f3611934e02da8968c0839095e0a",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration/8.0.0/microsoft.extensions.configuration.8.0.0.nupkg",
+          "package_sha256": "f413ec012971ad5f229663028dd6f74e251c9b9bc56719019c023f7cd0521320",
+          "member": "Microsoft.Extensions.Configuration.nuspec"
+        }
+      ]
+    },
+    "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b.txt": {
+      "sha256": "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration/8.0.0/microsoft.extensions.configuration.8.0.0.nupkg",
+          "package_sha256": "f413ec012971ad5f229663028dd6f74e251c9b9bc56719019c023f7cd0521320",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration/9.0.0/microsoft.extensions.configuration.9.0.0.nupkg",
+          "package_sha256": "b812de6f8cfad32f33ecd7a51ecf6e4f770b0fac0e0e4770c9f266ebf6192c33",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.abstractions/8.0.0/microsoft.extensions.configuration.abstractions.8.0.0.nupkg",
+          "package_sha256": "e1e0690e47fb309a334d99cec10bf071f81129019c3577b42bf905fa1e5197ca",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.abstractions/9.0.0/microsoft.extensions.configuration.abstractions.9.0.0.nupkg",
+          "package_sha256": "c6d1b65120bd426d1fd8d9fa8e4724969c840d3de170464ec4ec137347a9eee7",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.binder/8.0.2/microsoft.extensions.configuration.binder.8.0.2.nupkg",
+          "package_sha256": "68607456ea02df861a74012aaf0a1a5cb739aa56b9e69b300d5db12d2991ed21",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.binder/9.0.0/microsoft.extensions.configuration.binder.9.0.0.nupkg",
+          "package_sha256": "e9a8d859c34e417d96a9fb609e852656dcaf0b59243ceb530a27f80222847df5",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.environmentvariables/8.0.0/microsoft.extensions.configuration.environmentvariables.8.0.0.nupkg",
+          "package_sha256": "f9b8c566fa82b0c7f6151336a25ab1fdfb9bf90c1f335901863195393e470b8f",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.environmentvariables/9.0.0/microsoft.extensions.configuration.environmentvariables.9.0.0.nupkg",
+          "package_sha256": "b43271da9ad8669af444a4b09897ec2bd165506c1a0e6cae4b3da4a90c6c5a82",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.dependencyinjection/8.0.0/microsoft.extensions.dependencyinjection.8.0.0.nupkg",
+          "package_sha256": "faa20347c851ceb7821cd103b5470f7d51d076eaf358fa3f9aabe2087efcf844",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.dependencyinjection/9.0.0/microsoft.extensions.dependencyinjection.9.0.0.nupkg",
+          "package_sha256": "7401f9d8f3e54cb9fb5fed5a23fee7a5dac3ccc1053cc5d1bf88ac5756bed789",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.dependencyinjection.abstractions/8.0.0/microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg",
+          "package_sha256": "ef92b31065a36d110b7332690a226e6fe96d35430c6f3e40ff529053ee5d80ff",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.dependencyinjection.abstractions/9.0.0/microsoft.extensions.dependencyinjection.abstractions.9.0.0.nupkg",
+          "package_sha256": "0a7715c24299e42b081b63b4f8e33da97b985e1de9e941b2b9e4c748b0d52fe7",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.diagnostics.abstractions/8.0.0/microsoft.extensions.diagnostics.abstractions.8.0.0.nupkg",
+          "package_sha256": "5120f9b9939a6a132a8babbba30356c7f2d1e040eb3b0a8fac00229bb891a496",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.diagnostics.abstractions/9.0.0/microsoft.extensions.diagnostics.abstractions.9.0.0.nupkg",
+          "package_sha256": "c06d4b7044fe30f46351dcf71c83931d51276c6fc8345254ab33c4ac233bf5e6",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging/8.0.0/microsoft.extensions.logging.8.0.0.nupkg",
+          "package_sha256": "31e8746745fb2b23841b897445605cb871e285c00172f0b27d45e06ac990f75a",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging/9.0.0/microsoft.extensions.logging.9.0.0.nupkg",
+          "package_sha256": "911d7a73e37c9d0ad67982da8ea9d73e0ed18978d931214b9ca2c4b3855f8dc3",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.abstractions/8.0.0/microsoft.extensions.logging.abstractions.8.0.0.nupkg",
+          "package_sha256": "26675d8de83c5394be8814f046554054b7881f1738cabacd82a54c381ec48cce",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.abstractions/9.0.0/microsoft.extensions.logging.abstractions.9.0.0.nupkg",
+          "package_sha256": "8814ecf6dc2359715e111b78084ae42087282595358eb775456088f15e63eca5",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.configuration/8.0.0/microsoft.extensions.logging.configuration.8.0.0.nupkg",
+          "package_sha256": "9b39acb4db158ca4f412d41c740ba419189f0f7d13f3604c198952bbc9382bb5",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.configuration/9.0.0/microsoft.extensions.logging.configuration.9.0.0.nupkg",
+          "package_sha256": "cac3e306aeb8a7a24ce0499e56776bc979e12d61d862ccf3955a4fc515a4524c",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options/8.0.0/microsoft.extensions.options.8.0.0.nupkg",
+          "package_sha256": "9f69b82527a040a51394eb0a2d95141c728cabddba789d30f4df46f88dc5a05c",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options/9.0.0/microsoft.extensions.options.9.0.0.nupkg",
+          "package_sha256": "0d3e5eb80418fc8b41e4b3c8f16229e839ddd254af0513f7e6f1643970baf1c9",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options.configurationextensions/8.0.0/microsoft.extensions.options.configurationextensions.8.0.0.nupkg",
+          "package_sha256": "03905bcf0d6488d9208ab939c7c932c7083d94b4dc4a78288de0fea1ca46d512",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options.configurationextensions/9.0.0/microsoft.extensions.options.configurationextensions.9.0.0.nupkg",
+          "package_sha256": "af5677b04552223787d942a3f8a323f3a85aafaf20ff3c9b4aaa128c44817280",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.primitives/8.0.0/microsoft.extensions.primitives.8.0.0.nupkg",
+          "package_sha256": "154f2a8f70d1f1b0dd73573e59e199c7f3c265eaaa9ddc1e64cf5ea5ca578d2a",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.primitives/9.0.0/microsoft.extensions.primitives.9.0.0.nupkg",
+          "package_sha256": "64d2eeb0ad4246eab9059619303a9acf4e0f20a49c13667bb12dad7a153b109b",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/system.private.servicemodel/4.7.0/system.private.servicemodel.4.7.0.nupkg",
+          "package_sha256": "6318d59c11044529bad5c0581e695f78f1de8cdaee1a5ba1c41f12f63fee22db",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/system.security.permissions/4.7.0/system.security.permissions.4.7.0.nupkg",
+          "package_sha256": "04681730b522e6bc559a60a18c885c5d4c62b098ef94d4e85e5c9a21b531c38d",
+          "member": "LICENSE.TXT"
+        },
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/system.servicemodel.primitives/4.7.0/system.servicemodel.primitives.4.7.0.nupkg",
+          "package_sha256": "41eb57444d943d299c7b4cf34a58a648408489d78b44c1994e89383361f5d3a5",
+          "member": "LICENSE.TXT"
+        }
+      ]
+    },
+    "d8124af5988bf172eff7d8469a0e16bf7c5253530440b4ca6ba18a4890740f9c.txt": {
+      "sha256": "d8124af5988bf172eff7d8469a0e16bf7c5253530440b4ca6ba18a4890740f9c",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.abstractions/10.0.0/microsoft.extensions.configuration.abstractions.10.0.0.nupkg",
+          "package_sha256": "19c82b9d302278257b0154f5df3c8e8dfc302fce9ef7d8a23bf32230ec4f186d",
+          "member": "Microsoft.Extensions.Configuration.Abstractions.nuspec"
+        }
+      ]
+    },
+    "d983844f640f57fe17180056f9720d4380ace835d4d66e79747b04357862e7f9.txt": {
+      "sha256": "d983844f640f57fe17180056f9720d4380ace835d4d66e79747b04357862e7f9",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.environmentvariables/10.0.0/microsoft.extensions.configuration.environmentvariables.10.0.0.nupkg",
+          "package_sha256": "51ac9f7aaac098dc9f3a4ba170129f8fc5298d0a95fd932a5ab0f2c42486d4c0",
+          "member": "Microsoft.Extensions.Configuration.EnvironmentVariables.nuspec"
+        }
+      ]
+    },
+    "dbb2e8fee4abae9f107d8137f482c982449f83ee99c8c6c6eb167c09ee0049c8.txt": {
+      "sha256": "dbb2e8fee4abae9f107d8137f482c982449f83ee99c8c6c6eb167c09ee0049c8",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.api.providerbuilderextensions/1.19.1/opentelemetry.api.providerbuilderextensions.1.19.1.nupkg",
+          "package_sha256": "25b04ab6e18321ab6773e0cfaf0add63c17b5b7200d95bf4e688269e2eab3950",
+          "member": "OpenTelemetry.Api.ProviderBuilderExtensions.nuspec"
+        }
+      ]
+    },
+    "e0d4efcce675fd1bbe23faefa8405a7702edaf9ab3292b0b159eabf50a5f7eb2.txt": {
+      "sha256": "e0d4efcce675fd1bbe23faefa8405a7702edaf9ab3292b0b159eabf50a5f7eb2",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options.configurationextensions/9.0.0/microsoft.extensions.options.configurationextensions.9.0.0.nupkg",
+          "package_sha256": "af5677b04552223787d942a3f8a323f3a85aafaf20ff3c9b4aaa128c44817280",
+          "member": "Microsoft.Extensions.Options.ConfigurationExtensions.nuspec"
+        }
+      ]
+    },
+    "e19a61bfe08181bfd77de79dfdaad7c382007ef321eafd0b429453ad60fc70a2.txt": {
+      "sha256": "e19a61bfe08181bfd77de79dfdaad7c382007ef321eafd0b429453ad60fc70a2",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging/8.0.0/microsoft.extensions.logging.8.0.0.nupkg",
+          "package_sha256": "31e8746745fb2b23841b897445605cb871e285c00172f0b27d45e06ac990f75a",
+          "member": "Microsoft.Extensions.Logging.nuspec"
+        }
+      ]
+    },
+    "e28c774e4ea6fbe0d0ba5ae6d49649af8e2255eee971e45e9d08e59fa9d86f13.txt": {
+      "sha256": "e28c774e4ea6fbe0d0ba5ae6d49649af8e2255eee971e45e9d08e59fa9d86f13",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.configuration/8.0.0/microsoft.extensions.logging.configuration.8.0.0.nupkg",
+          "package_sha256": "9b39acb4db158ca4f412d41c740ba419189f0f7d13f3604c198952bbc9382bb5",
+          "member": "Microsoft.Extensions.Logging.Configuration.nuspec"
+        }
+      ]
+    },
+    "e49e6e9827ea70fb0f7c8162aa4356a1d2d211157851ba3faeb2cbacbba913f5.txt": {
+      "sha256": "e49e6e9827ea70fb0f7c8162aa4356a1d2d211157851ba3faeb2cbacbba913f5",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.abstractions/8.0.0/microsoft.extensions.logging.abstractions.8.0.0.nupkg",
+          "package_sha256": "26675d8de83c5394be8814f046554054b7881f1738cabacd82a54c381ec48cce",
+          "member": "Microsoft.Extensions.Logging.Abstractions.nuspec"
+        }
+      ]
+    },
+    "e843f26e0d5ea5596177e076996848430baebdfbf7c59c64818d1c1c9a7495bf.txt": {
+      "sha256": "e843f26e0d5ea5596177e076996848430baebdfbf7c59c64818d1c1c9a7495bf",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options/8.0.0/microsoft.extensions.options.8.0.0.nupkg",
+          "package_sha256": "9f69b82527a040a51394eb0a2d95141c728cabddba789d30f4df46f88dc5a05c",
+          "member": "Microsoft.Extensions.Options.nuspec"
+        }
+      ]
+    },
+    "e880d1303edfe7b0630d063aa6e4a50cd40df83820dd3b86fc6bad9aeb12d93c.txt": {
+      "sha256": "e880d1303edfe7b0630d063aa6e4a50cd40df83820dd3b86fc6bad9aeb12d93c",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/bb2d0ef0cfb64bbe0d9c88640848e4a92f263fd6/LICENSE"
+        }
+      ]
+    },
+    "ebb2613d4964a56cd433a2dc6b39d07ef4d756836872bc4e91b64d2f607c9675.txt": {
+      "sha256": "ebb2613d4964a56cd433a2dc6b39d07ef4d756836872bc4e91b64d2f607c9675",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.opamp.client/0.7.0-alpha.2/opentelemetry.opamp.client.0.7.0-alpha.2.nupkg",
+          "package_sha256": "8e81ce388ce59efe9401d383580a79c8fb46faf878dfbab576c04f36ebee8fe2",
+          "member": "OpenTelemetry.OpAmp.Client.nuspec"
+        }
+      ]
+    },
+    "ece339d8d2d362ccb64382b97e77c30902dccc08057281300feb86b8d566f8a2.txt": {
+      "sha256": "ece339d8d2d362ccb64382b97e77c30902dccc08057281300feb86b8d566f8a2",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.abstractions/9.0.0/microsoft.extensions.logging.abstractions.9.0.0.nupkg",
+          "package_sha256": "8814ecf6dc2359715e111b78084ae42087282595358eb775456088f15e63eca5",
+          "member": "Microsoft.Extensions.Logging.Abstractions.nuspec"
+        }
+      ]
+    },
+    "eda64b8d4359a8bfd67eab97c8da24699e723c07751698482417537c635f09ae.txt": {
+      "sha256": "eda64b8d4359a8bfd67eab97c8da24699e723c07751698482417537c635f09ae",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.dependencyinjection.abstractions/9.0.0/microsoft.extensions.dependencyinjection.abstractions.9.0.0.nupkg",
+          "package_sha256": "0a7715c24299e42b081b63b4f8e33da97b985e1de9e941b2b9e4c748b0d52fe7",
+          "member": "Microsoft.Extensions.DependencyInjection.Abstractions.nuspec"
+        }
+      ]
+    },
+    "ee410270d4b43052af56dee7d2e51579d749dc6ccb8d85771621892931400c99.txt": {
+      "sha256": "ee410270d4b43052af56dee7d2e51579d749dc6ccb8d85771621892931400c99",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/opentelemetry.exporter.prometheus.httplistener/1.19.1-beta.1/opentelemetry.exporter.prometheus.httplistener.1.19.1-beta.1.nupkg",
+          "package_sha256": "4061368ddef34d9c330717314e37375295a309507be775bf2f850636238e3ffb",
+          "member": "OpenTelemetry.Exporter.Prometheus.HttpListener.nuspec"
+        }
+      ]
+    },
+    "f633e62098af8b52865337e3b5b6373c95702296522773c5687d8a9af48d773e.txt": {
+      "sha256": "f633e62098af8b52865337e3b5b6373c95702296522773c5687d8a9af48d773e",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/system.security.permissions/4.7.0/system.security.permissions.4.7.0.nupkg",
+          "package_sha256": "04681730b522e6bc559a60a18c885c5d4c62b098ef94d4e85e5c9a21b531c38d",
+          "member": "System.Security.Permissions.nuspec"
+        }
+      ]
+    },
+    "f75b9c1c4c9565a391454a47e8f2034268910e6e42d2aacf0409152c6ca5b2e2.txt": {
+      "sha256": "f75b9c1c4c9565a391454a47e8f2034268910e6e42d2aacf0409152c6ca5b2e2",
+      "sources": [
+        {
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.primitives/9.0.0/microsoft.extensions.primitives.9.0.0.nupkg",
+          "package_sha256": "64d2eeb0ad4246eab9059619303a9acf4e0f20a49c13667bb12dad7a153b109b",
+          "member": "Microsoft.Extensions.Primitives.nuspec"
+        }
+      ]
+    }
+  }
+}
