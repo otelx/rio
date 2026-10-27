@@ -43,10 +43,12 @@
     }
   },
   "node": "0.78.0",
+  "nodeWinstonTransport": "0.30.0",
   "python": {
     "distro": "0.66b0",
     "sdk": "1.45.0",
-    "operatorRequirements": "v0.160.0"
+    "operatorRequirements": "v0.160.0",
+    "patches": ["OTLP span/link trace flags backport: opentelemetry-python#4666 / #5667"]
   },
   "ruby": {
     "commit": "68af0a92d6d9c2cd0ee38a9327e98797673227d1",
