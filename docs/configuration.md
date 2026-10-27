@@ -60,6 +60,32 @@ kubectl logs -n rio-system deployment/rio
 
 The webhook uses `failurePolicy: Ignore`. If it is unavailable, Kubernetes may create healthy uninstrumented Pods. The operator reports `InjectionMissing` instead of claiming that instrumentation succeeded or rolling back a healthy application. Correct the webhook and request a new revision to retry.
 
+### Snapshot authority and admission
+
+The cluster policy authorizes new instrumentation configurations. Saved configurations are a recovery mechanism for Deployments, StatefulSets, and DaemonSets managed by RIO; they are not a Pod opt-in API. All annotation names below use the `rio.otelx.github.io/` prefix.
+
+| Annotation | Authority and admission behavior |
+| --- | --- |
+| `configuration` | Immutable resolved configuration, accepted only when it equals the authenticated active rollout state and the live workload template. |
+| `workload-uid` | Binds the snapshot to the live managed workload UID in the Pod's namespace. Admission also resolves and verifies every controller reference, including the Deployment's ReplicaSet. Copying annotations to another workload or namespace does not authorize injection. |
+| `revision` | Configuration consistency hash. It must match the authenticated active configuration; a matching hash alone grants no authority. Pods from stale templates are rejected rather than injected with an obsolete or latest failing configuration. |
+| `state` and `state-signature` | Current, successful, and failed rollout history authenticated with HMAC-SHA256, bound to API version, kind, namespace, name, and workload UID. The controller verifies state before using it or signing its successor. Editing state or copying it to a recreated workload invalidates it. |
+| `applied-revision` | Requests validation of an existing injection. Admission verifies the authorized revision, delivery mode, payload volume, application mounts, copy init container when used, and managed environment variables before accepting reinvocation. Missing or conflicting injection components reject the Pod. |
+
+Owner-based selection and saved snapshots require an authenticated Pod CREATE from the Kubernetes controller manager (`system:kube-controller-manager`) or its standard `kube-system` controller service accounts: `replicaset-controller`, `statefulset-controller`, `daemon-set-controller`, or `job-controller`. Kubernetes supplies the admission identity; Pod annotations and owner references cannot supply it. Clusters using different controller identities need an explicit implementation adaptation before using managed snapshots. Do not grant application users permission to impersonate these identities.
+
+Direct Pods and Pods created by other identities use the current central policy as kind `Pod`, even if they supply owner references. Standalone ReplicaSets, Jobs, and CronJobs created by the standard controllers use their resolved workload kind with the current central policy. These unmanaged workloads do not accept saved `configuration`, `workload-uid`, or `revision` annotations. Remove those annotations from application manifests. They cannot enable injection or choose an alternative payload. A forged `applied-revision` cannot suppress authorized injection: admission rejects it unless the complete injection contract is present.
+
+The operator generates an immutable `rio-snapshot-authority` Secret in its namespace on first startup and reuses it after restarts. The installation grants the operator permission to create Secrets only in that namespace and to read only this named Secret. Protect and back up this Secret alongside workload state. Policy writers, operator administrators, holders of the signing key, and identities allowed to impersonate Kubernetes controllers are trusted administrators. Workload editors can change application templates, but cannot mint or edit authenticated configurations. Authenticated history is scoped to the same workload UID; it is not a general authorization token for another workload. This mechanism governs RIO's mutation; it does not restrict users from installing instrumentation themselves in application images or Pod specifications.
+
+Rollback atomically makes the saved successful configuration the active authenticated state and template. Admission uses that configuration even while the central policy still contains the failing candidate, including after an operator restart. No configuration fields are inherited from that candidate.
+
+### Migrating unsigned state and recovering the authority key
+
+Versions predating authenticated snapshots leave unsigned `state` annotations. RIO refuses to adopt that history automatically, because it cannot distinguish genuine old state from user-supplied configuration. Before upgrading a cluster with existing managed workloads, export their manifests and state, verify the saved successful configuration as a platform administrator, and set the central policy to the intended known-good configuration. Stop the old operator, remove the legacy `state` annotation on each managed workload and the `configuration`, `revision`, and `workload-uid` annotations on its Pod template, then start the new operator with the updated installation RBAC. This starts a new managed rollout under the central policy. Keep the old backup until the new rollout is healthy; the initial recovery baseline for this new history is uninstrumented. Existing Pods are replaced through normal rollout behavior.
+
+Do not delete or rotate `rio-snapshot-authority` while retaining signed workload state. If the Secret is lost, restore the original key from a trusted backup before restarting the operator. If it cannot be restored, use the same explicit administrator verification and state reset procedure above, also removing `state-signature`. A new key cannot authenticate old recovery history. Invalid signatures, malformed state, and stale snapshots are reported as errors instead of silently becoming trusted configuration.
+
 ## Upgrading from alpha.1 or alpha.2
 
 The `v0.1.0-alpha.3` release changes both image paths:

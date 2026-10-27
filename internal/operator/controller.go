@@ -20,6 +20,7 @@ import (
 )
 
 type Controller struct {
+	Authority    *Authority
 	Kube         kubernetes.Interface
 	Dynamic      dynamic.Interface
 	Namespace    string
@@ -99,7 +100,7 @@ func (c *Controller) Reconcile(ctx context.Context) error {
 		}
 	}
 	for _, w := range workloads {
-		s, e := readState(w.object)
+		s, e := c.Authority.readState(w.object)
 		if e != nil {
 			return e
 		}
@@ -136,7 +137,7 @@ func (c *Controller) Reconcile(ctx context.Context) error {
 	for _, w := range workloads {
 		obj := w.object
 		wanted := policy.Resolve(obj.GetNamespace(), w.kind, obj.GetName())
-		state, e := readState(obj)
+		state, e := c.Authority.readState(obj)
 		if e != nil {
 			return e
 		}
@@ -168,7 +169,7 @@ func (c *Controller) Reconcile(ctx context.Context) error {
 		}
 		next, templateChanged := Advance(state, wanted, health, time.Now().UTC())
 		if state == nil || !reflect.DeepEqual(*state, next) {
-			if err = writeState(obj, next, templateChanged); err != nil {
+			if err = c.Authority.writeState(obj, next, templateChanged); err != nil {
 				return err
 			}
 			obj, err = c.Dynamic.Resource(w.resource).Namespace(obj.GetNamespace()).Update(ctx, obj, meta.UpdateOptions{})

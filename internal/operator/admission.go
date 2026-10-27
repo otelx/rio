@@ -1,13 +1,11 @@
 package operator
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
-	"strings"
 	"sync"
 
 	admission "k8s.io/api/admission/v1"
@@ -31,6 +29,7 @@ func (s *Store) Get() Snapshot  { s.mu.RLock(); defer s.mu.RUnlock(); return s.s
 func (s *Store) Set(v Snapshot) { s.mu.Lock(); defer s.mu.Unlock(); s.snapshot = v }
 
 type Webhook struct {
+	Authority *Authority
 	Store     *Store
 	Kube      kubernetes.Interface
 	Namespace string
@@ -60,21 +59,9 @@ func (w *Webhook) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 				response.Allowed = false
 				response.Result = &meta.Status{Message: "instrumentation policy has not synchronized"}
 			} else {
-				kind, name, err := w.owner(req.Context(), &pod)
+				cfg, service, err := w.configuration(req.Context(), &pod, r.UserInfo.Username, snapshot.Policy)
 				if err == nil {
-					cfg := snapshot.Policy.Resolve(pod.Namespace, kind, name)
-					if pinned := pod.Annotations[ConfigAnnotation]; pinned != "" {
-						// Unmarshal into a fresh value: omitted fields in a saved
-						// revision must not inherit env/retry settings from the new CR.
-						cfg = Config{}
-						err = json.Unmarshal([]byte(pinned), &cfg)
-						if err == nil && pod.Annotations[RevisionAnnotation] != cfg.Revision() {
-							err = fmt.Errorf("instrumentation revision does not match its configuration")
-						}
-					}
-					if err == nil {
-						err = Mutate(&pod, cfg, snapshot.NativeImages[cfg.Image], name)
-					}
+					err = Mutate(&pod, cfg, snapshot.NativeImages[cfg.Image], service)
 				}
 				if err != nil {
 					response.Allowed = false
@@ -92,54 +79,21 @@ func (w *Webhook) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	_ = json.NewEncoder(rw).Encode(admission.AdmissionReview{TypeMeta: meta.TypeMeta{APIVersion: "admission.k8s.io/v1", Kind: "AdmissionReview"}, Response: response})
 }
 
-func (w *Webhook) owner(ctx context.Context, pod *core.Pod) (string, string, error) {
-	for _, ref := range pod.OwnerReferences {
-		if ref.Controller == nil || !*ref.Controller {
-			continue
-		}
-		if ref.Kind == "ReplicaSet" {
-			rs, err := w.Kube.AppsV1().ReplicaSets(pod.Namespace).Get(ctx, ref.Name, meta.GetOptions{})
-			if err != nil {
-				return "", "", err
-			}
-			for _, parent := range rs.OwnerReferences {
-				if parent.Kind == "Deployment" && parent.Controller != nil && *parent.Controller {
-					return parent.Kind, parent.Name, nil
-				}
-			}
-		}
-		if ref.Kind == "Job" {
-			job, err := w.Kube.BatchV1().Jobs(pod.Namespace).Get(ctx, ref.Name, meta.GetOptions{})
-			if err != nil {
-				return "", "", err
-			}
-			for _, parent := range job.OwnerReferences {
-				if parent.Kind == "CronJob" && parent.Controller != nil && *parent.Controller {
-					return parent.Kind, parent.Name, nil
-				}
-			}
-		}
-		return ref.Kind, ref.Name, nil
-	}
-	name := pod.Name
-	if name == "" {
-		name = strings.TrimSuffix(pod.GenerateName, "-")
-	}
-	return "Pod", name, nil
-}
-
 func Mutate(pod *core.Pod, cfg Config, native bool, service string) error {
 	if pod.Annotations == nil {
 		pod.Annotations = map[string]string{}
 	}
 	if !cfg.Enabled {
+		if pod.Annotations[AppliedAnnotation] != "" {
+			return fmt.Errorf("applied instrumentation is not authorized by the effective configuration")
+		}
 		return nil
 	}
 	if pod.Spec.OS != nil && pod.Spec.OS.Name == core.Windows {
 		return fmt.Errorf("Injector payload supports Linux containers only")
 	}
-	if pod.Annotations[AppliedAnnotation] == cfg.Revision() {
-		return nil
+	if pod.Annotations[AppliedAnnotation] != "" {
+		return verifyInjection(pod, cfg, native, service)
 	}
 	for _, vol := range pod.Spec.Volumes {
 		if vol.Name == VolumeName {
