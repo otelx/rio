@@ -6,6 +6,8 @@ Gemfile contains OpenTelemetry packages or setup. Application logging uses
 Logger 1.7.0, and outgoing requests use Net::HTTP 0.10.0 with bounded timeouts.
 The standard Logger formatter emits the message alone so its captured body is
 exactly the marker message, with no timestamp prefix or trailing newline.
+`RIO_FIXTURE_DELAY_MS` optionally delays each work handler before logging and
+calling the next service, bounded to 0..1000ms (default 0), for overlap tests.
 The two runtime manifest digests in `fixture.json` match the shipped Ruby bundle
 build inputs and include Linux amd64 and arm64 variants.
 

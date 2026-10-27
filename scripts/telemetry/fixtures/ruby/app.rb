@@ -12,6 +12,7 @@ class Fixture < Sinatra::Base
   set :host_authorization, permitted_hosts: []
   LOGGER = Logger.new($stdout)
   LOGGER.formatter = proc { |_severity, _datetime, _progname, message| message.to_s }
+  DELAY_MS = [[ENV.fetch('RIO_FIXTURE_DELAY_MS', '0').to_i, 0].max, 1000].min
 
   get '/health' do
     content_type :json
@@ -20,6 +21,7 @@ class Fixture < Sinatra::Base
 
   get '/work/:marker' do
     marker = params.fetch('marker')
+    sleep(DELAY_MS / 1000.0) if DELAY_MS.positive?
     LOGGER.info("rio-fixture #{marker}")
 
     # The pinned Rackup WEBrick Input retains the received request. Read its
