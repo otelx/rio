@@ -6,6 +6,8 @@
 - Publish image-index/architecture digests, source checksums, SPDX SBOMs, and authenticated artifact attestations; require anonymous quickstart checks on both architectures before announcing releases.
 - Preserve Go dependency notices and the Injector license in final images, include tested-image notice inventories in source distributions, and gate releases on a current redistribution review.
 
+- Define the limited support contract for the first normal `v0.1.0` release: Kubernetes 1.35.0, native Linux amd64/arm64 CI, Node.js 24 built-in HTTP trace export on the tested glibc/musl images, and both delivery paths. Other bundled language paths remain experimental; metrics/log capture and propagation are unvalidated. This does not announce a normal release or production readiness, and the CRD remains `v1alpha1`.
+- Define matching `rio/operator`/`rio/instrumentation` release pairs, uninstrumented migration boundaries, cross-release recovery limits, API/configuration and persisted-annotation compatibility expectations, and the maintained release range. Name the sole maintainer and recovery limits; set best-effort private security-report targets of 7 days for acknowledgement and 14 days for initial triage. See [compatibility](docs/compatibility.md), [SECURITY.md](SECURITY.md), and [maintenance responsibilities](CONTRIBUTING.md#maintenance-responsibilities-and-recovery).
 - Retire and delete the original `ghcr.io/otelx/rio` and `ghcr.io/otelx/rio-payload` packages to make the current image names clear. Their alpha.1 and alpha.2 images can no longer be pulled from GHCR; use alpha.3 or later at `ghcr.io/otelx/rio/operator` and `ghcr.io/otelx/rio/instrumentation`. Source tags and release archives remain available.
 
 ## v0.1.0-alpha.3
