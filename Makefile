@@ -30,7 +30,7 @@ payload: prepare
 images: image payload
 smoke:
 	./payload/scripts/smoke.sh
-admission-e2e:
+admission-e2e: prepare
 	./scripts/admission-e2e.sh
 e2e:
 	./scripts/e2e.sh

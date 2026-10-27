@@ -21,6 +21,9 @@ fi
 artifacts="$root/.artifacts/admission/$cluster"
 mkdir -p "$artifacts"
 export KUBECONFIG="$artifacts/kubeconfig"
+export GOTMPDIR=${GOTMPDIR:-"$artifacts/tmp"}
+export TMPDIR="$GOTMPDIR"
+mkdir -p "$GOTMPDIR"
 export GOCACHE=${GOCACHE:-"$root/.artifacts/go-cache"}
 export GOMODCACHE=${GOMODCACHE:-"$root/.artifacts/go-mod-cache"}
 export GOPATH=${GOPATH:-"$root/.artifacts/go"}
