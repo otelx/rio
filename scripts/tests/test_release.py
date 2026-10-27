@@ -187,6 +187,7 @@ if args[0]=='api':
   print('false' if data.get('settings_disabled') else 'true'); sys.exit(0)
  if any('releases/tags/' in a for a in args): print('true'); sys.exit(0)
  if data.get('api_failure'): raise SystemExit('API failure')
+ if any('/pulls' in a or '/actions/workflows/' in a for a in args): print('1'); sys.exit(0)
  print(json.dumps([data.get('releases',[])])); sys.exit(0)
 if args[:2]==['release','create']:
  if data.get('reserve_failure'): raise SystemExit('Reservation failed')
@@ -230,12 +231,13 @@ class DraftFixture(PublicationFixture):
                 notices = directory / 'notices' / image
                 notices.mkdir(parents=True)
                 (notices / 'inventory.json').write_text('[]')
-        subprocess.run(['git','init','-q',str(self.root)],check=True)
+        subprocess.run(['git','init','-q','--initial-branch=main',str(self.root)],check=True)
+        subprocess.run(['git','-C',str(self.root),'config',f'url.{self.root}.insteadOf','https://github.com/otelx/rio.git'],check=True)
         subprocess.run(['git','-C',str(self.root),'add','scripts','config','examples','docs','CHANGELOG.md'],check=True)
         subprocess.run(['git','-C',str(self.root),'-c','commit.gpgsign=false','-c','user.name=Fixture','-c','user.email=fixture@example.invalid','commit','-qm','Fixture'],check=True)
         subprocess.run(['git','-C',str(self.root),'-c','tag.gpgsign=false','tag',version],check=True)
         sha = subprocess.check_output(['git','-C',str(self.root),'rev-parse','HEAD'],text=True).strip()
-        self.env.update(GITHUB_ACTIONS='true',GITHUB_REPOSITORY='otelx/rio',GITHUB_REF_TYPE='tag',GITHUB_REF_NAME=version,GITHUB_SHA=sha,GITHUB_RUN_ID='12345')
+        self.env.update(GITHUB_ACTIONS='true',GITHUB_EVENT_NAME='push',GITHUB_REPOSITORY='otelx/rio',GITHUB_REF_TYPE='tag',GITHUB_REF_NAME=version,GITHUB_SHA=sha,GITHUB_RUN_ID='12345')
 
     def prepare(self):
         return subprocess.run([str(self.root / 'scripts/release.sh')],env=self.env,text=True,capture_output=True)

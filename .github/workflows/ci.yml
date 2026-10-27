@@ -28,7 +28,7 @@ jobs:
           go-version-file: go.mod
           cache: false
       - run: make test vet build
-      - name: Release regression checks
+      - name: Release and source-policy regression checks
         run: python3 -m unittest discover -s scripts/tests -v
       - name: Check source formatting and shell scripts
         run: |
@@ -224,14 +224,21 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
+      actions: read
       contents: write
       packages: write
       id-token: write
       attestations: write
+      pull-requests: read
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
+          fetch-depth: 0
+      - name: Verify release source before registry authentication
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/check-release-source.sh
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           pattern: tested-release-images-*

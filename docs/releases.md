@@ -15,6 +15,11 @@ changes, the two image-index digests, and the source checksum.
 
 ## Publication gates
 
+The source guard requires the exact resulting commit of a merged PR to protected
+`main`, plus a successful CI push run on `main` for that commit. It runs before
+registry authentication and again before draft reservation. A passing tag build
+alone does not authorize a release. See [maintainer controls](maintainers.md).
+
 The tag workflow:
 
 1. Runs source checks, native amd64/arm64 builds, all five language loaders with

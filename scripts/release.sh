@@ -24,6 +24,7 @@ commit=$(git rev-parse "$version^{commit}")
 [[ "$commit" == "${GITHUB_SHA:?}" && "$commit" == "$(git rev-parse HEAD)" ]] || {
   printf 'Tag, workflow commit, and checkout must agree\n' >&2; exit 1;
 }
+"$root/scripts/check-release-source.sh"
 for file in scripts/install.sh config/install.yaml config/example.yaml examples/quickstart/policy.yaml docs/quickstart.md docs/configuration.md; do
   grep -Fq -- "$image_tag" "$file" || { printf 'Release reference missing from %s\n' "$file" >&2; exit 1; }
 done
