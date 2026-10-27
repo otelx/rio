@@ -219,7 +219,7 @@ func TestAdmissionKubernetesAPI(t *testing.T) {
 	}
 	zero := int32(0)
 	replicaSet, err := kube.AppsV1().ReplicaSets(selected).Create(ctx, &apps.ReplicaSet{
-		ObjectMeta: meta.ObjectMeta{Name: "snapshot", OwnerReferences: []meta.OwnerReference{ownerRef("Deployment", deployment.Name, string(deployment.UID))}},
+		ObjectMeta: meta.ObjectMeta{Name: "snapshot", Labels: deployment.Spec.Template.Labels, OwnerReferences: []meta.OwnerReference{ownerRef("Deployment", deployment.Name, string(deployment.UID))}},
 		Spec:       apps.ReplicaSetSpec{Replicas: &zero, Selector: deployment.Spec.Selector.DeepCopy(), Template: *deployment.Spec.Template.DeepCopy()},
 	}, meta.CreateOptions{})
 	if err != nil {
