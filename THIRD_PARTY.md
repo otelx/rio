@@ -40,6 +40,11 @@ all four profiler hashes, dynamic dependencies, and compiler comments. Those
 comments identify GCC 9.4.0/Clang 5.0.2 for glibc amd64, GCC 12.3.0/Clang 14 for
 glibc arm64, and Alpine GCC 15.2.0/Clang 21.1.2 for both musl targets. They do not
 identify every statically linked runtime object or establish all of its terms.
+The profiler's miniutf implementation carries Dropbox's MIT grant, and the
+vendored CoreCLR LLVM headers retain the University of Illinois/NCSA license.
+Their complete original license headers are preserved in `MINIUTF-LICENSE` and
+`LLVM-NOTICE` alongside the other native notices; the manifest records extraction
+boundaries and the full source-file hashes.
 
 ## Audit findings, 2026-10-27
 

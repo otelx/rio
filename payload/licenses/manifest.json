@@ -46,6 +46,22 @@
       "sha256": "9d6b43ce4d8de0c878bf16b54d8e7a10d9bd42b75178153e3af6a815bdc90f74",
       "source": "https://raw.githubusercontent.com/gcc-mirror/gcc/5115c7e447fc07457443df874bf57840e8316d5f/COPYING.RUNTIME",
       "basis": "License text only: this does not certify eligible compilation or pin the actual bundled GNU runtime version."
+    },
+    {
+      "component": ".NET native miniutf (Dropbox)",
+      "path": "dotnet/MINIUTF-LICENSE",
+      "sha256": "58b531e2b9868431df48a7cf47415dfbed4b903235b829491b2ea2eb86342174",
+      "source": "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/bb2d0ef0cfb64bbe0d9c88640848e4a92f263fd6/src/OpenTelemetry.AutoInstrumentation.Native/miniutf.cpp",
+      "source_sha256": "acf884ef351076f97c86df8bd1fcb660a262def72a95930000351c6c90cf463f",
+      "extraction": "Verbatim first 20 lines; includes the complete original license header."
+    },
+    {
+      "component": ".NET native vendored LLVM headers",
+      "path": "dotnet/LLVM-NOTICE",
+      "sha256": "c0e9c93bdee60779be2c4b29c7fd8ba50f5c607eeeec3caef40bfbf5b707d38e",
+      "source": "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/bb2d0ef0cfb64bbe0d9c88640848e4a92f263fd6/src/OpenTelemetry.AutoInstrumentation.Native/lib/coreclr/src/inc/llvm/ELF.h",
+      "source_sha256": "a22c6754c84bd13b7baa60055d7968fc3842d3e3837d313e3ef994b00e1f3fa0",
+      "extraction": "Verbatim first 46 lines; includes the complete original license header."
     }
   ],
   "review_status": "partial; see THIRD_PARTY.md",
