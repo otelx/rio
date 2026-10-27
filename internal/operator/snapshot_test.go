@@ -19,7 +19,9 @@ import (
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
+	dynamicfake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/kubernetes/fake"
 )
 
@@ -207,7 +209,7 @@ func TestAdmissionRejectsForgedStaleCopiedAndMalformedSnapshots(t *testing.T) {
 
 func TestDirectAndUnmanagedPodsUseCentralPolicy(t *testing.T) {
 	for _, selected := range []bool{true, false} {
-		for _, owner := range []string{"Pod", "ReplicaSet", "Job", "CronJob"} {
+		for _, owner := range []string{"Pod", "ReplicaSet", "Job", "CronJob", "CustomController"} {
 			t.Run(fmt.Sprintf("%s-selected-%v", owner, selected), func(t *testing.T) {
 				p := testPolicy()
 				if !selected {
@@ -218,6 +220,8 @@ func TestDirectAndUnmanagedPodsUseCentralPolicy(t *testing.T) {
 				pod := &core.Pod{ObjectMeta: meta.ObjectMeta{Name: "web", Namespace: "app"}, Spec: core.PodSpec{Containers: []core.Container{{Name: "app"}}}}
 				kube := fake.NewClientset()
 				switch owner {
+				case "CustomController":
+					pod.OwnerReferences = []meta.OwnerReference{ownerRef("CustomController", "custom", "custom")}
 				case "ReplicaSet":
 					pod.OwnerReferences = []meta.OwnerReference{ownerRef("ReplicaSet", "rs", "rs")}
 					_, _ = kube.AppsV1().ReplicaSets("app").Create(context.Background(), &apps.ReplicaSet{ObjectMeta: meta.ObjectMeta{Name: "rs", UID: "rs"}}, meta.CreateOptions{})
@@ -310,5 +314,62 @@ func TestForgedOwnerCannotSelectWorkloadPolicy(t *testing.T) {
 	response := admissionResult(t, w, pod, "tenant")
 	if !response.Allowed || bytes.Contains(response.Patch, []byte(`"name":"rio-payload"`)) {
 		t.Fatalf("forged owner selected Deployment policy: %v %s", response.Result, response.Patch)
+	}
+}
+
+func TestInvalidWorkloadStateDoesNotBlockOtherWorkloads(t *testing.T) {
+	p := testPolicy()
+	p.APIVersion = Group + "/v1alpha1"
+	p.Kind = "Instrumentation"
+	raw, _ := json.Marshal(p)
+	var policy map[string]any
+	_ = json.Unmarshal(raw, &policy)
+	makeWorkload := func(name string) *unstructured.Unstructured {
+		return &unstructured.Unstructured{Object: map[string]any{"apiVersion": "apps/v1", "kind": "Deployment", "metadata": map[string]any{"name": name, "namespace": "app", "uid": name}, "spec": map[string]any{"template": map[string]any{"spec": map[string]any{"containers": []any{map[string]any{"name": "app", "image": "application"}}}}}}}
+	}
+	valid := makeWorkload("valid")
+	forged := makeWorkload("forged")
+	forged.SetAnnotations(map[string]string{StateAnnotation: `{"current":{"enabled":true,"image":"forged"}}`})
+	lists := map[schema.GroupVersionResource]string{PolicyResource: "InstrumentationList"}
+	for name, kind := range map[string]string{"deployments": "DeploymentList", "statefulsets": "StatefulSetList", "daemonsets": "DaemonSetList"} {
+		lists[schema.GroupVersionResource{Group: "apps", Version: "v1", Resource: name}] = kind
+	}
+	dyn := dynamicfake.NewSimpleDynamicClientWithCustomListKinds(runtime.NewScheme(), lists, &unstructured.Unstructured{Object: policy}, valid, forged)
+	c := &Controller{Authority: testAuthority(), Kube: fake.NewClientset(), Dynamic: dyn, Namespace: "operator", Store: &Store{}}
+	if err := c.Reconcile(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if !c.Store.Get().Synced {
+		t.Fatal("invalid workload blocked central policy admission")
+	}
+	deployments := dyn.Resource(schema.GroupVersionResource{Group: "apps", Version: "v1", Resource: "deployments"}).Namespace("app")
+	good, err := deployments.Get(context.Background(), "valid", meta.GetOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if state, err := c.Authority.readState(good); err != nil || state == nil || state.Current.Image != p.Spec.Image {
+		t.Fatalf("healthy workload blocked: %+v %v", state, err)
+	}
+	bad, err := deployments.Get(context.Background(), "forged", meta.GetOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(bad.GetAnnotations(), forged.GetAnnotations()) {
+		t.Fatal("forged state adopted or rewritten")
+	}
+	cr, err := dyn.Resource(PolicyResource).Get(context.Background(), PolicyName, meta.GetOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	status, _, _ := unstructured.NestedSlice(cr.Object, "status", "workloads")
+	found := false
+	for _, entry := range status {
+		row := entry.(map[string]any)
+		if row["name"] == "forged" && row["phase"] == "InvalidState" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("invalid state not reported: %+v", status)
 	}
 }

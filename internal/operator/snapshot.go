@@ -99,6 +99,16 @@ func (w *Webhook) owner(ctx context.Context, pod *core.Pod) (string, string, *un
 		}
 		return "Pod", name, nil, nil
 	}
+	switch ref.Kind {
+	case "Deployment", "StatefulSet", "DaemonSet", "ReplicaSet", "Job", "CronJob":
+		// These built-in identities can select a supported workload rule.
+	default:
+		name := pod.Name
+		if name == "" {
+			name = strings.TrimSuffix(pod.GenerateName, "-")
+		}
+		return "Pod", name, nil, nil
+	}
 	obj, err := getOwner(ctx, w.Kube, pod.Namespace, *ref)
 	if err != nil {
 		return "", "", nil, err

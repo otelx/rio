@@ -99,10 +99,12 @@ func (c *Controller) Reconcile(ctx context.Context) error {
 			}
 		}
 	}
+	invalidState := map[*unstructured.Unstructured]error{}
 	for _, w := range workloads {
 		s, e := c.Authority.readState(w.object)
 		if e != nil {
-			return e
+			invalidState[w.object] = e
+			continue
 		}
 		if s != nil {
 			if s.Current.Enabled {
@@ -136,6 +138,12 @@ func (c *Controller) Reconcile(ctx context.Context) error {
 	cleanupComplete := true
 	for _, w := range workloads {
 		obj := w.object
+		if problem := invalidState[obj]; problem != nil {
+			reports = append(reports, map[string]any{"namespace": obj.GetNamespace(), "kind": w.kind, "name": obj.GetName(), "phase": "InvalidState", "message": problem.Error()})
+			phase = "Degraded"
+			cleanupComplete = false
+			continue
+		}
 		wanted := policy.Resolve(obj.GetNamespace(), w.kind, obj.GetName())
 		state, e := c.Authority.readState(obj)
 		if e != nil {
