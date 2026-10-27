@@ -14,7 +14,7 @@
     "name": "http.server.request.duration",
     "type": "histogram",
     "unit": "s",
-    "temporality": "cumulative",
+    "temporality": 2,
     "activity": "aiohttp request duration histogram count increases after /work requests"
   },
   "logs": {
