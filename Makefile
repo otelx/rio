@@ -10,7 +10,7 @@ PAYLOAD_IMAGE ?= ghcr.io/otelx/rio/instrumentation:dev
 PLATFORMS ?= linux/amd64,linux/arm64
 export OPERATOR_IMAGE PAYLOAD_IMAGE
 
-.PHONY: prepare test build vet image archive payload images smoke e2e install uninstall
+.PHONY: prepare test build vet image archive payload images smoke e2e admission-e2e install uninstall
 prepare:
 	mkdir -p "$(GOCACHE)" "$(GOMODCACHE)" "$(GOTMPDIR)" "$(ARTIFACTS)/bin"
 test: prepare
@@ -30,6 +30,8 @@ payload: prepare
 images: image payload
 smoke:
 	./payload/scripts/smoke.sh
+admission-e2e: prepare
+	./scripts/admission-e2e.sh
 e2e:
 	./scripts/e2e.sh
 install:

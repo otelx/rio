@@ -119,6 +119,12 @@ jobs:
           export TMPDIR="$PWD/.artifacts/tmp"
           go install sigs.k8s.io/kind@v0.33.0
           echo "$GOBIN" >> "$GITHUB_PATH"
+      - name: Verify admission failure isolation through the Kubernetes API
+        env:
+          CLUSTER_NAME: rio-issue-1-admission-${{ matrix.arch }}-${{ matrix.delivery }}
+        run: |
+          export CLUSTER_NAME="${CLUSTER_NAME,,}"
+          make admission-e2e
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: tested-release-images-${{ matrix.arch }}
@@ -139,6 +145,7 @@ jobs:
         with:
           name: diagnostics-${{ matrix.arch }}-${{ matrix.delivery }}
           path: |
+            .artifacts/admission/**/*.log
             .artifacts/e2e/**/*.log
             .artifacts/e2e/**/*.json
           include-hidden-files: true

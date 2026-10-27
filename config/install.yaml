@@ -133,7 +133,10 @@ webhooks:
       matchExpressions:
         - key: kubernetes.io/metadata.name
           operator: NotIn
-          values: [rio-system]
+          values: [rio-system, kube-system, kube-public, kube-node-lease]
+    matchConditions:
+      - name: exclude-critical-pods
+        expression: '!has(object.spec.priorityClassName) || !(object.spec.priorityClassName in ["system-node-critical", "system-cluster-critical"])'
     clientConfig:
       service:
         namespace: rio-system
