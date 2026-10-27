@@ -121,7 +121,7 @@ jobs:
           echo "$GOBIN" >> "$GITHUB_PATH"
       - name: Verify admission failure isolation through the Kubernetes API
         env:
-          CLUSTER_NAME: rio-issue-1-admission-${{ matrix.arch }}-${{ matrix.delivery }}
+          CLUSTER_NAME: rio-issue-6-issue-1-${{ matrix.arch }}-${{ matrix.delivery }}
         run: |
           export CLUSTER_NAME="${CLUSTER_NAME,,}"
           make admission-e2e
