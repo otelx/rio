@@ -85,7 +85,7 @@ func (w *Webhook) admit(ctx context.Context, pod *core.Pod, user string) ([]byte
 		potential = pod.DeepCopy()
 		potential.OwnerReferences = nil
 	}
-	if !snapshot.Synced || !snapshot.Policy.mayInjectPod(potential) {
+	if !snapshot.Synced || (!snapshot.Policy.mayInjectPod(potential) && !savedCandidate(pod, user)) {
 		return nil, nil
 	}
 	cfg, service, err := w.configuration(ctx, pod, user, snapshot.Policy)

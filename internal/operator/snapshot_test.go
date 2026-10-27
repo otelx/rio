@@ -382,3 +382,56 @@ func TestInvalidWorkloadStateDoesNotBlockOtherWorkloads(t *testing.T) {
 		t.Fatalf("invalid state not reported: %+v", status)
 	}
 }
+
+func TestAuthenticatedRecoverySurvivesPolicyRemoval(t *testing.T) {
+	stable := testPolicy().Resolve("app", "Deployment", "web")
+	for _, mode := range []string{"removed", "unselected", "skip", "deleting"} {
+		t.Run(mode, func(t *testing.T) {
+			w, pod, _ := snapshotFixture(t, "Deployment", stable)
+			policy := testPolicy()
+			switch mode {
+			case "removed":
+				policy = nil
+			case "unselected":
+				policy.Spec.Rules = nil
+			case "skip":
+				policy.Spec.Rules[0].Action = "Skip"
+			case "deleting":
+				now := meta.Now()
+				policy.DeletionTimestamp = &now
+			}
+			w.Store.Set(Snapshot{Policy: policy, Synced: true})
+			response := admissionResult(t, w, pod, "system:kube-controller-manager")
+			if !response.Allowed || !bytes.Contains(response.Patch, []byte(`"image":"payload:v1"`)) {
+				t.Fatalf("authenticated recovery lost after %s policy: %v %s", mode, response.Result, response.Patch)
+			}
+			// The same bytes and owner references cannot authorize a Pod creator.
+			response = admissionResult(t, w, pod, "tenant")
+			if !response.Allowed || response.Patch != nil {
+				t.Fatal("ordinary creator selected injection outside policy")
+			}
+			// A controller can carry application-supplied hints, so creator
+			// authentication alone must never authorize an unselected payload.
+			forged := pod.DeepCopy()
+			cfg := stable
+			cfg.Image = "forged"
+			raw, _ := json.Marshal(cfg)
+			forged.Annotations[ConfigAnnotation] = string(raw)
+			forged.Annotations[RevisionAnnotation] = cfg.Revision()
+			response = admissionResult(t, w, forged, "system:kube-controller-manager")
+			if !response.Allowed || response.Patch != nil {
+				t.Fatal("unselected forged snapshot must remain unchanged")
+			}
+			deployment, _ := w.Kube.AppsV1().Deployments("app").Get(context.Background(), "web", meta.GetOptions{})
+			delete(deployment.Annotations, StateSignatureAnnotation)
+			_, err := w.Kube.AppsV1().Deployments("app").Update(context.Background(), deployment, meta.UpdateOptions{})
+			if err != nil {
+				t.Fatal(err)
+			}
+			response = admissionResult(t, w, pod, "system:kube-controller-manager")
+			if !response.Allowed || response.Patch != nil {
+				t.Fatal("unsigned state authorized injection or blocked unselected admission")
+			}
+		})
+	}
+}

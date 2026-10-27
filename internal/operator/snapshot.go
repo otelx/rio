@@ -28,12 +28,16 @@ func controllerUser(user string) bool {
 	return false
 }
 
+func savedCandidate(pod *core.Pod, user string) bool {
+	return controllerUser(user) && pod.Annotations[ConfigAnnotation] != "" && pod.Annotations[RevisionAnnotation] != "" && pod.Annotations[OwnerAnnotation] != ""
+}
+
 type ownerLookupError struct{ err error }
 
 func (e *ownerLookupError) Error() string { return e.err.Error() }
 func (e *ownerLookupError) Unwrap() error { return e.err }
 
-func (w *Webhook) configuration(ctx context.Context, pod *core.Pod, user string, policy *Policy) (Config, string, error) {
+func (w *Webhook) configuration(ctx context.Context, pod *core.Pod, user string, policy *Policy) (resolved Config, service string, configurationErr error) {
 	kind, name := "Pod", pod.Name
 	if name == "" {
 		name = strings.TrimSuffix(pod.GenerateName, "-")
@@ -49,10 +53,18 @@ func (w *Webhook) configuration(ctx context.Context, pod *core.Pod, user string,
 		}
 	}
 	cfg := policy.Resolve(pod.Namespace, kind, name)
-	// Preserve admission isolation: annotations never select an otherwise
-	// unselected Pod, and are irrelevant when no injection is authorized.
+	// Invalid hints must not block an unselected Pod. Only fully verified
+	// active history can authorize injection independently of current selection.
+	// This is essential when removal or a Skip revision itself needs rollback.
 	if !cfg.Enabled {
-		return cfg, name, nil
+		defer func() {
+			if configurationErr != nil {
+				resolved, service, configurationErr = cfg, name, nil
+			}
+		}()
+		if workload == nil || !savedCandidate(pod, user) {
+			return cfg, name, nil
+		}
 	}
 	hasSnapshot := false
 	for _, key := range []string{ConfigAnnotation, OwnerAnnotation, RevisionAnnotation} {

@@ -296,6 +296,18 @@ func TestAdmissionKubernetesAPI(t *testing.T) {
 	patchState(`{"current":{"enabled":true,"image":"forged"}}`)
 	denied("edited unsigned workload state", owned, true)
 	patchState(originalState)
+	selectedSnapshot := store.Get()
+	store.Set(Snapshot{Synced: true})
+	restored, err := createOwned(owned)
+	if err != nil || restored.Annotations[AppliedAnnotation] != owned.Annotations[RevisionAnnotation] {
+		t.Fatalf("authenticated recovery was overridden by policy removal: %v", err)
+	}
+	skipped, err := createOwned(forged)
+	if err != nil || skipped.Annotations[AppliedAnnotation] != "" {
+		t.Fatalf("unselected forged snapshot authorized injection or blocked admission: %v", err)
+	}
+	store.Set(selectedSnapshot)
+	t.Log("authenticated recovery survived absent current policy; forged configuration remained uninstrumented")
 	t.Log("snapshot authority: authenticated controller accepted; forged/copied/stale/malformed snapshots, unsigned state, and forged applied markers rejected; unselected copy admitted unchanged")
 
 	yes := true
