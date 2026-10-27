@@ -71,6 +71,19 @@ class TelemetryDiagnosticsTests(unittest.TestCase):
             'INFO rio-fixture marker\nApplication initialized; error budget is available\n'])
         self.harness.save_apps()
 
+    def test_dotnet_agent_failure_is_rejected_even_when_application_is_healthy(self):
+        # Default fail-fast=false can leave a healthy application serving with
+        # no SDK. A disabled-export case must not mistake this for suppression.
+        pod = {'metadata': {'name': 'dotnet'}, 'status': {'containerStatuses': [{'restartCount': 0}]}}
+        for failure in ('Error in StartupHook initialization',
+                        'OpenTelemetry SDK load exception.',
+                        '[rio-dotnet-bootstrap] Initialization failed: missing original hook'):
+            logs = 'INFO rio-fixture marker\n' + failure + '\n'
+            self.harness.kube = Mock(side_effect=[json.dumps({'items': [pod]}), logs])
+            with self.subTest(failure=failure), self.assertRaises(AssertionError):
+                self.harness.save_apps()
+            self.assertEqual((self.harness.out / 'dotnet.log').read_text(), logs)
+
 
 if __name__ == '__main__':
     unittest.main()

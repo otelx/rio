@@ -9,7 +9,8 @@
   },
   "build_image": "mcr.microsoft.com/dotnet/sdk:8.0.427-bookworm-slim@sha256:ff39a765f04619c8d146796fc09b38499ae5984f4a2a4c3a0a57d0022855daee",
   "env": {
-    "OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE": "true"
+    "OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE": "true",
+    "OTEL_DOTNET_AUTO_LOGGER": "console"
   },
   "metrics": {
     "source": "ASP.NET Core server request metrics (automatic agent ASPNETCORE instrumentation)",

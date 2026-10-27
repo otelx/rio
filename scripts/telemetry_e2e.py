@@ -321,6 +321,8 @@ class Harness:
             assert not re.search(r'(?i)(Error loading shared library|cannot open shared object|Gem::LoadError|'
                                  r'Failed to load.*[Oo]pen[Tt]elemetry|Error in sitecustomize|'
                                  r'Auto-instrumentation failed to initialize\. Error:|'
+                                 r'Error in StartupHook initialization|OpenTelemetry SDK load exception|'
+                                 r'\[rio-dotnet-bootstrap\]|'
                                  r'Attempted duplicate registration|has already been initialized|'
                                  r'ConfigurationException|OpenTelemetry.*[Cc]onfiguration.*[Ee]rror)', logs), logs
 
