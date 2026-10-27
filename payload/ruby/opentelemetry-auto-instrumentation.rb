@@ -6,8 +6,13 @@
 require 'bundler'
 require 'bundler/setup' if Bundler::SharedHelpers.in_bundle?
 entry = Dir[File.join(__dir__, 'bundler/gems/*/lib/opentelemetry-auto-instrumentation.rb')].fetch(0)
-require entry
-# Register the real upstream standard Logger bridge before the application's
-# Bundler.require triggers the distro's use_all initialization. No app SDK setup
-# is necessary. The pinned instrumentation-all version predates this bridge.
-require 'opentelemetry-instrumentation-logger'
+# The upstream loader can call Bundler.require immediately. Defer that call
+# until the Logger bridge is registered, otherwise use_all misses the bridge.
+require_bundler = ENV.delete('OTEL_RUBY_REQUIRE_BUNDLER')
+begin
+  require entry
+  require 'opentelemetry-instrumentation-logger'
+ensure
+  ENV['OTEL_RUBY_REQUIRE_BUNDLER'] = require_bundler unless require_bundler.nil?
+end
+Bundler.require if require_bundler == 'true'
