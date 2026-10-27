@@ -71,7 +71,9 @@ The `v0.1.0-alpha.3` release changes both image paths:
 
 Use the `v0.1.0-alpha.3` installation files and run `./scripts/install.sh` to update the operator Deployment. Update your `Instrumentation` manifest's `spec.image` and any `rules[].image` overrides to the new instrumentation path and release tag, then apply the policy. The policy change triggers instrumentation rollouts for supported managed workloads. Recreate other selected Pods to apply the new image to them. Update image references in deployment automation and registry mirrors as well.
 
-New releases publish only the new paths, without compatibility aliases. Previously published images and release tags retain their original names. For local development, follow the [source build instructions](development.md).
+The retired `ghcr.io/otelx/rio` and `ghcr.io/otelx/rio-payload` packages have been deleted. Images for alpha.1 and alpha.2 can no longer be pulled from GHCR. Use alpha.3 or later under the new paths; source tags and release archives remain available. For local development, follow the [source build instructions](development.md).
+
+Update old policy image references, including rule overrides, before recreating or rescheduling instrumented Pods. Saved recovery revisions may also reference retired images; a recovery that needs to pull a deleted image cannot succeed unless that image is already cached or supplied through a maintained registry mirror. Cross-release upgrade and recovery validation is tracked in [issue #6](https://github.com/otelx/rio/issues/6).
 
 ## Automatic payload delivery
 

@@ -40,7 +40,7 @@ This repository builds two images:
 
 The operator Deployment uses `rio/operator`; the `Instrumentation` policy's `spec.image` selects `rio/instrumentation`. Agent and Injector source remain upstream dependencies, pinned in [payload/versions.json](payload/versions.json) and language lockfiles. The image names changed in `v0.1.0-alpha.3`; see [upgrade instructions](docs/configuration.md#upgrading-from-alpha1-or-alpha2).
 
-RIO targets Linux amd64 and arm64, including glibc and Alpine/musl application images. Starting with `v0.1.0-alpha.2`, multi-platform release tags support mixed Linux clusters. The existing `v0.1.0-alpha.1` images are amd64 only; see [compatibility](docs/compatibility.md) for the validated runtime versions and release limits.
+RIO targets Linux amd64 and arm64, including glibc and Alpine/musl application images. Use `v0.1.0-alpha.3` or later under the image paths above. The original image packages for alpha.1 and alpha.2 have been retired and deleted; their source tags and release archives remain available. See [compatibility](docs/compatibility.md) for the validated runtime versions and release limits.
 
 ## Learn more
 

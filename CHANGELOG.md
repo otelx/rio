@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Retire and delete the original `ghcr.io/otelx/rio` and `ghcr.io/otelx/rio-payload` packages to make the current image names clear. Their alpha.1 and alpha.2 images can no longer be pulled from GHCR; use alpha.3 or later at `ghcr.io/otelx/rio/operator` and `ghcr.io/otelx/rio/instrumentation`. Source tags and release archives remain available.
+
 ## v0.1.0-alpha.3
 
 - **Breaking:** Rename the operator image from `ghcr.io/otelx/rio` to `ghcr.io/otelx/rio/operator`, and the instrumentation image from `ghcr.io/otelx/rio-payload` to `ghcr.io/otelx/rio/instrumentation`. Builds and releases use the new names without compatibility aliases. Update the operator Deployment image and instrumentation policy image references, including any rule overrides; see [upgrade instructions](docs/configuration.md#upgrading-from-alpha1-or-alpha2).
