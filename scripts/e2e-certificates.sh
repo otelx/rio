@@ -62,7 +62,8 @@ PY
       if [[ "$certificate_case" == expiring ]]; then certificate_observed=true; break; fi
     elif [[ "$certificate_case" == expired ]] && python3 - "$cert_dir/before.err" <<'PY'
 import pathlib,sys
-assert 'expired' in pathlib.Path(sys.argv[1]).read_text().lower()
+text=pathlib.Path(sys.argv[1]).read_text().lower()
+sys.exit(0 if 'x509: certificate has expired or is not yet valid' in text and 'is after' in text else 1)
 PY
     then certificate_observed=true; break; fi
     sleep 1
