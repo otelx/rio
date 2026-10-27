@@ -27,6 +27,26 @@ source attribution is in [payload/NOTICE](payload/NOTICE); RIO attribution is in
 [NOTICE](NOTICE). These snapshots preserve existing files; they do not establish
 that every required upstream notice or source obligation has been satisfied.
 
+## Audit findings, 2026-10-27
+
+Local amd64 scans of the updated images produced SPDX 2.3 documents with 42
+operator packages and 771 instrumentation packages. Syft reported `NOASSERTION`
+for the declared license of 41 operator packages and 235 instrumentation packages,
+including .NET assemblies. This does not establish that a license is absent;
+the operator notice snapshot separately contains 52 redistribution files.
+The instrumentation archive scan preserved 541 existing notice files before
+adding the Injector license. Scanner declarations alone cannot approve the review.
+
+The pinned Alpine runtime includes 16 packages. Its package metadata identifies
+GPL terms for alpine-baselayout, apk-tools/libapk, BusyBox, musl-utils, and scanelf,
+along with MIT, Apache, MPL, BSD, and Zlib terms for other packages. Preserving the
+package database does not supply all associated license/notice texts or verify
+corresponding-source availability. Those base-image materials, the Injector's
+embedded dependencies, and .NET's embedded dependency redistribution material
+are concrete outstanding gaps. The Java agent already embeds upstream notices;
+Node.js, Python, and Ruby package material is retained and still needs reconciliation
+against the full per-architecture inventory.
+
 ## Outstanding release gate
 
 `THIRD_PARTY_REVIEW.json` is deliberately `pending`. Complete the following before

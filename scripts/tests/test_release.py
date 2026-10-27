@@ -207,7 +207,7 @@ raise SystemExit('Unexpected gh invocation: '+str(args))
 
 
 class DraftFixture(PublicationFixture):
-    def prepare_fixture(self):
+    def prepare_fixture(self, version="v1.2.3"):
         shutil.copytree(ROOT / 'scripts', self.root / 'scripts', ignore=shutil.ignore_patterns('__pycache__'))
         gh = self.bin / 'gh'
         gh.write_text(FAKE_GH)
@@ -216,8 +216,8 @@ class DraftFixture(PublicationFixture):
                      'examples/quickstart/policy.yaml', 'docs/quickstart.md', 'docs/configuration.md'):
             path = self.root / name
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text('v1.2.3\n')
-        (self.root / 'CHANGELOG.md').write_text('## Unreleased\nFuture\n\n## v1.2.3\nStable changes.\n\n## v1.2.2\nOld changes.\n')
+            path.write_text(metadata.version_info(version)['image_tag']+'\n')
+        (self.root / 'CHANGELOG.md').write_text(f'## Unreleased\nFuture\n\n## {version}\nStable changes.\n\n## v1.2.2\nOld changes.\n')
         for arch in ('amd64','arm64'):
             directory = self.root / f'.artifacts/release/tested-release-images-{arch}'
             directory.mkdir(parents=True)
@@ -233,15 +233,24 @@ class DraftFixture(PublicationFixture):
         subprocess.run(['git','init','-q',str(self.root)],check=True)
         subprocess.run(['git','-C',str(self.root),'add','scripts','config','examples','docs','CHANGELOG.md'],check=True)
         subprocess.run(['git','-C',str(self.root),'-c','commit.gpgsign=false','-c','user.name=Fixture','-c','user.email=fixture@example.invalid','commit','-qm','Fixture'],check=True)
-        subprocess.run(['git','-C',str(self.root),'-c','tag.gpgsign=false','tag','v1.2.3'],check=True)
+        subprocess.run(['git','-C',str(self.root),'-c','tag.gpgsign=false','tag',version],check=True)
         sha = subprocess.check_output(['git','-C',str(self.root),'rev-parse','HEAD'],text=True).strip()
-        self.env.update(GITHUB_ACTIONS='true',GITHUB_REPOSITORY='otelx/rio',GITHUB_REF_TYPE='tag',GITHUB_REF_NAME='v1.2.3',GITHUB_SHA=sha,GITHUB_RUN_ID='12345')
+        self.env.update(GITHUB_ACTIONS='true',GITHUB_REPOSITORY='otelx/rio',GITHUB_REF_TYPE='tag',GITHUB_REF_NAME=version,GITHUB_SHA=sha,GITHUB_RUN_ID='12345')
 
     def prepare(self):
         return subprocess.run([str(self.root / 'scripts/release.sh')],env=self.env,text=True,capture_output=True)
 
 
 class DraftReservationTests(DraftFixture):
+    def test_prerelease_with_build_metadata_uses_prerelease_flag_and_mapped_image_tags(self):
+        self.prepare_fixture('v1.2.3-rc.1+build.01')
+        result = self.prepare()
+        self.assertEqual(result.returncode,0,result.stderr)
+        reservation = next(c for c in self.calls() if c[:3]==['gh','release','create'])
+        self.assertIn('--prerelease',reservation)
+        pushes = [c[1] for c in self.calls() if c[0]=='push']
+        self.assertTrue(all('v1.2.3-rc.1_build.01-' in ref for ref in pushes))
+
     def test_existing_draft_published_release_and_api_failure_prevent_push(self):
         self.prepare_fixture()
         for state in ({'releases':[{'tag_name':'v1.2.3','draft':True}]},
