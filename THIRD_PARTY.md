@@ -6,9 +6,9 @@ other packages with their own terms. An image label is not a license inventory.
 | Distribution | Version/source inventory | Preserved material |
 | --- | --- | --- |
 | Operator Go dependencies | `go.mod`, `go.sum`, and compiled-image SBOM | `go-licenses/v2@v2.0.1 save` follows the compiled dependency graph and copies redistribution material into `/licenses/go`; the Go runtime license is included there too. |
-| Injector shared library | `payload/versions.json`, Injector v0.11.0 asset SHA-256 per architecture | Tagged upstream Apache-2.0 license in `payload/licenses/injector/LICENSE`, copied to `/licenses/upstream/injector/LICENSE`. Embedded native dependencies require further review. |
+| Injector shared library | `payload/versions.json`, Injector v0.11.0 asset SHA-256 per architecture | Upstream Apache-2.0 license and Zig 0.15.2 standard-library MIT notice in `/licenses/upstream/injector/`. Its source build disables libc and declares no external Zig packages. |
 | Java agent | `payload/versions.json`, Java instrumentation v2.30.0 asset SHA-256 | Embedded `META-INF/licenses/` and other license/notice entries remain in the agent JAR. The notice inventory extracts these entries as well. |
-| .NET agents, glibc and musl | `payload/versions.json`, .NET instrumentation v1.17.0 asset SHA-256 | Upstream distribution `LICENSE` files remain under `/dist/agents/dotnet/{glibc,musl}`. Embedded native/managed dependencies require further review. |
+| .NET agents, glibc and musl | `payload/versions.json`, .NET instrumentation v1.17.0 asset SHA-256 | Upstream distribution `LICENSE` files remain under `/dist/agents/dotnet/{glibc,musl}`. Supplemental fmt, spdlog 1.15.3, .NET Foundation MIT, and GNU runtime license texts are in `/licenses/upstream/dotnet/`. Managed assembly notices and exact native runtime inputs require further review. |
 | Node.js agent and dependencies | `payload/node/package-lock.json` | npm package license and notice files remain under `/dist/agents/node/node_modules`. |
 | Python agents and dependencies, glibc and musl | `payload/python/requirements.lock` | Wheel license/notice and dist-info material remains under `/dist/agents/python/{glibc,musl}`. |
 | Ruby agents and dependencies, glibc and musl | `payload/ruby/Gemfile.lock`, source revision in `payload/versions.json` | Gem license and notice files remain under `/dist/agents/ruby/{glibc,musl}`. |
@@ -27,6 +27,15 @@ source attribution is in [payload/NOTICE](payload/NOTICE); RIO attribution is in
 [NOTICE](NOTICE). These snapshots preserve existing files; they do not establish
 that every required upstream notice or source obligation has been satisfied.
 
+The collector also retains README and AUTHORS files: `data-uri-to-buffer` and
+`pg-types`, for example, put the complete MIT grant and copyright attribution in
+their README instead of a separate LICENSE. Nested `web-streams-polyfill` entry
+points share their parent package's LICENSE. Supplemental material is copied
+verbatim from immutable upstream commits; [the material manifest](payload/licenses/manifest.json)
+records its source and SHA-256. GNU runtime texts do not identify or certify the
+actual compiler/runtime build used upstream, and the .NET Foundation MIT text is
+not a claim about the version of the copied CoreCLR headers.
+
 ## Audit findings, 2026-10-27
 
 Local amd64 scans of the updated images produced SPDX 2.3 documents with 42
@@ -41,9 +50,9 @@ The pinned Alpine runtime includes 16 packages. Its package metadata identifies
 GPL terms for alpine-baselayout, apk-tools/libapk, BusyBox, musl-utils, and scanelf,
 along with MIT, Apache, MPL, BSD, and Zlib terms for other packages. Preserving the
 package database does not supply all associated license/notice texts or verify
-corresponding-source availability. Those base-image materials, the Injector's
-embedded dependencies, and .NET's embedded dependency redistribution material
-are concrete outstanding gaps. The Java agent already embeds upstream notices;
+corresponding-source availability. Those base-image materials and .NET's managed
+dependency notices and native runtime inventory are concrete outstanding gaps.
+The Java agent already embeds upstream notices;
 Node.js, Python, and Ruby package material is retained and still needs reconciliation
 against the full per-architecture inventory.
 

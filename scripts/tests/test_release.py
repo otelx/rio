@@ -52,6 +52,25 @@ class VersionTests(unittest.TestCase):
 
 
 class NoticeTests(unittest.TestCase):
+    def setUp(self):
+        (ROOT / '.artifacts').mkdir(exist_ok=True)
+
+    def test_embedded_readme_license_is_preserved_in_source_notices(self):
+        with tempfile.TemporaryDirectory(prefix='issue-5-notices-',dir=ROOT / '.artifacts') as directory, io.BytesIO() as data:
+            material = b'Copyright upstream\nPermission is hereby granted, free of charge.'
+            with tarfile.open(fileobj=data, mode='w') as archive:
+                for name in ('licenses/LICENSE','dist/agents/node/node_modules/pg-types/README.md'):
+                    info = tarfile.TarInfo(name)
+                    info.size = len(material)
+                    archive.addfile(info, io.BytesIO(material))
+            data.seek(0)
+            with tarfile.open(fileobj=data) as archive:
+                notices.collect(archive,Path(directory))
+            copied = Path(directory) / 'dist/agents/node/node_modules/pg-types/README.md'
+            self.assertEqual(copied.read_bytes(),material)
+            inventory = json.loads((Path(directory) / 'inventory.json').read_text())
+            self.assertTrue(any(item['path'].endswith('/README.md') for item in inventory))
+
     def test_go_source_changes_invalidate_redistribution_approval(self):
         (ROOT / '.artifacts').mkdir(exist_ok=True)
         with tempfile.TemporaryDirectory(prefix='issue-5-review-', dir=ROOT / '.artifacts') as directory:

@@ -17,7 +17,9 @@ from pathlib import Path, PurePosixPath
 
 
 def notice_name(name):
-    return bool(re.search(r"(^|[-_.])(licen[cs]es?|notices?|copyright|copying)([-_.]|$)", name, re.I))
+    # Some upstream npm distributions carry the complete license in README
+    # instead of a LICENSE file. Preserve that documentation verbatim too.
+    return bool(re.search(r"(^|[-_.])(licen[cs]es?|notices?|copyright|copying|readme|authors?)([-_.]|$)", name, re.I))
 
 
 def collect(archive, output):
