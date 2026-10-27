@@ -6,7 +6,7 @@ The payload comes from [the image component](../payload/README.md). Application 
 
 Start with the [quickstart](quickstart.md) for a complete local installation.
 
-The [support contract](compatibility.md) defines the validated runtime/signal scope, matching operator/instrumentation versions, cross-release migration limits, and the compatibility policy for this API and persisted annotations. The API remains `v1alpha1` for the first normal `v0.1.0` release.
+See [compatibility](compatibility.md) for supported environments, signals, API compatibility, and migration limits.
 
 ## Configuration
 
@@ -68,18 +68,21 @@ Malformed persisted rollout state, unreadable templates, failed workload updates
 
 The operator reports `InjectionMissing` for a healthy managed Pod that missed injection instead of claiming that instrumentation succeeded or rolling back a healthy application. Correct the webhook or policy synchronization and request a new revision to retry. Standalone Pods and Jobs are not automatically restarted; recreate them when instrumentation is needed.
 
-## Upgrading from alpha.1 or alpha.2
+<a id="upgrading-from-alpha1-or-alpha2"></a>
+<a id="retired-image-references"></a>
 
-The `v0.1.0-alpha.3` release changes both image paths:
+## Upgrading existing releases
 
-| Component | Previous image | New image |
+Replace any retired image references with the current repositories:
+
+| Component | Deleted repository | Current repository |
 | --- | --- | --- |
 | Operator | `ghcr.io/otelx/rio` | `ghcr.io/otelx/rio/operator` |
 | Instrumentation | `ghcr.io/otelx/rio-payload` | `ghcr.io/otelx/rio/instrumentation` |
 
 The retired `ghcr.io/otelx/rio` and `ghcr.io/otelx/rio-payload` packages have been deleted. Source tags and release archives remain available, but the old images cannot be pulled from GHCR. Do not recreate or reschedule old instrumented Pods before migrating: both their saved configuration and last successful recovery revision can reference the deleted payload. An image still cached on a node is not a durable recovery source. Keep a copy of your policy manifest and workload objects, including annotations, before upgrading.
 
-Use the following migration for an installed alpha.2 release (the integration baseline). Alpha.1 should also use this cleanup-first procedure, but is not a validated controller rollback target.
+The integration baselines are alpha.2 and alpha.3. Use this cleanup-first procedure for those releases; alpha.1 and other unvalidated transitions require the [clean reset](compatibility.md#operatorinstrumentation-versions-and-upgrades).
 
 1. If workloads are already `RollingBack`, wait for `RolledBack` or `RecoveryFailed` and inspect their status before proceeding. Temporarily replace the rules with a single `Skip` rule selecting `namespaces: ["*"]` and allow a sufficient cleanup deadline (for example `timeoutSeconds: 300`), keeping the operator, webhook, and CR running. For each previously managed workload, wait for `Disabled` and healthy replacement Pods without `rio-payload` volumes or `LD_PRELOAD`. Check that both `current.enabled` and `stable.enabled` in the workload's `rio.otelx.github.io/state` annotation are false. This establishes an uninstrumented recovery baseline without pulling the retired payload. Standalone Pods and other unsupported rollout resources must be recreated from their original, uninstrumented manifests while selection is disabled.
 2. Run the candidate's `./scripts/install.sh` with its operator image. This applies the CRD and installation resources and waits for the operator Deployment. It preserves the TLS Secret; use the renewal command below if certificates need replacement. Admission can be unavailable briefly during the single replica's Recreate rollout.

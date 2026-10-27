@@ -1,87 +1,81 @@
 # Compatibility and operational limits
 
-RIO is currently alpha and supports evaluation only. This document defines the deliberately limited support contract for the first normal release, `v0.1.0`; it does not announce that release or establish production readiness. “Supported” means eligible for investigation and fixes within the [maintenance policy](../SECURITY.md), without an availability or resolution SLA. All other combinations remain experimental or unsupported as specified below.
+RIO is alpha and intended for evaluation. The scope below is planned for `v0.1.0`. Support covers bug investigation and fixes under the [maintenance policy](../SECURITY.md), without an availability or resolution SLA.
 
 ## First normal release scope
 
-| Dimension | Supported scope for `v0.1.0` | Evidence and limits |
+| Component | Supported scope | Validation |
 | --- | --- | --- |
-| Kubernetes | 1.35.0, Linux nodes | Two-node kind clusters in CI. Other Kubernetes versions and distributions are evaluation targets until separately validated. |
-| Architecture | amd64 and arm64 (aarch64) | Native CI workers test each architecture; common image tags select the matching platform. A heterogeneous cluster is not an end-to-end CI fixture. |
-| Container runtime | containerd as packaged in `kindest/node:v1.35.0` | CRI-O is capability-detected but has no end-to-end validation and remains experimental. |
-| Application runtime and libc | Node.js 24.22.1 with glibc 2.36 on Debian 12 (`node:24`), or musl 1.2.6 on Alpine 3.24 (`node:24-alpine`) | Built-in `node:http` server trace export only. These are the current fixture versions, not a promise for arbitrary libc or Node.js versions. The fixture tags float; release evidence must identify the exact resolved images and update this matrix if they change. |
-| Delivery | Native image volume after successful per-node probes; init-container copy into `emptyDir` otherwise | Both delivery paths, architectures, and Node.js libc variants are integration-tested. |
-| Workload lifecycle | Deployments, StatefulSets, and DaemonSets with supported rolling-update strategies | Injection, failed rollout, recovery, restart, and removal are tested. Other Pod producers have admission-only behavior, with no managed restart or recovery guarantee. |
-| Security profile | Application profiles permitting dynamic preloading and readable/executable agent mounts; root copy init container allowed when fallback is needed | Arbitrary seccomp, AppArmor, SELinux, and admission-policy combinations are not certified. Pod Security Restricted is not an end-to-end validated support profile. |
+| Kubernetes | 1.35.0, Linux amd64 and arm64 | Two-node kind clusters on native workers for each architecture; heterogeneous clusters are unvalidated |
+| Container runtime | containerd 2.2.0 in `kindest/node:v1.35.0` | CRI-O is detected but remains experimental |
+| Application | Node.js 24.22.1, built-in `node:http` server | HTTP server spans received by an OpenTelemetry Collector |
+| libc | glibc 2.36 on Debian 12; musl 1.2.6 on Alpine 3.24 | `node:24` and `node:24-alpine`, on both architectures |
+| Delivery | Native image volume or init-container copy to `emptyDir` | Both paths tested with each architecture and libc |
+| Workloads | Deployments, StatefulSets, DaemonSets with supported rolling-update strategies | Injection, failure recovery, operator restart, and removal |
 
-The [alpha.3 release validation](https://github.com/otelx/rio/actions/runs/40559269374) establishes the current baseline, not evidence for a future tag. Before a normal release, rerun the complete [CI workflow](../.github/workflows/ci.yml) on the candidate, retain its `hello-injected.json` image IDs, node/runtime metadata, and `runtime.log` version evidence, and narrow this matrix if any path fails. No language, version, distribution, or signal becomes supported solely because an upstream agent advertises it. See [payload validation](../payload/README.md#validation-and-updating) for the exact fixtures.
+Other Kubernetes versions, runtimes, and application images need separate validation. Fixture tags float; release evidence must record resolved image IDs and runtime/libc versions. See the [validation run](https://github.com/otelx/rio/actions/runs/40565419938) and [payload fixtures](../payload/README.md#validation-and-updating).
 
-## Kubernetes and delivery
+## Delivery and security constraints
 
-- CI runs kind with Kubernetes 1.35.0 on native Linux amd64 and arm64 workers and checks both delivery paths. Older Kubernetes versions accepted by capability detection are not thereby supported.
-- Native image-volume delivery is selected only after runtime checks and a probe on every registered Linux node succeed. Known minimum runtimes are containerd 2.1 and CRI-O 1.31. Kubernetes feature gates must also permit image volumes.
-- Otherwise RIO copies the same payload into an `emptyDir` with an init container. This copy runs as UID 0 with all capabilities dropped. Restricted namespaces requiring every container to run nonroot need a volume-permissions adaptation.
-- Windows containers are unsupported. RIO does not change application scheduling.
-- Starting with `v0.1.0-alpha.2`, the controller and payload release tags contain amd64 and arm64 images. Mixed Linux clusters can use the same tags on both architectures; image selection is validated separately from heterogeneous-cluster lifecycle behavior. Capability probes must succeed on every Linux node before native delivery is selected. Application images must also provide the architectures on which they can be scheduled.
-- The historical `v0.1.0-alpha.1` images were amd64 only. The retired packages for alpha.1 and alpha.2 have been deleted; their images can no longer be pulled from GHCR.
-- Starting with `v0.1.0-alpha.3`, releases use `ghcr.io/otelx/rio/operator` and `ghcr.io/otelx/rio/instrumentation`. Use these paths for installations and upgrades. See [upgrade instructions](configuration.md#upgrading-from-alpha1-or-alpha2).
+Native delivery requires image-volume feature gates, containerd 2.1+ or CRI-O 1.31+, and a successful payload-mount probe on every registered Linux node. These detection thresholds do not extend the supported versions above. Otherwise RIO uses the copy init container, which runs as UID 0 with all capabilities dropped. Namespaces requiring every container to run nonroot need a volume-permissions adaptation.
+
+Application profiles must permit `LD_PRELOAD` and readable/executable agent mounts. Pod Security Restricted and custom seccomp, AppArmor, or SELinux policies are unvalidated. Test coexistence with existing agents and preload libraries before adoption.
+
+Windows containers are unsupported. RIO does not change scheduling; application images must support every architecture on which they can run.
 
 ## Runtimes and signals
 
-| Language path | Runtime loader fixtures | Application telemetry evidence | Support classification for `v0.1.0` |
-| --- | --- | --- | --- |
-| Node.js | 24, glibc and musl, amd64 and arm64 | Built-in HTTP server spans reach a Collector over OTLP HTTP/protobuf with both delivery methods | Supported only within the matrix above |
-| Java | 21, glibc and musl, amd64 and arm64 | No application export check | Experimental |
-| .NET | 8, glibc and musl, amd64 and arm64 | No application export check | Experimental |
-| Python | 3.14.6, glibc and musl, amd64 and arm64 | No application export check | Experimental |
-| Ruby | 3.3.12, glibc and musl, amd64 and arm64 | No application export check | Experimental |
+Loader checks run on amd64 and arm64 with glibc and musl. They disable exporters.
 
-All five agents are bundled, but loader checks disable exporters. Java, .NET, Python, and Ruby remain experimental until representative application telemetry reaches a Collector in repeatable integration checks for their advertised environments. Unsupported runtime versions, frameworks, native extensions, and application images require separate validation. See [payload inputs](../payload/README.md).
+| Language | Loader fixture | Application telemetry support |
+| --- | --- | --- |
+| Node.js | 24 | HTTP server trace export within the scope above |
+| Java | 21 | Experimental; export untested |
+| .NET | 8 | Experimental; export untested |
+| Python | 3.14.6 | Experimental; export untested |
+| Ruby | 3.3.12 | Experimental; export untested |
 
-The Injector library is preloaded into application processes. Test compatibility with existing agents, `LD_PRELOAD` libraries, and restrictive security profiles.
+Promoting an experimental language requires repeatable application-to-Collector tests for its advertised environments.
 
-| Capability | Promise and validation boundary |
-| --- | --- |
-| Exporter configuration | Signal switches configure each agent's `OTEL_TRACES_EXPORTER`, `OTEL_METRICS_EXPORTER`, and `OTEL_LOGS_EXPORTER` to `otlp` or `none`, with OTLP HTTP/protobuf. This configures exporters; it does not establish automatic capture. |
-| Traces | Integration checks require Node.js HTTP server spans with a trace ID and service name at the Collector. Other protocols, frameworks, sampling behavior, and delivery under failures are not guaranteed. |
-| Metrics and logs | Exporter configuration is available, but automatic capture and end-to-end export are experimental for every language. Logs do not collect container stdout/stderr. |
-| Propagation | No integration assertion checks incoming `traceparent`/`tracestate`, outgoing context, parent-child relationships, baggage, or cross-service/cross-language propagation. A received span with a trace ID proves export only. Propagation remains unvalidated. |
+Signal switches set the agents' `OTEL_TRACES_EXPORTER`, `OTEL_METRICS_EXPORTER`, and `OTEL_LOGS_EXPORTER` to `otlp` or `none`, using OTLP HTTP/protobuf. Capture depends on the agent's instrumentation of the application's libraries.
 
-RIO does not instrument Go using these language payloads; OBI is a separate installation. Coexistence with OBI or another agent is unvalidated. A healthy rollout does not prove telemetry arrival or application correctness.
+- **Traces:** tests require Node.js HTTP server spans with a trace ID and service name at the Collector. Other protocols, frameworks, sampling behavior, and delivery during failures are unvalidated.
+- **Metrics and logs:** automatic capture and export remain experimental for every language. RIO does not collect container stdout/stderr.
+- **Propagation:** incoming `traceparent`/`tracestate`, outgoing context, parent-child relationships, baggage, and cross-service or cross-language propagation are untested.
+
+RIO does not instrument Go. OBI is a separate installation; coexistence is unvalidated.
 
 ## Operator/instrumentation versions and upgrades
 
-Use immutable release tags or digests and the matching installation manifests and CRD. The normal-release contract supports `ghcr.io/otelx/rio/operator:VERSION` with `ghcr.io/otelx/rio/instrumentation:VERSION` from the **same full release**, including any rule image overrides. Custom builds, mutable tags, and arbitrary upstream Injector/agent replacements are experimental.
+Use `ghcr.io/otelx/rio/operator:VERSION` and `ghcr.io/otelx/rio/instrumentation:VERSION` from the same full release, with its manifests and CRD. This includes policy rule overrides. Keep image references immutable and retain images needed for recovery. Custom builds and substituted agents are experimental.
 
-| Combination or transition | Support policy |
-| --- | --- |
-| Same full release pair, including `v0.1.0` when published | Supported within that release's environment matrix. Recovery restores saved configuration referencing that release's instrumentation image; keep it pullable. |
-| Different operator and instrumentation releases, including different patches or alpha suffixes | Experimental unless a future release explicitly lists and validates that exact combination. Old running Pods can retain their agents, but newly created or recovery Pods may pull the image from their saved configuration. |
-| Alpha.2 or alpha.3 to the candidate tested by the current upgrade suite | The [tested procedure](configuration.md#upgrading-from-alpha1-or-alpha2) preserves persisted state across the controller upgrade, then establishes an uninstrumented stable baseline before migrating both default and override payload images. The alpha.2 test removes retired image fixtures from every node before failed migration/recovery. No uninterrupted instrumentation guarantee. |
-| Temporary controller rollback to the tested alpha.2/alpha.3 baseline | Validated with the candidate CRD, existing annotations, and new payload path; retain the unchanged CRD/state/hash format and an available historical controller image. This is a diagnostic rollback, not a permanently supported mixed release pair. |
-| Other in-place upgrade/downgrade with persisted state across releases | Unsupported until that exact transition is listed and passes cross-release tests. Do not infer compatibility from same-version restart/recovery or the pinned alpha baselines. |
-| Migration without a validated persisted-state transition | Use the clean reset described below. This trades instrumentation continuity for avoiding cross-version state and mixed-version recovery. |
-| Alpha.1/alpha.2 image paths | Retired and deleted from GHCR, with no pull or recovery guarantee. Cached copies are not a durable recovery plan. Preserve verified copies in a maintained mirror before attempting recovery, or migrate through uninstrumented workloads. |
+The upgrade suite validates alpha.2 and alpha.3 to the candidate with persisted successful and blocked revisions. Follow the [tested upgrade procedure](configuration.md#upgrading-existing-releases), including an uninstrumented recovery baseline before changing payload images. Temporary controller rollback retains the unchanged candidate CRD/state format; available alpha.3 payload rollback is also tested. Historical controllers lack later safeguards, so follow the documented diagnostic restrictions. Other mixed versions and unvalidated transitions remain unsupported.
 
-For transitions outside the tested alpha.2/alpha.3 upgrade procedure, use a clean reset. First save the policy, installation manifests, workload manifests and annotations, and exact image digests in a restricted backup (annotations can contain configuration values). While the old operator/webhook are functioning, remove selection, wait for managed workloads to finish removing instrumentation, and recreate admission-only Pods without injection. Verify replacement Pods have no RIO volume, copy init container, or injected environment settings. If a recovery already requires an unavailable old payload, use a verified mirror or plan an application maintenance window; do not claim automatic recovery is available. The tested cleanup-first path avoids pulling a retired payload by establishing an uninstrumented stable configuration while existing workloads are healthy.
+For transitions outside those tested baselines, use a clean reset without reusing persisted state:
 
-Then run the old release's normal uninstall procedure while it can still finish finalizer cleanup. After confirming all affected Pods are uninstrumented and the old operator is stopped, remove the RIO bookkeeping annotations listed below from workload metadata and Pod templates before installing the new release's CRD/operator and applying a policy with its matching instrumentation image. Keep old ReplicaSet/ControllerRevision templates and backups out of application rollback automation: they can reintroduce old snapshots and deleted image references. Recreate affected workload objects from clean source manifests if their revision histories cannot be safely excluded. This is a deliberate reset of instrumentation history, not an in-place state migration. Never remove state or finalizers to bypass an active or failed instrumentation rollout.
+1. Back up the policy, manifests, workload annotations, and image digests. Restrict access to backups containing configuration values.
+2. With the old operator running, remove selection and wait for managed workloads to become uninstrumented. Recreate admission-only Pods. Check replacement Pods for removal of RIO volumes, init containers, and injected environment settings.
+3. Run the old release's uninstall procedure and confirm cleanup completed. Do not strip state or finalizers from an active or failed rollout.
+4. With the old operator stopped, remove the bookkeeping annotations below from workload metadata and Pod templates. Exclude old ReplicaSet/ControllerRevision templates from rollback automation, or recreate workloads from clean manifests; old templates can restore stale image references.
+5. Install the new release's CRD/operator and apply a policy using its matching instrumentation image.
+
+Recovery can pull images from saved configurations even after the policy changes. If an image is unavailable, restore it from a verified mirror or plan a maintenance window. See [retired image references](configuration.md#retired-image-references).
 
 ## API, configuration, and persisted state
 
-The Kubernetes API remains `rio.otelx.github.io/v1alpha1` at `v0.1.0`. A normal version under major zero does not freeze the API or promote the CRD; see [Semantic Versioning](https://semver.org/#spec-item-4). The public configuration surface includes the CRD fields/defaults, policy selection and signal semantics, supported installation options, and documented environment overrides. Status fields and rollout messages are diagnostic and should not be treated as a stable automation protocol.
+The API remains `rio.otelx.github.io/v1alpha1` for `v0.1.0`. A normal major-zero release does not freeze the API. Compatibility covers CRD fields/defaults, policy behavior, installation options, and documented environment overrides. Status fields and messages are diagnostic.
 
-For normal `0.1.x` patches, preserve existing valid configuration and its meaning; additive optional fields must preserve existing defaults. Breaking configuration changes require a new minor release, explicit release notes, and a migration procedure. Announce deprecations in the changelog and configuration reference at least one normal minor release before removal, except for an urgent security fix with a documented mitigation. Pre-release changes may break compatibility but still require migration notes. Upstream agent changes that alter configuration or capture behavior must be called out separately; they are not covered by a frozen agent API promise.
+Normal `0.1.x` patches preserve valid configuration and its meaning. Breaking changes require a new minor release and migration instructions. Announce deprecations in the changelog and configuration reference at least one normal minor release before removal. Urgent security fixes may shorten that period with a documented mitigation. Pre-release breaks and upstream agent behavior changes also require migration notes.
 
-Persisted annotations under `rio.otelx.github.io/` are part of the recovery format, not disposable caches:
+Annotations under `rio.otelx.github.io/` store recovery state:
 
-| Location | Annotation suffixes | Meaning |
+| Location | Suffixes | Contents |
 | --- | --- | --- |
-| Workload metadata | `state` | JSON containing current/stable configurations, phase, timing, and failed revision; used after operator restarts |
-| Workload Pod template | `configuration`, `revision`, `workload-uid` | Resolved configuration snapshot, its hash, and owning workload identity |
-| Admitted Pod | Template annotations plus `applied-revision`, `delivery` | Actual mutation revision and chosen delivery path |
+| Workload metadata | `state` | Current/stable configurations, rollout phase, timing, failed revision |
+| Pod template | `configuration`, `revision`, `workload-uid` | Configuration snapshot, hash, owning workload |
+| Admitted Pod | Template annotations plus `applied-revision`, `delivery` | Applied revision and delivery method |
 
-Do not edit these annotations, copy them to another workload, or delete them during rollout/recovery. Saved configurations can retain older image references even after the central policy changes. Source-controlled application manifests should omit these operator-owned values. Normal patch releases must retain the ability to read their minor line's persisted format and preserve revision identity, or provide and validate an explicit migration before release. Cross-release state migration and downgrade support require the evidence described above; the upgrade matrix covers only its pinned alpha.2/alpha.3 baselines, not arbitrary future transitions. A format change must document backup, conversion/reset, rollback limits, and restoration steps. Deleting the CRD or stripping annotations is not a migration strategy while workloads remain instrumented.
+Omit these from source-controlled manifests. Do not edit, copy, or remove them during rollout/recovery. Normal patches must read their minor line's persisted format and preserve revision identity, or provide a tested migration. Format changes must document backup, conversion/reset, restoration, and downgrade limits.
 
 ## Rollout and recovery
 
@@ -93,11 +87,10 @@ Use immutable payload tags or digests. Replacing bytes behind an existing image 
 
 ## Operational boundaries
 
-- One operator replica, with Recreate during its own upgrades; no leader election. The [upgrade and rollback procedure](configuration.md#upgrading-from-alpha1-or-alpha2) covers alpha.2-to-candidate migration and controller-only rollback with an unchanged CRD/state format.
+- One operator replica, with Recreate during its own upgrades; no leader election.
 - Self-signed webhook certificates created by the installer expire after one year; no automatic rotation. Reinstallation reuses the current Secret. Use the [tested renewal and recovery procedure](configuration.md#webhook-certificate-renewal) before expiration or to recover expired certificates.
 - The webhook uses `failurePolicy: Ignore`. A webhook outage can admit healthy uninstrumented Pods; status reports `InjectionMissing` for managed workloads.
 - Cluster-wide RBAC can patch supported workload templates and delete failed recovery Pods. Only trusted administrators should install RIO or change policy.
 - Policy `env` can resolve values from Secrets in selected application namespaces. Limit permission to edit the cluster policy accordingly.
-- The API is `rio.otelx.github.io/v1alpha1`. It is independent of upstream OpenTelemetry APIs and the presentation's historical demo API. No in-place migration from those APIs is provided.
 
 See [configuration](configuration.md) for detailed selection and recovery behavior.
