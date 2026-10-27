@@ -87,11 +87,11 @@ def activity_increase(records, service, spec, before, requests):
     return after
 
 
-def _request_signals(harness, name):
+def _request_signals(harness, name, body_suffix=''):
     marker = uuid.uuid4().hex
     harness.request(name, marker)
     span = harness.poll(lambda: server_span(harness.records('traces'), name, marker))
-    harness.poll(lambda: log_record(harness.records('logs'), name, marker, span))
+    harness.poll(lambda: log_record(harness.records('logs'), name, marker, span, body_suffix=body_suffix))
 
 
 def _save_apps(harness):
@@ -140,7 +140,7 @@ def run(harness):
                                env={'OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE': 'cumulative',
                                     'OTEL_METRIC_EXPORT_INTERVAL': '1000'})
                 name = harness.deploy(lang, libc, f'{lang}-{libc}-{case}-{suffix}', True)
-                _request_signals(harness, name)
+                _request_signals(harness, name, body_suffix=harness.config[lang]['logs'].get('bodySuffix', ''))
                 if enabled:
                     before = harness.poll(lambda: histogram_snapshot(harness.records('metrics'), name, spec))
                     for _ in range(3):

@@ -10,6 +10,11 @@ Applications listen on `0.0.0.0:8080`. `GET /work/MARKER` returns JSON with `mar
 
 For each `/work/` request, emit exactly one INFO application log with body `rio-fixture MARKER` through the language's ordinary logging library. Include no OpenTelemetry dependencies, SDK setup, custom telemetry, or propagation API in application code. A request may perform bounded CPU/allocation activity for automatic runtime metrics. The harness configures exporter/metric intervals through RIO policy, never an application SDK.
 
+If a logging library captures a formatted line terminator, declare its exact
+suffix in `logs.bodySuffix` (for example `"\n"`). Collector assertions append
+that declared suffix to the marker and compare the complete body exactly;
+they never trim or normalize captured records.
+
 The harness creates fresh service identities per scenario, tests serving without injection, trace export and trace suppression, and inspects Collector OTLP JSON. Signal and propagation scenarios reuse these same images. Build outputs, resolved image IDs, runtime output, policy/Pod JSON, application/operator/Collector logs and Collector signal files belong under ignored `.artifacts/telemetry/UNIQUE-RUN/`.
 
 Workers must report changes, exact commands and outcomes, commit/branch identifiers, and every remaining acceptance criterion. Fixture implementation alone does not resolve a child; the parent integrates it and validates admission, both delivery methods, architectures and libc variants in CI before closure.

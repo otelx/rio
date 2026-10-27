@@ -47,6 +47,24 @@ class CapturedLogTests(unittest.TestCase):
         with self.assertRaises(AssertionError):
             captured_log(self.records, 'application', 'current', self.span, self.started_ns)
 
+    def test_declared_newline_body_is_exact_without_normalization(self):
+        # Ruby Logger captures its normal formatted body, including the CRI
+        # line terminator. Missing, repeated, or different terminators must fail.
+        for suffix in ('', '\n\n', '\r\n', ' '):
+            self.record['body']['stringValue'] = 'rio-fixture current' + suffix
+            with self.subTest(suffix=suffix), self.assertRaises(AssertionError):
+                captured_log(self.records, 'application', 'current', self.span,
+                             self.started_ns, body_suffix='\n')
+        self.record['body']['stringValue'] = 'rio-fixture current\n'
+        self.assertEqual(captured_log(self.records, 'application', 'current', self.span,
+                                     self.started_ns, body_suffix='\n'), self.record)
+        with self.assertRaises(AssertionError):
+            captured_log(self.records, 'application', 'current', self.span, self.started_ns)
+        self.records.extend(copy.deepcopy(self.records))
+        with self.assertRaises(AssertionError):
+            captured_log(self.records, 'application', 'current', self.span,
+                         self.started_ns, body_suffix='\n')
+
     def test_allows_no_correlation_only_when_library_does_not_claim_it(self):
         del self.record['traceId']
         del self.record['spanId']

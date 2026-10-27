@@ -11,7 +11,7 @@ class Fixture < Sinatra::Base
   set :environment, :production
   set :host_authorization, permitted_hosts: []
   LOGGER = Logger.new($stdout)
-  LOGGER.formatter = proc { |_severity, _datetime, _progname, message| message.to_s }
+  LOGGER.formatter = proc { |_severity, _datetime, _progname, message| "#{message}\n" }
   DELAY_MS = [[ENV.fetch('RIO_FIXTURE_DELAY_MS', '0').to_i, 0].max, 1000].min
 
   get '/health' do

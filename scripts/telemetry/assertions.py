@@ -52,9 +52,9 @@ def server_span(records, service, marker):
     return matches[0]
 
 
-def log_record(records, service, marker, span=None):
+def log_record(records, service, marker, span=None, body_suffix=''):
     matches = [r for r in items(records, 'logs', service)
-               if r.get('body', {}).get('stringValue') == 'rio-fixture ' + marker]
+               if r.get('body', {}).get('stringValue') == 'rio-fixture ' + marker + body_suffix]
     assert len(matches) == 1, f'{service}: expected one captured log for {marker}, got {len(matches)}'
     record = matches[0]
     assert 9 <= int(record['severityNumber']) <= 12, record

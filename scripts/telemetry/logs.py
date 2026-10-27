@@ -11,9 +11,9 @@ import uuid
 from telemetry.assertions import log_record, metric_sample, server_span
 
 
-def captured_log(records, service, marker, span, started_ns):
+def captured_log(records, service, marker, span, started_ns, body_suffix=''):
     """Reject stale, duplicated, misattributed, and incorrectly correlated logs."""
-    record = log_record(records, service, marker, span)
+    record = log_record(records, service, marker, span, body_suffix=body_suffix)
     # Kubernetes nodes share the host clock. Allow five seconds of skew while
     # requiring a current event; the UUID body and fresh service also isolate it.
     assert int(record['timeUnixNano']) >= started_ns - 5_000_000_000, record
@@ -50,6 +50,7 @@ def run(harness):
     for language in harness.args.languages:
         spec = harness.config[language]
         assert spec.get('logs'), f'{language}: no automatic logging-library integration specified'
+        body_suffix = spec['logs'].get('bodySuffix', '')
         for libc in harness.args.libcs:
             harness.current = harness.out / f'logs-{language}-{libc}'
             harness.current.mkdir(parents=True, exist_ok=True)
@@ -84,12 +85,13 @@ def run(harness):
                 if enabled:
                     correlation = span if spec['logs'].get('correlation') else None
                     harness.poll(lambda: captured_log(harness.records('logs'), name, marker,
-                                                      correlation, started_ns))
+                                                      correlation, started_ns, body_suffix=body_suffix))
                     # Keep checking after the initial successful export. Another
                     # processor or a delayed duplicate batch must fail the case.
                     deadline = time.monotonic() + 4
                     while time.monotonic() < deadline:
-                        captured_log(harness.records('logs'), name, marker, correlation, started_ns)
+                        captured_log(harness.records('logs'), name, marker, correlation, started_ns,
+                                     body_suffix=body_suffix)
                         time.sleep(1)
                 else:
                     harness.assert_silent(name, ('logs',), duration=8)

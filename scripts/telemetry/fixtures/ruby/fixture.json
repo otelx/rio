@@ -11,6 +11,7 @@
   "logs": {
     "library": "Ruby Logger 1.7.0",
     "body": "rio-fixture MARKER",
+    "bodySuffix": "\n",
     "severity": "INFO",
     "correlation": true
   }

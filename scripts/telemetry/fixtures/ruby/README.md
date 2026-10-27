@@ -4,8 +4,10 @@ Ruby 3.3.12 serves Sinatra 4.2.1 on Rack 3.2.7, Rackup 2.3.1, and WEBrick 1.9.2.
 `Gemfile.lock` pins all application dependencies; neither the application nor its
 Gemfile contains OpenTelemetry packages or setup. Application logging uses
 Logger 1.7.0, and outgoing requests use Net::HTTP 0.10.0 with bounded timeouts.
-The standard Logger formatter emits the message alone so its captured body is
-exactly the marker message, with no timestamp prefix or trailing newline.
+The standard Logger formatter emits the marker message with a trailing newline
+so container runtimes promptly expose the complete application log line. The
+shipped Logger bridge captures this formatted message, including its newline;
+`logs.bodySuffix` records the exact expected OTLP body terminator.
 `RIO_FIXTURE_DELAY_MS` optionally delays each work handler before logging and
 calling the next service, bounded to 0..1000ms (default 0), for overlap tests.
 The two runtime manifest digests in `fixture.json` match the shipped Ruby bundle
