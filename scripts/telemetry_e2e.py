@@ -376,7 +376,7 @@ def main():
     parser.add_argument('--allow-known-blockers', action='store_true',
                         help='Run implemented coverage while reporting unresolved upstream gaps (CI does not establish issue completion)')
     parser.add_argument('--scenarios', nargs='+', choices=['traces', 'propagation', 'metrics', 'logs'],
-                        default=['traces', 'propagation', 'metrics', 'logs'])
+                        default=['traces', 'metrics', 'logs', 'propagation'])
     args = parser.parse_args()
     harness = Harness(args)
     success = False
@@ -385,9 +385,6 @@ def main():
         harness.setup()
         if 'traces' in args.scenarios:
             harness.trace_cases()
-        if 'propagation' in args.scenarios:
-            from telemetry.propagation import run
-            run(harness)
         if 'metrics' in args.scenarios:
             from telemetry.metrics import run
             blockers = run(harness)
@@ -397,6 +394,9 @@ def main():
                     raise RuntimeError('Automatic metrics coverage incomplete; see metrics-coverage.json and issue #22')
         if 'logs' in args.scenarios:
             from telemetry.logs import run
+            run(harness)
+        if 'propagation' in args.scenarios:
+            from telemetry.propagation import run
             run(harness)
         success = True
     finally:
