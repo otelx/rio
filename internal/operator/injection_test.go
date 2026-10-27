@@ -23,6 +23,9 @@ func TestReinvocationVerifiesInjectedContract(t *testing.T) {
 				t.Fatal(err)
 			}
 			// Simulate API defaulting before the webhook runs again.
+			if !native {
+				original.Spec.InitContainers[0].VolumeMounts = append(original.Spec.InitContainers[0].VolumeMounts, core.VolumeMount{Name: "kube-api-access-test", MountPath: "/var/run/secrets/kubernetes.io/serviceaccount", ReadOnly: true})
+			}
 			for i := range original.Spec.Containers {
 				for j := range original.Spec.Containers[i].Env {
 					e := &original.Spec.Containers[i].Env[j]
@@ -101,6 +104,10 @@ func TestReinvocationVerifiesInjectedContract(t *testing.T) {
 					{"wrong-init-command", func(p *core.Pod) { p.Spec.InitContainers[0].Command = []string{"true"} }},
 					{"wrong-init-env", func(p *core.Pod) { p.Spec.InitContainers[0].Env = nil }},
 					{"wrong-init-mount", func(p *core.Pod) { p.Spec.InitContainers[0].VolumeMounts = nil }},
+					{"init-mount-shadows-input", func(p *core.Pod) {
+						p.Spec.InitContainers[0].VolumeMounts = append(p.Spec.InitContainers[0].VolumeMounts, core.VolumeMount{Name: "other", MountPath: "/dist"})
+					}},
+					{"writable-service-account-mount", func(p *core.Pod) { p.Spec.InitContainers[0].VolumeMounts[1].ReadOnly = false }},
 					{"wrong-init-security", func(p *core.Pod) { p.Spec.InitContainers[0].SecurityContext = nil }},
 				}...)
 			}

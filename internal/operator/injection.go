@@ -62,7 +62,26 @@ func verifyInjection(pod *core.Pod, cfg Config, native bool, service string) err
 			return reject()
 		}
 		want := expected.Spec.InitContainers[0]
-		if init.Image != want.Image || init.ImagePullPolicy != want.ImagePullPolicy || !reflect.DeepEqual(init.Command, want.Command) || len(init.Args) != 0 || init.WorkingDir != "" || !reflect.DeepEqual(init.SecurityContext, want.SecurityContext) || !reflect.DeepEqual(init.Env, want.Env) || len(init.EnvFrom) != 0 || !reflect.DeepEqual(init.VolumeMounts, want.VolumeMounts) || init.RestartPolicy != nil {
+		payloadMounts := 0
+		for _, mount := range init.VolumeMounts {
+			if mount.Name == VolumeName || mount.MountPath == MountPath {
+				payloadMounts++
+				if !reflect.DeepEqual(mount, want.VolumeMounts[0]) {
+					return reject()
+				}
+				continue
+			}
+			// The ServiceAccount admission plugin mounts credentials in newly
+			// injected init containers before mutating webhooks are reinvoked.
+			// This path cannot shadow the payload, its inputs, or the copy script.
+			if mount.MountPath != "/var/run/secrets/kubernetes.io/serviceaccount" || !mount.ReadOnly || mount.SubPath != "" || mount.SubPathExpr != "" || mount.MountPropagation != nil {
+				return reject()
+			}
+		}
+		if payloadMounts != 1 {
+			return reject()
+		}
+		if init.Image != want.Image || init.ImagePullPolicy != want.ImagePullPolicy || !reflect.DeepEqual(init.Command, want.Command) || len(init.Args) != 0 || init.WorkingDir != "" || !reflect.DeepEqual(init.SecurityContext, want.SecurityContext) || !reflect.DeepEqual(init.Env, want.Env) || len(init.EnvFrom) != 0 || init.RestartPolicy != nil {
 			return reject()
 		}
 	}
