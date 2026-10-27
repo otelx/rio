@@ -33,6 +33,7 @@ import json,sys
 releases=[r for page in json.loads(sys.argv[2]) for r in page if r['tag_name']==sys.argv[1]]
 assert len(releases)==1 and releases[0]['draft'], 'Expected the reserved, unpublished draft'
 assert releases[0]['id']==json.load(open(sys.argv[3]))['release_id'], 'Draft reservation changed'
+assert not releases[0].get('assets'), 'Partial asset upload already consumed this version; use a new version'
 PY
 signer=otelx/rio/.github/workflows/ci.yml
 # Verify authenticated attestations for actual subjects, not just the presence

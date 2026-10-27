@@ -324,11 +324,12 @@ class FinalizationTests(DraftFixture):
     def test_settings_attestation_upload_and_draft_changes_block_publication(self):
         self.prepared()
         base = self.state.read_text()
-        for key in ('settings_disabled','attestation_failure','upload_failure','draft_changed','tag_changed'):
+        for key in ('settings_disabled','attestation_failure','upload_failure','draft_changed','tag_changed','partial_assets'):
             with self.subTest(failure=key):
                 data = json.loads(base)
                 if key=='draft_changed': data['releases'][0]['id']=999
                 elif key=='tag_changed': data['tags'][next(iter(data['tags']))]='sha256:'+'f'*64
+                elif key=='partial_assets': data['releases'][0]['assets']=[{'name':'already-uploaded.tar.gz'}]
                 else: data[key]=True
                 self.state.write_text(json.dumps(data)); self.log.unlink(missing_ok=True)
                 self.assert_unpublished(self.finalize())

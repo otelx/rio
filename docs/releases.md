@@ -87,13 +87,20 @@ unpublish, or republish existing releases as part of normal publication.
 
 ## Retry after failure
 
-A draft reservation or any pushed tag consumes the version. Never delete the
-reservation, overwrite a tag, use `--clobber`, resume with rebuilt images, or rerun
-publication for that version. Preserve the draft, image tags/digests, and failed
-workflow diagnostics for investigation. Correct the cause on the supported branch,
-choose a **new version**, update its references and notes, and rerun all gates.
-An existing published release is always refused. An automatic rerun before any
-reservation or push is safe only if every destination still passes the preflight.
+If preparation fails after reserving a draft or pushing any tag, the version is
+consumed. Never delete the reservation, overwrite a tag, use `--clobber`, or resume
+with rebuilt images. Preserve the draft, image tags/digests, and failed workflow
+diagnostics. Correct the cause on the supported branch, choose a **new version**,
+update its references and notes, and rerun all gates. A whole-workflow rerun after
+reservation is refused, as is any attempt to replace a published release.
+
+After successful preparation, read-only verification jobs and finalization may be
+retried using the **same run's immutable prepared artifact**, provided the draft ID,
+source commit, image digests, and verification records still agree and no release
+asset has been uploaded. Finalization refuses a draft containing any assets, so a
+partial asset upload also requires a new version. This permits transient check
+failures to be retried without rebuilding or replacing anything. Before any draft
+or push, a whole-workflow retry is safe if all destinations still pass preflight.
 
 ## Verify and install by digest
 
