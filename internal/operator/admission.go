@@ -3,11 +3,11 @@ package operator
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
-	"strings"
 	"sync"
 
 	admission "k8s.io/api/admission/v1"
@@ -31,6 +31,7 @@ func (s *Store) Get() Snapshot  { s.mu.RLock(); defer s.mu.RUnlock(); return s.s
 func (s *Store) Set(v Snapshot) { s.mu.Lock(); defer s.mu.Unlock(); s.snapshot = v }
 
 type Webhook struct {
+	Authority *Authority
 	Store     *Store
 	Kube      kubernetes.Interface
 	Namespace string
@@ -55,7 +56,7 @@ func (w *Webhook) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			if pod.Namespace == "" {
 				pod.Namespace = r.Namespace
 			}
-			patch, err := w.admit(req.Context(), &pod)
+			patch, err := w.admit(req.Context(), &pod, r.UserInfo.Username)
 			if err != nil {
 				response.Allowed = false
 				response.Result = &meta.Status{Message: err.Error()}
@@ -73,79 +74,36 @@ func (w *Webhook) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 // admit returns no patch when instrumentation is irrelevant or policy/owner
 // information is unavailable. Explicit rejections are reserved for unsafe
 // mutation of a workload known to be selected by a synchronized policy.
-func (w *Webhook) admit(ctx context.Context, pod *core.Pod) ([]byte, error) {
+func (w *Webhook) admit(ctx context.Context, pod *core.Pod, user string) ([]byte, error) {
 	if criticalPriority(pod.Spec.PriorityClassName) {
 		return nil, nil
 	}
 	snapshot := w.Store.Get()
-	if !snapshot.Synced || !snapshot.Policy.mayInjectPod(pod) {
+	potential := pod
+	if !controllerUser(user) && meta.GetControllerOf(pod) != nil {
+		// Owner references supplied by another identity cannot select workload rules.
+		potential = pod.DeepCopy()
+		potential.OwnerReferences = nil
+	}
+	if !snapshot.Synced || (!snapshot.Policy.mayInjectPod(potential) && !savedCandidate(pod, user)) {
 		return nil, nil
 	}
-	kind, name, err := w.owner(ctx, pod)
-	if err != nil {
-		// An unavailable owner cannot establish selection. Never turn that
-		// uncertainty into a rejection of an unrelated application Pod.
+	cfg, service, err := w.configuration(ctx, pod, user, snapshot.Policy)
+	var lookup *ownerLookupError
+	if errors.As(err, &lookup) {
 		slog.Warn("skipping injection; owner unavailable", "namespace", pod.Namespace, "pod", pod.Name, "error", err)
 		return nil, nil
 	}
-	cfg := snapshot.Policy.Resolve(pod.Namespace, kind, name)
-	if !cfg.Enabled {
-		return nil, nil
-	}
-	if pinned := pod.Annotations[ConfigAnnotation]; pinned != "" {
-		// Decode into a fresh revision so omitted fields cannot inherit
-		// settings from the current policy during rollback.
-		cfg = Config{}
-		if err := json.Unmarshal([]byte(pinned), &cfg); err != nil {
-			return nil, err
-		}
-		if pod.Annotations[RevisionAnnotation] != cfg.Revision() {
-			return nil, fmt.Errorf("instrumentation revision does not match its configuration")
-		}
+	if err != nil {
+		return nil, err
 	}
 	if !cfg.Enabled {
 		return nil, nil
 	}
-	if err := Mutate(pod, cfg, snapshot.NativeImages[cfg.Image], name); err != nil {
+	if err := Mutate(pod, cfg, snapshot.NativeImages[cfg.Image], service); err != nil {
 		return nil, err
 	}
 	return json.Marshal([]map[string]any{{"op": "add", "path": "/spec", "value": pod.Spec}, {"op": "add", "path": "/metadata/annotations", "value": pod.Annotations}})
-}
-
-func (w *Webhook) owner(ctx context.Context, pod *core.Pod) (string, string, error) {
-	for _, ref := range pod.OwnerReferences {
-		if ref.Controller == nil || !*ref.Controller {
-			continue
-		}
-		if ref.Kind == "ReplicaSet" {
-			rs, err := w.Kube.AppsV1().ReplicaSets(pod.Namespace).Get(ctx, ref.Name, meta.GetOptions{})
-			if err != nil {
-				return "", "", err
-			}
-			for _, parent := range rs.OwnerReferences {
-				if parent.Kind == "Deployment" && parent.Controller != nil && *parent.Controller {
-					return parent.Kind, parent.Name, nil
-				}
-			}
-		}
-		if ref.Kind == "Job" {
-			job, err := w.Kube.BatchV1().Jobs(pod.Namespace).Get(ctx, ref.Name, meta.GetOptions{})
-			if err != nil {
-				return "", "", err
-			}
-			for _, parent := range job.OwnerReferences {
-				if parent.Kind == "CronJob" && parent.Controller != nil && *parent.Controller {
-					return parent.Kind, parent.Name, nil
-				}
-			}
-		}
-		return ref.Kind, ref.Name, nil
-	}
-	name := pod.Name
-	if name == "" {
-		name = strings.TrimSuffix(pod.GenerateName, "-")
-	}
-	return "Pod", name, nil
 }
 
 func Mutate(pod *core.Pod, cfg Config, native bool, service string) error {
@@ -153,13 +111,16 @@ func Mutate(pod *core.Pod, cfg Config, native bool, service string) error {
 		pod.Annotations = map[string]string{}
 	}
 	if !cfg.Enabled {
+		if pod.Annotations[AppliedAnnotation] != "" {
+			return fmt.Errorf("applied instrumentation is not authorized by the effective configuration")
+		}
 		return nil
 	}
 	if pod.Spec.OS != nil && pod.Spec.OS.Name == core.Windows {
 		return fmt.Errorf("Injector payload supports Linux containers only")
 	}
-	if pod.Annotations[AppliedAnnotation] == cfg.Revision() {
-		return nil
+	if pod.Annotations[AppliedAnnotation] != "" {
+		return verifyInjection(pod, cfg, native, service)
 	}
 	for _, vol := range pod.Spec.Volumes {
 		if vol.Name == VolumeName {

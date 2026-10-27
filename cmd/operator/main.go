@@ -39,11 +39,13 @@ func main() {
 	must(err)
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
+	authority, err := operator.LoadAuthority(ctx, kube, *namespace)
+	must(err)
 	store := &operator.Store{}
-	c := &operator.Controller{Kube: kube, Dynamic: dyn, Namespace: *namespace, Store: store, Capabilities: &operator.Capabilities{Kube: kube, Namespace: *namespace}}
+	c := &operator.Controller{Authority: authority, Kube: kube, Dynamic: dyn, Namespace: *namespace, Store: store, Capabilities: &operator.Capabilities{Kube: kube, Namespace: *namespace}}
 	go c.Run(ctx)
 	mux := http.NewServeMux()
-	mux.Handle("/mutate", &operator.Webhook{Store: store, Kube: kube, Namespace: *namespace})
+	mux.Handle("/mutate", &operator.Webhook{Authority: authority, Store: store, Kube: kube, Namespace: *namespace})
 	webhook := &http.Server{Addr: ":9443", Handler: mux, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second}
 	healthMux := http.NewServeMux()
 	healthMux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200) })

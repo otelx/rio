@@ -19,9 +19,11 @@ type State struct {
 }
 
 type Health struct {
-	Ready   bool
-	Failed  bool
-	Message string
+	InjectionMissing bool
+	Instrumented     bool
+	Ready            bool
+	Failed           bool
+	Message          string
 }
 
 // Advance contains only rollout decisions. Its caller atomically persists state
@@ -42,7 +44,20 @@ func Advance(state *State, wanted Config, health Health, now time.Time) (State, 
 		s.Message = ""
 		return s, false
 	}
+	if s.Phase == "RollbackInjectionMissing" {
+		if !health.Instrumented {
+			return s, false
+		}
+		s.Phase = "RollingBack"
+		s.Started = now
+		s.Message = ""
+	}
 	if s.Phase == "RollingBack" {
+		if health.Ready && s.Current.Enabled && health.InjectionMissing {
+			s.Phase = "RollbackInjectionMissing"
+			s.Message = "healthy recovery pods did not receive the saved instrumentation; repair admission and recreate the affected pods"
+			return s, false
+		}
 		if health.Ready {
 			s.Phase = "RolledBack"
 			s.Message = "previous instrumentation restored; change effective configuration or retryToken to retry"
@@ -61,10 +76,25 @@ func Advance(state *State, wanted Config, health Health, now time.Time) (State, 
 		s.Message = ""
 		return s, true
 	}
+	if s.Phase == "InjectionMissing" {
+		if !health.Instrumented {
+			return s, false
+		}
+		// Start the health deadline when the candidate is actually observed,
+		// rather than charging the previous admission outage to its health.
+		s.Phase = "RollingOut"
+		s.Started = now
+		s.Message = ""
+	}
 	if s.Phase != "RollingOut" {
 		return s, false
 	}
 	if health.Ready {
+		if s.Current.Enabled && health.InjectionMissing {
+			s.Phase = "InjectionMissing"
+			s.Message = "healthy pods did not receive the requested instrumentation; repair admission and recreate pods or change retryToken"
+			return s, false
+		}
 		s.Stable = s.Current
 		s.Phase = "Ready"
 		if !s.Current.Enabled {
@@ -183,15 +213,23 @@ func workloadHealth(obj *unstructured.Unstructured, kind string, pods []core.Pod
 	}
 	matching := int64(0)
 	readyCandidates := int64(0)
+	missing := false
+	failure := ""
 	minimumReady := time.Duration(get("spec", "minReadySeconds")) * time.Second
 	for _, pod := range pods {
-		if pod.Annotations[OwnerAnnotation] != string(obj.GetUID()) || pod.DeletionTimestamp != nil {
+		if pod.Namespace != obj.GetNamespace() || pod.Annotations[OwnerAnnotation] != string(obj.GetUID()) || pod.DeletionTimestamp != nil {
 			continue
 		}
 		if pod.Annotations[RevisionAnnotation] != current.Revision() {
 			continue
 		}
 		matching++
+		if current.Enabled {
+			mode := pod.Annotations[Prefix+"delivery"]
+			if (mode != "imageVolume" && mode != "initContainer") || verifyInjection(&pod, current, mode == "imageVolume", obj.GetName()) != nil {
+				missing = true
+			}
+		}
 		for _, condition := range pod.Status.Conditions {
 			if condition.Type == core.PodReady && condition.Status == core.ConditionTrue && time.Since(condition.LastTransitionTime.Time) >= minimumReady {
 				readyCandidates++
@@ -200,15 +238,24 @@ func workloadHealth(obj *unstructured.Unstructured, kind string, pods []core.Pod
 		statuses := append(append([]core.ContainerStatus(nil), pod.Status.InitContainerStatuses...), pod.Status.ContainerStatuses...)
 		for _, cs := range statuses {
 			if cs.RestartCount >= 3 && cs.State.Waiting != nil && cs.State.Waiting.Reason == "CrashLoopBackOff" {
-				return Health{Failed: true, Message: "repeated crashes in " + pod.Name + "/" + cs.Name}
+				failure = "repeated crashes in " + pod.Name + "/" + cs.Name
 			}
 		}
 	}
+	health := Health{InjectionMissing: missing, Instrumented: matching >= desired && !missing}
+	if failure != "" {
+		health.Failed = true
+		health.Message = failure
+		return health
+	}
 	if updated == desired && ready >= desired && matching >= desired && readyCandidates >= desired {
 		if kind == "Deployment" && get("status", "replicas") > desired {
-			return Health{Message: "waiting for old replicas to retire"}
+			health.Message = "waiting for old replicas to retire"
+			return health
 		}
-		return Health{Ready: true}
+		health.Ready = true
+		return health
 	}
-	return Health{Message: fmt.Sprintf("%d/%d updated and %d/%d ready", updated, desired, ready, desired)}
+	health.Message = fmt.Sprintf("%d/%d updated and %d/%d ready", updated, desired, ready, desired)
+	return health
 }
