@@ -17,7 +17,7 @@ version=${GITHUB_REF_NAME:?Expected a release tag}
 [[ ${GITHUB_REPOSITORY:-} == otelx/rio && ${GITHUB_REF_TYPE:-} == tag && ${GITHUB_ACTIONS:-} == true ]] || {
   printf 'Release publishing is restricted to tag workflows in otelx/rio\n' >&2; exit 1;
 }
-metadata=$(python3 scripts/release_metadata.py "$version" --changelog CHANGELOG.md)
+metadata=$(python3 scripts/release_metadata.py "$version" --changelog CHANGELOG.md --root .)
 image_tag=$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["image_tag"])' "$metadata")
 prerelease=$(python3 -c 'import json,sys; print(str(json.loads(sys.argv[1])["prerelease"]).lower())' "$metadata")
 commit=$(git rev-parse "$version^{commit}")
@@ -25,9 +25,6 @@ commit=$(git rev-parse "$version^{commit}")
   printf 'Tag, workflow commit, and checkout must agree\n' >&2; exit 1;
 }
 "$root/scripts/check-release-source.sh"
-for file in scripts/install.sh config/install.yaml config/example.yaml examples/quickstart/policy.yaml docs/quickstart.md docs/configuration.md; do
-  grep -Fq -- "$image_tag" "$file" || { printf 'Release reference missing from %s\n' "$file" >&2; exit 1; }
-done
 # Listing (including drafts) must succeed. A failed lookup is never absence.
 releases=$(gh api --paginate --slurp 'repos/otelx/rio/releases?per_page=100')
 python3 - "$version" "$releases" <<'PY'

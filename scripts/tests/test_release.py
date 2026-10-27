@@ -217,7 +217,11 @@ class DraftFixture(PublicationFixture):
                      'examples/quickstart/policy.yaml', 'docs/quickstart.md', 'docs/configuration.md'):
             path = self.root / name
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(metadata.version_info(version)['image_tag']+'\n')
+            if name == 'docs/quickstart.md':
+                path.write_text(f'git clone --branch {version} https://github.com/otelx/rio.git\n')
+            else:
+                image = 'operator' if name in ('scripts/install.sh','config/install.yaml') else 'instrumentation'
+                path.write_text(f'ghcr.io/otelx/rio/{image}:'+metadata.version_info(version)['image_tag']+'\n')
         (self.root / 'CHANGELOG.md').write_text(f'## Unreleased\nFuture\n\n## {version}\nStable changes.\n\n## v1.2.2\nOld changes.\n')
         for arch in ('amd64','arm64'):
             directory = self.root / f'.artifacts/release/tested-release-images-{arch}'
@@ -244,6 +248,17 @@ class DraftFixture(PublicationFixture):
 
 
 class DraftReservationTests(DraftFixture):
+    def test_prerelease_reference_cannot_satisfy_stable_release_preflight(self):
+        self.prepare_fixture()
+        for name in ('config/install.yaml','docs/quickstart.md'):
+            path = self.root / name
+            original = path.read_text()
+            path.write_text(original.replace('v1.2.3','v1.2.3-alpha.1'))
+            result = self.prepare()
+            self.assertNotEqual(result.returncode,0,result.stdout)
+            self.assertFalse(self.calls(), 'Reference mismatches must stop before remote operations')
+            path.write_text(original)
+
     def test_prerelease_with_build_metadata_uses_prerelease_flag_and_mapped_image_tags(self):
         self.prepare_fixture('v1.2.3-rc.1+build.01')
         result = self.prepare()
