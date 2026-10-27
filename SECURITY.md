@@ -21,3 +21,5 @@ The initial target is to acknowledge a private report within **7 calendar days**
 Release decisions, issue/security triage, and dependency maintenance belong to [@MrAlias](https://github.com/MrAlias), the current repository administrator. There is no appointed backup maintainer or independent security response team. See [maintainer responsibilities and recovery](CONTRIBUTING.md#maintenance-responsibilities-and-recovery) for the limits and recovery arrangements. If the maintainer is unavailable, responses and releases can pause; users needing guaranteed response coverage should arrange independent maintenance before adoption.
 
 Installation requires cluster-wide permissions, and the payload executes inside selected application containers. Read [operational limits](docs/compatibility.md) and restrict policy editing to trusted administrators.
+
+Maintainers follow the [repository protections and credential response policy](docs/maintainers.md). Revoke or rotate exposed credentials immediately, report them privately, and investigate their use before closing secret-scanning alerts. Removing a credential from source does not revoke it.
