@@ -1,6 +1,7 @@
 """Real HTTP caller/callee W3C checks, reusing admission-created fixtures."""
 import concurrent.futures
 import json
+import time
 import uuid
 
 from .assertions import items, server_span, valid_id
@@ -55,6 +56,19 @@ def check_headers(body, trace, client, state, baggage):
         assert 'baggage' not in headers, headers
 
 
+def assert_unsampled_absent(records, services, trace_ids):
+    leaked = [span for service in services for span in items(records, 'traces', service)
+              if span['traceId'] in trace_ids]
+    assert not leaked, f'Unsampled requests exported spans: {leaked}'
+
+
+def observe_unsampled(harness, services, trace_ids, duration=8):
+    deadline = time.monotonic() + duration
+    while time.monotonic() < deadline:
+        assert_unsampled_absent(harness.records('traces'), services, trace_ids)
+        time.sleep(1)
+
+
 def run(h):
     languages = h.args.languages
     # Five-language ring: node -> java -> dotnet -> python -> ruby -> node.
@@ -75,6 +89,7 @@ def run(h):
                 'OTEL_PROPAGATORS': 'tracecontext,baggage' if enabled else 'tracecontext',
                 'OTEL_TRACES_SAMPLER': 'parentbased_always_on'})
             names = {lang: h.deploy(lang, libc, f'prop-{lang}-{libc}-{str(enabled).lower()}', True) for lang in languages}
+            unsampled_ids = set()
             for caller, callee in pairs:
                 # Overlap distinct contexts and baggage; each application must preserve isolation.
                 cases = [(uuid.uuid4().hex, uuid.uuid4().hex[:16], uuid.uuid4().hex, uuid.uuid4().hex) for _ in range(3)]
@@ -116,14 +131,16 @@ def run(h):
                     outgoing = body['downstream']['headers']['traceparent']
                     assert len(outgoing) == 1 and outgoing[0].split('-')[1] == trace and outgoing[0].endswith('-00'), outgoing
                     assert valid_id(outgoing[0].split('-')[2], 16), outgoing
-                    import time
-                    time.sleep(3)
-                    records = h.records('traces')
-                    assert not [s for service in (names[caller], names[callee]) for s in items(records, 'traces', service) if s['traceId'] == trace]
+                    assert outgoing[0].split('-')[2] != remote, outgoing
+                    unsampled_ids.add(trace)
+                    observe_unsampled(h, names.values(), {trace})
                 summary.append({'caller': caller, 'callee': callee, 'libc': libc,
                     'arch': h.args.arch, 'delivery': h.args.delivery, 'baggage': enabled})
                 print(f'PASS propagation {caller}->{callee}/{libc}/baggage={enabled}', flush=True)
             h.save_apps()
+            # Later positive exports can reveal a delayed batch from an earlier
+            # unsampled request. Recheck every negative context before cleanup.
+            assert_unsampled_absent(h.records('traces'), names.values(), unsampled_ids)
             h.kube('delete', 'deployment', '--all', '-n', h.namespace, '--wait=true')
     (h.out / 'propagation-coverage.json').write_text(json.dumps(summary, indent=2))
     for lang in languages:

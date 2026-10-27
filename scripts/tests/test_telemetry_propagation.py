@@ -3,9 +3,11 @@ import copy
 from pathlib import Path
 import sys
 import unittest
+from unittest.mock import Mock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from telemetry.propagation import check_headers, fresh_root, generated_traceparent, relationship
+from telemetry.propagation import (assert_unsampled_absent, check_headers, fresh_root,
+                                   generated_traceparent, observe_unsampled, relationship)
 
 
 class PropagationAssertions(unittest.TestCase):
@@ -28,6 +30,21 @@ class PropagationAssertions(unittest.TestCase):
     def test_valid_remote_parent_and_client_server_ancestry(self):
         self.assertEqual(relationship(self.records, 'caller', 'callee', 'first', 'second',
                                      (self.trace, '3' * 16)), (self.caller, self.client, self.callee))
+
+    def test_delayed_export_after_initial_silence_fails_unsampled_observation(self):
+        harness = Mock()
+        harness.records.side_effect = [[], self.records]
+        with patch('telemetry.propagation.time.monotonic', side_effect=[0, 0, 1]), \
+                patch('telemetry.propagation.time.sleep'), self.assertRaises(AssertionError):
+            observe_unsampled(harness, ['caller', 'callee'], {self.trace})
+        self.assertEqual(harness.records.call_count, 2)
+
+    def test_final_sweep_checks_previous_unsampled_contexts_in_every_service(self):
+        # A delayed export from an earlier request cannot hide behind the newest
+        # request's unrelated trace or a span exported by another ring service.
+        with self.assertRaises(AssertionError):
+            assert_unsampled_absent(self.records, ['caller', 'callee'], {'9' * 32, self.trace})
+        assert_unsampled_absent(self.records, ['caller', 'callee'], {'9' * 32})
 
     def test_shared_trace_cannot_hide_wrong_parentage(self):
         self.callee['parentSpanId'] = '6' * 16

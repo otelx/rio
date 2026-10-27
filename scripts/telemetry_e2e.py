@@ -320,6 +320,7 @@ class Harness:
             assert all(c.get('restartCount', 0) == 0 for c in pod.get('status', {}).get('containerStatuses', [])), pod['status']
             assert not re.search(r'(?i)(Error loading shared library|cannot open shared object|Gem::LoadError|'
                                  r'Failed to load.*[Oo]pen[Tt]elemetry|Error in sitecustomize|'
+                                 r'Auto-instrumentation failed to initialize\. Error:|'
                                  r'Attempted duplicate registration|has already been initialized|'
                                  r'ConfigurationException|OpenTelemetry.*[Cc]onfiguration.*[Ee]rror)', logs), logs
 
@@ -331,6 +332,19 @@ class Harness:
             time.sleep(1)
 
     def diagnostics(self):
+        # Preserve raw OTLP even when the test failed before its first poll for
+        # that signal. Collector's own log does not contain file-exported data.
+        # Each read is independent so an unavailable file/Pod cannot hide the
+        # remaining signals or replace the original integration failure.
+        for signal in ('traces', 'metrics', 'logs'):
+            try:
+                raw = self.kube('exec', '-n', 'rio-telemetry', 'deployment/collector', '-c', 'reader', '--',
+                                'sh', '-c', f'if [ -f /data/{signal}.json ]; then cat /data/{signal}.json; fi',
+                                timeout=40)
+                (self.out / f'collector-{signal}.jsonl').write_text(raw)
+            except Exception as exc:
+                print(f'Collector {signal} diagnostics failed ({type(exc).__name__}); see commands.log',
+                      file=sys.stderr)
         for ns in (self.namespace, 'rio-system', 'rio-telemetry'):
             (self.out / (ns + '-pods.json')).write_text(self.kube('get', 'pods', '-n', ns, '-o', 'json', check=False))
             (self.out / (ns + '-describe.log')).write_text(self.kube('describe', 'pods', '-n', ns, check=False))
