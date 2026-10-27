@@ -9,4 +9,9 @@ with its OpenTelemetry Ruby source revision updated and locked:
 https://github.com/grafana/beyla/tree/main/pkg/webhook/image/ruby
 
 Bundled Injector and language agents are upstream OpenTelemetry distributions.
-Their licenses and notices remain with their release/package contents.
+The Injector v0.11.0 Apache-2.0 license is preserved in
+/licenses/upstream/injector/LICENSE (from its tagged upstream source).
+Java's embedded META-INF/licenses material, .NET's LICENSE files, and the
+Node.js, Python, and Ruby packages' license/notice files remain in /dist.
+See THIRD_PARTY.md in the source distribution for the inventory, generated
+notice snapshots, and outstanding review of embedded and base-image components.
