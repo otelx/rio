@@ -253,6 +253,7 @@ class Harness:
                     pass
                 else:
                     raise AssertionError('Trace assertion accepted deliberately uninstrumented app')
+                self.save_apps()
                 # Existing baseline must stay uninstrumented for this negative control.
                 self.kube('delete', 'deployment', name, '-n', self.namespace, '--wait=true')
                 self.policy({'traces': True, 'metrics': False, 'logs': False})
@@ -263,8 +264,15 @@ class Harness:
                 self.assert_silent(name, ('metrics', 'logs'), duration=3)
                 self.policy({'traces': False, 'metrics': False, 'logs': False})
                 name = self.deploy(lang, libc, base + '-disabled', True)
-                self.request(name, uuid.uuid4().hex)
+                marker = uuid.uuid4().hex
+                self.request(name, marker)
                 self.assert_silent(name, ('traces', 'metrics', 'logs'))
+                try:
+                    server_span(self.records('traces'), name, marker)
+                except AssertionError:
+                    pass
+                else:
+                    raise AssertionError('Trace assertion accepted deliberately disabled export')
                 self.save_apps()
                 print(f'PASS trace export and negative controls: {lang}/{libc}/{self.args.arch}/{self.args.delivery}', flush=True)
                 self.kube('delete', 'deployment', '--all', '-n', self.namespace, '--wait=true')
