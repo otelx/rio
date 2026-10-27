@@ -6,7 +6,8 @@ if [[ ${1:-} == --help || ${1:-} == -h ]]; then
   exit 0
 fi
 [[ $# -eq 0 ]] || { printf 'Unexpected arguments\n' >&2; exit 2; }
-for required in git gh; do
+root=$(cd -- "$(dirname -- "$0")/.." && pwd)
+for required in git gh python3; do
   command -v "$required" >/dev/null || { printf 'Missing command: %s\n' "$required" >&2; exit 1; }
 done
 trap 'printf "Release source verification failed at line %s\n" "$LINENO" >&2' ERR
@@ -15,9 +16,10 @@ trap 'printf "Release source verification failed at line %s\n" "$LINENO" >&2' ER
 }
 version=${GITHUB_REF_NAME:?Expected a release tag}
 commit=${GITHUB_SHA:?Expected the tested release commit}
-[[ "$version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$ && "$commit" =~ ^[a-f0-9]{40}$ ]] || {
-  printf 'Expected an alpha tag and a full commit SHA\n' >&2; exit 2;
+[[ "$commit" =~ ^[a-f0-9]{40}$ ]] || {
+  printf 'Expected a full commit SHA\n' >&2; exit 2;
 }
+python3 "$root/scripts/release_metadata.py" "$version" > /dev/null
 # Explicit private refs work with detached, shallow Actions checkouts. Fetch the
 # actual repository, rather than trusting a caller-supplied local main branch.
 git fetch --no-tags https://github.com/otelx/rio.git \

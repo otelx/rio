@@ -54,6 +54,7 @@ COPY --from=ruby-glibc /payload /dist/agents/ruby/glibc
 COPY --from=ruby-musl /payload /dist/agents/ruby/musl
 COPY versions.json /dist/versions.json
 COPY LICENSE NOTICE /licenses/
+COPY licenses/ /licenses/upstream/
 COPY copy-to-volume.sh verify-layout.sh /
 RUN chmod +x /copy-to-volume.sh /verify-layout.sh && /verify-layout.sh
 CMD ["/copy-to-volume.sh"]

@@ -1,0 +1,52 @@
+{
+  "materials": [
+    {
+      "component": "OpenTelemetry Injector 0.11.0",
+      "path": "injector/LICENSE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "source": "https://raw.githubusercontent.com/open-telemetry/opentelemetry-injector/ea9dca1df161b87d48c1c9fb04c052a4062dff3e/LICENSE"
+    },
+    {
+      "component": "Zig standard library used by Injector 0.11.0",
+      "path": "injector/ZIG-LICENSE",
+      "sha256": "5c537d6853e005298a285d508cff9ac7192cea23576c840d485b2b586a7ff177",
+      "source": "https://raw.githubusercontent.com/ziglang/zig/e4cbd752c8c05f131051f8c873cff7823177d7d3/LICENSE",
+      "basis": "Injector v0.11.0 zig-version pins 0.15.2; build.zig.zon declares no external packages and build.zig disables libc."
+    },
+    {
+      "component": ".NET 1.17.0 profiler bundled fmt",
+      "path": "dotnet/FMT-LICENSE",
+      "sha256": "07580f2a3b35709ce703d523f447b242f6dfec7582a8c0df102c7fa2849375f8",
+      "source": "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/bb2d0ef0cfb64bbe0d9c88640848e4a92f263fd6/src/OpenTelemetry.AutoInstrumentation.Native/lib/spdlog/include/spdlog/fmt/bundled/fmt.license.rst"
+    },
+    {
+      "component": ".NET 1.17.0 profiler bundled spdlog 1.15.3",
+      "path": "dotnet/SPDLOG-LICENSE",
+      "sha256": "4ccecab18d1ff0b61174fe3d6c430541625d3ddb865b0d5887db296f883c76e7",
+      "source": "https://raw.githubusercontent.com/gabime/spdlog/6fa36017cfd5731d617e1a934f0e5ea9c4445b13/LICENSE",
+      "basis": "Vendored include/spdlog/version.h identifies 1.15.3 and its source headers declare MIT."
+    },
+    {
+      "component": ".NET Foundation MIT text for copied native CoreCLR headers",
+      "path": "dotnet/CORECLR-MIT-LICENSE",
+      "sha256": "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310",
+      "source": "https://raw.githubusercontent.com/dotnet/runtime/60629d14374c56f1cb51819049ad1fa529307f8d/LICENSE.TXT",
+      "basis": "The copied lib/coreclr/src/inc/cor.h in instrumentation v1.17.0 declares .NET Foundation MIT. The license text source is not a claim that the vendored CoreCLR code is v10.0.0."
+    },
+    {
+      "component": "GNU runtime license text for static libgcc/libstdc++",
+      "path": "dotnet/GNU-GPL-3.0",
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+      "source": "https://raw.githubusercontent.com/gcc-mirror/gcc/5115c7e447fc07457443df874bf57840e8316d5f/COPYING3",
+      "basis": "Instrumentation v1.17.0 native CMake uses -static-libgcc and -static-libstdc++; exact compiler/runtime build versions remain unverified."
+    },
+    {
+      "component": "GCC Runtime Library Exception 3.1 text",
+      "path": "dotnet/GCC-RUNTIME-EXCEPTION",
+      "sha256": "9d6b43ce4d8de0c878bf16b54d8e7a10d9bd42b75178153e3af6a815bdc90f74",
+      "source": "https://raw.githubusercontent.com/gcc-mirror/gcc/5115c7e447fc07457443df874bf57840e8316d5f/COPYING.RUNTIME",
+      "basis": "License text only: this does not certify eligible compilation or pin the actual bundled GNU runtime version."
+    }
+  ],
+  "review_status": "partial; see THIRD_PARTY.md"
+}
