@@ -112,8 +112,11 @@ class Harness:
                            'python': 'python --version', 'ruby': 'ruby --version'}[lang]
                 (self.out / f'runtime-{lang}-{libc}.log').write_text(self.command('docker', 'run', '--rm',
                     '--entrypoint', '/bin/sh', image, '-c', runtime + '; cat /etc/os-release; ldd --version 2>&1 || test "$?" -eq 1'))
+        actual_agents = json.loads(self.command('docker', 'run', '--rm', self.payload, '/bin/cat', '/dist/versions.json'))
+        assert actual_agents == json.loads((ROOT / 'payload/versions.json').read_text()), 'Bundle manifest differs from tested source'
         (self.out / 'versions.json').write_text(json.dumps({'fixtures': self.config, 'collector': COLLECTOR,
-            'agents': json.loads((ROOT / 'payload/versions.json').read_text()), 'delivery': self.args.delivery}, indent=2))
+            'agents': actual_agents, 'delivery': self.args.delivery,
+            'sourceCommit': self.command('git', '-C', str(ROOT), 'rev-parse', 'HEAD').strip()}, indent=2))
         for kind, image in [('operator', self.operator), ('instrumentation', self.payload)]:
             (self.out / f'{kind}-image.json').write_text(self.command('docker', 'image', 'inspect', image))
 
