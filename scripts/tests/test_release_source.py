@@ -39,13 +39,16 @@ class ReleaseSourceTests(unittest.TestCase):
 import os, sys
 args = sys.argv[1:]
 assert args[:3] == ['api', '--method', 'GET'], args
-assert args[3] == 'repos/otelx/rio/actions/workflows/ci.yml/runs', args
-for parameter in ['branch=main', 'event=push', 'status=completed',
-                  'head_sha=' + os.environ['GITHUB_SHA']]:
-    assert parameter in args, args
 if os.environ.get('TEST_API_ERROR'):
     sys.exit(1)
-print(os.environ.get('TEST_SUCCESSFUL_RUNS', '1'))
+if args[3] == 'repos/otelx/rio/actions/workflows/ci.yml/runs':
+    for parameter in ['branch=main', 'event=push', 'status=completed',
+                      'head_sha=' + os.environ['GITHUB_SHA']]:
+        assert parameter in args, args
+    print(os.environ.get('TEST_SUCCESSFUL_RUNS', '1'))
+else:
+    assert args[3] == 'repos/otelx/rio/commits/' + os.environ['GITHUB_SHA'] + '/pulls', args
+    print(os.environ.get('TEST_MERGED_PRS', '1'))
 ''')
         gh.chmod(0o755)
         self.env = dict(os.environ, PATH=str(self.bin) + os.pathsep + os.environ["PATH"],
@@ -102,6 +105,9 @@ print(os.environ.get('TEST_SUCCESSFUL_RUNS', '1'))
 
     def test_api_error_fails_closed(self):
         self.guard(False, TEST_API_ERROR="1")
+
+    def test_historical_direct_push_fails_closed(self):
+        self.assertIn("not the result of a merged PR", self.guard(False, TEST_MERGED_PRS="0"))
 
     def test_invalid_api_result_fails_closed(self):
         self.guard(False, TEST_SUCCESSFUL_RUNS="null")

@@ -29,6 +29,13 @@ git fetch --no-tags https://github.com/otelx/rio.git \
 git merge-base --is-ancestor "$commit" refs/rio-release/main || {
   printf 'Release commit is not in protected main history\n' >&2; exit 1;
 }
+# An old direct push can be an ancestor of today's protected main. Require the
+# exact resulting commit of a merged PR, rather than merely an associated PR.
+reviewed=$(gh api --method GET "repos/otelx/rio/commits/$commit/pulls" \
+  --jq "[.[] | select(.merged_at != null and .base.ref == \"main\" and .base.repo.full_name == \"otelx/rio\" and .merge_commit_sha == \"$commit\")] | length")
+[[ "$reviewed" =~ ^[0-9]+$ && "$reviewed" -gt 0 ]] || {
+  printf 'Release commit is not the result of a merged PR to main\n' >&2; exit 1;
+}
 # A passing tag build alone is insufficient: the exact commit must already
 # have completed the full CI workflow on main, after its PR was merged.
 passed=$(gh api --method GET repos/otelx/rio/actions/workflows/ci.yml/runs \
