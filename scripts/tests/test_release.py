@@ -52,6 +52,23 @@ class VersionTests(unittest.TestCase):
 
 
 class NoticeTests(unittest.TestCase):
+    def test_go_source_changes_invalidate_redistribution_approval(self):
+        (ROOT / '.artifacts').mkdir(exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix='issue-5-review-', dir=ROOT / '.artifacts') as directory:
+            root = Path(directory)
+            source = root / 'internal/operator/example.go'
+            source.parent.mkdir(parents=True)
+            source.write_text('package operator\n')
+            subprocess.run(['git','init','-q',directory],check=True)
+            subprocess.run(['git','-C',directory,'add','internal'],check=True)
+            before = licenses.input_digest(root)
+            source.write_text('package operator\nimport _ "example.com/newly-active-dependency"\n')
+            after = licenses.input_digest(root)
+            self.assertNotEqual(before,after)
+            review = {'status':'approved','inputs_sha256':before,'reviewer':'maintainer','evidence':'review-link'}
+            with self.assertRaises(ValueError):
+                licenses.check_review(review,after)
+
     def test_extract_inventory_and_reject_traversal(self):
         for unsafe in (False, True):
             with tempfile.TemporaryDirectory() as directory, io.BytesIO() as data:

@@ -63,7 +63,9 @@ approving publication:
   `status` to `approved`, and set `inputs_sha256` to the output of
   `python3 scripts/check_license_review.py --digest` for the reviewed commit.
 
-The digest covers packaging, dependency locks, RIO attribution, payload inputs,
-and the notice collector. Changing an input invalidates approval. CI refuses to
+The digest covers packaging, Go compilation sources, dependency locks, RIO
+attribution, payload inputs, and the notice collector. Source changes can activate
+an already-locked dependency, so locks alone cannot bind a review. Changing an
+input invalidates approval. CI refuses to
 reserve a draft or push release images while the review is pending or stale.
 Do not mark the review approved solely because scans or file-presence checks pass.

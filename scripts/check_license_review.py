@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def input_digest(root=ROOT):
     paths = subprocess.check_output(
-        ["git", "ls-files", "-z", "--", "Dockerfile", "go.mod", "go.sum", "LICENSE", "NOTICE", "payload", "scripts/image_notices.py"],
+        ["git", "ls-files", "-z", "--", "Dockerfile", "go.mod", "go.sum", "cmd", "internal", "LICENSE", "NOTICE", "payload", "scripts/image_notices.py"],
         cwd=root,
     ).decode().split("\0")
     digest = hashlib.sha256()
