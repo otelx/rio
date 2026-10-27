@@ -6,7 +6,7 @@
 
 RIO lets a platform team select application namespaces using one central policy. Its Kubernetes controller delivers the [OpenTelemetry Injector](https://github.com/open-telemetry/opentelemetry-injector) and language agents to selected Pods, and manages rolling updates when the policy changes. The Injector detects supported runtimes when application processes start. Application images do not need to be rebuilt.
 
-> **Status: experimental, alpha.** Use a disposable cluster to evaluate RIO. The API and payload contract may change. The [first normal release support contract](docs/compatibility.md) is limited to Kubernetes 1.35.0, Linux amd64/arm64, and Node.js 24 HTTP trace export with the tested glibc/musl images. Java, .NET, Python, and Ruby paths, metrics/log capture, and propagation remain experimental or unvalidated. No normal release or production-readiness claim is announced here.
+> **Status: experimental, alpha.** Validated for Kubernetes 1.35.0, Linux amd64/arm64, and Node.js 24 HTTP traces with glibc and musl. Other language paths, metrics, logs, and propagation remain experimental or unvalidated. See [compatibility](docs/compatibility.md) for supported environments and limitations.
 
 ## Try it
 
@@ -28,7 +28,7 @@ RIO uses one **cluster-scoped** `Instrumentation` resource named `cluster`. Name
 
 1. **Select:** resolve the first matching policy rule for each workload.
 2. **Deliver:** mount the payload using a verified native image volume, or copy it with an init container when native delivery is unavailable.
-3. **Activate:** the upstream Injector detects the process runtime and loads its language agent. The payload bundles Node.js plus experimental Java, .NET, Python, and Ruby paths; bundling and loader checks do not establish application telemetry support.
+3. **Activate:** the upstream Injector detects the process runtime and loads the language agent for Node.js, Java, .NET, Python, or Ruby.
 4. **Manage:** roll supported workloads when their effective configuration changes; restore the previous instrumentation configuration if the rollout fails.
 
 RIO uses two container images:
@@ -42,7 +42,7 @@ The operator Deployment uses `rio/operator`; the `Instrumentation` policy's `spe
 
 RIO targets Linux amd64 and arm64, including glibc and Alpine/musl application images. See [compatibility](docs/compatibility.md) for supported environments and limitations.
 
-Use operator and instrumentation images from the same full release. In-place cross-release upgrade/downgrade and mixed-version recovery are unvalidated; read the [version and migration policy](docs/compatibility.md#operatorinstrumentation-versions-and-upgrades). Only the latest alpha is currently maintained; the first normal release will use the [maintenance and security policy](SECURITY.md). [@MrAlias](https://github.com/MrAlias) owns release decisions, triage, and dependency maintenance; there is no appointed backup responder.
+Use operator and instrumentation images from the same release. In-place upgrades, downgrades, and mixed-version recovery are unvalidated; see the [version and migration policy](docs/compatibility.md#operatorinstrumentation-versions-and-upgrades).
 
 ## Learn more
 
