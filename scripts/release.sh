@@ -36,16 +36,12 @@ Select namespaces, detect supported runtimes through the upstream Injector, and 
 
 Start with the [quickstart](https://github.com/otelx/rio/blob/$version/docs/quickstart.md) and read the [compatibility limits](https://github.com/otelx/rio/blob/$version/docs/compatibility.md).
 
-Application telemetry validation covers Node.js 24 built-in HTTP server trace export on the tested glibc/musl images. Java, .NET, Python, and Ruby have loader checks only and remain experimental. Metrics/log capture and export, and context propagation, are unvalidated. Exporter configuration does not guarantee automatic capture. The Kubernetes API remains \`v1alpha1\`.
-
-Use operator and instrumentation images from this same full release. In-place cross-release upgrade/downgrade and mixed-version recovery are unvalidated; follow the [migration policy](https://github.com/otelx/rio/blob/$version/docs/compatibility.md#operatorinstrumentation-versions-and-upgrades). See the [maintenance and private security-report policy](https://github.com/otelx/rio/blob/$version/SECURITY.md); only the latest alpha is currently maintained, with best-effort acknowledgement within 7 calendar days and initial triage within 14 calendar days, without an SLA or appointed backup responder.
+Node.js HTTP server trace export is tested on glibc and musl. Java, .NET, Python, Ruby, and metrics/log capture remain experimental; propagation is untested. The API remains \`v1alpha1\`. Use matching operator and instrumentation versions; see [compatibility and migration limits](https://github.com/otelx/rio/blob/$version/docs/compatibility.md) and [security reporting](https://github.com/otelx/rio/blob/$version/SECURITY.md).
 
 Images validated by this release workflow:
 
 - Operator: \`ghcr.io/otelx/rio/operator:$version\`
 - Instrumentation (OpenTelemetry Injector and language agents): \`ghcr.io/otelx/rio/instrumentation:$version\`
-
-**Breaking image rename:** Update the operator Deployment from \`ghcr.io/otelx/rio\` to \`ghcr.io/otelx/rio/operator\`. Update the instrumentation policy's \`spec.image\` and any rule image overrides from \`ghcr.io/otelx/rio-payload\` to \`ghcr.io/otelx/rio/instrumentation\`, using this release's tag. The original packages have been deleted, so alpha.1 and alpha.2 images can no longer be pulled from GHCR. Source tags and release archives remain available. See the [upgrade instructions](https://github.com/otelx/rio/blob/$version/docs/configuration.md#upgrading-from-alpha1-or-alpha2).
 
 See [CHANGELOG.md](https://github.com/otelx/rio/blob/$version/CHANGELOG.md) for release details.
 EOF
