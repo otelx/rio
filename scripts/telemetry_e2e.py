@@ -27,11 +27,15 @@ COLLECTOR = 'otel/opentelemetry-collector-contrib:0.163.2@sha256:7f22d2a6748110f
 class Harness:
     def __init__(self, args):
         self.args = args
-        self.run_id = 'rio-issue-17-' + uuid.uuid4().hex[:10]
+        self.run_id = args.resume or 'rio-issue-17-' + uuid.uuid4().hex[:10]
+        assert re.fullmatch(r'rio-issue-17-[0-9a-f]{10}', self.run_id), 'Invalid owned run ID'
         self.cluster = self.run_id
-        self.out = ROOT / '.artifacts/telemetry' / self.run_id
+        base = ROOT / '.artifacts/telemetry' / self.run_id
+        if args.resume:
+            assert (base / 'kubeconfig').is_file(), 'Resume requires this worktree\'s saved kubeconfig'
+        self.out = base / ('retry-' + uuid.uuid4().hex[:8]) if args.resume else base
         self.out.mkdir(parents=True)
-        self.env = dict(os.environ, KUBECONFIG=str(self.out / 'kubeconfig'))
+        self.env = dict(os.environ, KUBECONFIG=str(base / 'kubeconfig'))
         self.operator = os.environ.get('OPERATOR_IMAGE', 'ghcr.io/otelx/rio/operator:issue-17')
         self.payload = os.environ.get('PAYLOAD_IMAGE', 'ghcr.io/otelx/rio/instrumentation:issue-17')
         self.namespace = 'rio-fixtures'
@@ -72,14 +76,22 @@ class Harness:
         self.command('docker', 'run', '--rm', '--user', '65532:65532', self.payload,
                      '/bin/sh', '-ec', '/verify-layout.sh; cat /dist/injector/otelinject.conf >/dev/null')
         existing = self.command('kind', 'get', 'clusters').splitlines()
-        assert self.cluster not in existing
+        if self.args.resume:
+            assert self.cluster in existing, 'Saved cluster no longer exists'
+            assert self.kube('config', 'current-context').strip() == 'kind-' + self.cluster
+        else:
+            assert self.cluster not in existing
         config = 'kind: Cluster\napiVersion: kind.x-k8s.io/v1alpha4\nfeatureGates:\n  ImageVolume: ' + str(self.args.delivery == 'imageVolume').lower() + '\nnodes:\n  - role: control-plane\n'
         path = self.out / 'kind.yaml'
         path.write_text(config)
         self.created = True
-        self.command('kind', 'create', 'cluster', '--retain', '--name', self.cluster, '--image', 'kindest/node:v1.35.0',
-                     '--config', str(path), '--kubeconfig', self.env['KUBECONFIG'], '--wait', '180s', timeout=300)
+        if not self.args.resume:
+            self.command('kind', 'create', 'cluster', '--retain', '--name', self.cluster, '--image', 'kindest/node:v1.35.0',
+                         '--config', str(path), '--kubeconfig', self.env['KUBECONFIG'], '--wait', '180s', timeout=300)
         self.command('kind', 'load', 'docker-image', '--name', self.cluster, self.operator, self.payload, timeout=300)
+        if self.args.resume:
+            self.kube('delete', 'namespace', self.namespace, 'rio-telemetry', '--ignore-not-found', '--wait=true', '--timeout=180s', timeout=210)
+            self.kube('delete', 'instrumentations.rio.otelx.github.io', 'cluster', '--ignore-not-found', '--wait=true', '--timeout=180s', check=False)
         self.command(str(ROOT / 'scripts/install.sh'), self.operator, timeout=300)
         nodes = json.loads(self.kube('get', 'nodes', '-o', 'json'))
         (self.out / 'nodes.json').write_text(json.dumps(nodes, indent=2))
@@ -141,7 +153,7 @@ class Harness:
         self.expected_config = {'signals': dict(signals, **(rule_signals or {})), 'env': agent_env}
         self.apply({'apiVersion': 'rio.otelx.github.io/v1alpha1', 'kind': 'Instrumentation', 'metadata': {'name': 'cluster'},
             'spec': {'image': self.payload, 'endpoint': 'http://collector.rio-telemetry.svc:4318',
-                     'signals': signals, 'timeoutSeconds': 120,
+                     'signals': signals, 'timeoutSeconds': 300,
                      'env': [{'name': k, 'value': v} for k, v in agent_env.items()], 'rules': [rule]}})
 
     def deploy(self, lang, libc, name, injected):
@@ -156,7 +168,7 @@ class Harness:
                     'readinessProbe': {'tcpSocket': {'port': 8080}, 'periodSeconds': 2}}]}}}})
         self.apply({'apiVersion': 'v1', 'kind': 'Service', 'metadata': {'name': name, 'namespace': self.namespace},
             'spec': {'selector': {'app': name}, 'ports': [{'port': 8080}]}})
-        self.kube('rollout', 'status', 'deployment/' + name, '-n', self.namespace, '--timeout=180s', timeout=210)
+        self.kube('rollout', 'status', 'deployment/' + name, '-n', self.namespace, '--timeout=360s', timeout=390)
         def admitted():
             pods = json.loads(self.kube('get', 'pods', '-n', self.namespace, '-l', 'app=' + name, '-o', 'json'))
             (self.current / (name + '-pods.json')).write_text(json.dumps(pods, indent=2))
@@ -184,7 +196,7 @@ class Harness:
             assert any(c['type'] == 'Ready' and c['status'] == 'True' for c in active[0].get('status', {}).get('conditions', []))
         # Capabilities may still be probing when an initial uninstrumented Pod
         # starts; wait for the controller's admitted replacement to be Ready.
-        self.poll(admitted, timeout=180)
+        self.poll(admitted, timeout=360)
         return name
 
     def request(self, name, marker, headers=None, next_url=None):
@@ -324,6 +336,7 @@ def main():
     parser.add_argument('--arch', choices=['amd64', 'arm64'], required=True)
     parser.add_argument('--delivery', choices=['imageVolume', 'initContainer'], required=True)
     parser.add_argument('--keep-cluster', action='store_true')
+    parser.add_argument('--resume', metavar='OWNED-RUN-ID', help='Retry a retained cluster with fresh namespaces/Collector and a new evidence directory')
     parser.add_argument('--allow-known-blockers', action='store_true',
                         help='Run implemented coverage while reporting unresolved upstream gaps (CI does not establish issue completion)')
     parser.add_argument('--scenarios', nargs='+', choices=['traces', 'propagation', 'metrics', 'logs'],

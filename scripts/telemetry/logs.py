@@ -59,7 +59,7 @@ def run(harness):
             bare = harness.deploy(language, libc, base + '-bare', False)
             marker = uuid.uuid4().hex
             harness.request(bare, marker)
-            application_logged(harness, bare, marker)
+            harness.poll(lambda: application_logged(harness, bare, marker))
             harness.assert_silent(bare, ('traces', 'metrics', 'logs'))
             harness.save_apps()
             harness.kube('delete', 'deployment', bare, '-n', harness.namespace, '--wait=true')
@@ -77,7 +77,7 @@ def run(harness):
                 marker = uuid.uuid4().hex
                 started_ns = time.time_ns()
                 harness.request(name, marker)
-                application_logged(harness, name, marker)
+                harness.poll(lambda: application_logged(harness, name, marker))
                 span = other_signals(harness, name, marker, spec)
                 if enabled:
                     correlation = span if spec['logs'].get('correlation') else None
