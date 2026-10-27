@@ -116,11 +116,13 @@ kubectl apply -f "$artifacts/workloads.json"
 for kind in deployment statefulset daemonset; do
   kubectl rollout status "$kind/$kind" -n injector-component-test --timeout=180s
 done
-python3 - "${PREVIOUS_PAYLOAD_IMAGE:-$payload_image}" > "$artifacts/policy.json" <<'PY'
+healthy_timeout=60
+if [[ -n "${PREVIOUS_SOURCE:-}" ]]; then healthy_timeout=180; fi
+python3 - "${PREVIOUS_PAYLOAD_IMAGE:-$payload_image}" "$healthy_timeout" > "$artifacts/policy.json" <<'PY'
 import json,sys
 print(json.dumps({'apiVersion':'rio.otelx.github.io/v1alpha1','kind':'Instrumentation','metadata':{'name':'cluster'},'spec':{
     'image':sys.argv[1],'endpoint':'http://collector.invalid:4318','signals':{'traces':True,'metrics':True,'logs':True},
-    'timeoutSeconds':60,'rules':[{'name':'override','selector':{'namespaces':['injector-component-test'],'workloads':[{'kind':'Deployment','name':'deployment'}]},'action':'Inject','image':sys.argv[1]},{'name':'fixture','selector':{'namespaces':['injector-component-test']},'action':'Inject'}]}}))
+    'timeoutSeconds':int(sys.argv[2]),'rules':[{'name':'override','selector':{'namespaces':['injector-component-test'],'workloads':[{'kind':'Deployment','name':'deployment'}]},'action':'Inject','image':sys.argv[1]},{'name':'fixture','selector':{'namespaces':['injector-component-test']},'action':'Inject'}]}}))
 PY
 wait_phase() {
   local wanted=$1
@@ -137,7 +139,12 @@ PY
     sleep 2
   done
   cat "$artifacts/status.json"
-  kubectl logs deployment/rio -n rio-system > "$artifacts/operator.log"
+  # Best-effort diagnostics from this fixture; retain the original phase failure.
+  kubectl logs deployment/rio -n rio-system > "$artifacts/operator.log" 2>&1 || true
+  kubectl get pods -n injector-component-test -o json > "$artifacts/failed-pods.json" 2> "$artifacts/failed-pods.err" || true
+  kubectl get deployments,statefulsets,daemonsets -n injector-component-test -o json > "$artifacts/failed-workloads.json" 2> "$artifacts/failed-workloads.err" || true
+  kubectl get events -n injector-component-test -o json > "$artifacts/failed-events.json" 2> "$artifacts/failed-events.err" || true
+  kubectl logs -n kube-system -l component=kube-controller-manager --tail=200 --prefix=true > "$artifacts/controller-manager.log" 2>&1 || true
   return 1
 }
 wait_admission() {
@@ -230,6 +237,11 @@ for obj in json.load(open(sys.argv[1]))['items']:
     subprocess.run(['kubectl','patch',obj['kind'].lower()+'/'+obj['metadata']['name'],'-n',obj['metadata']['namespace'],
                     '--type=merge','--patch-file',str(path)],check=True)
 CHECK
+  # Resetting template annotations starts another uninstrumented rollout.
+  # Let it converge before a failing candidate tests OrderedReady recovery.
+  for kind in deployment statefulset daemonset; do
+    kubectl rollout status "$kind/$kind" -n injector-component-test --timeout=180s
+  done
   "$component/scripts/install.sh" "$operator_image"
   # Remove the retired fixture reference from each node after cleanup. A
   # subsequent failed migration must recover without pulling that reference.
@@ -250,7 +262,13 @@ CHECK
   kubectl apply -f "$artifacts/migrated-policy.json"
   wait_phase RolledBack
 fi
-kubectl patch instrumentations.rio.otelx.github.io cluster --type=merge -p '{"spec":{"timeoutSeconds":60,"retryToken":"corrected","env":[]}}'
+# Copy delivery updates DaemonSet nodes sequentially; successful upgrade paths
+# need time for every copy. Deliberately broken candidates still use 15 seconds.
+python3 - "$healthy_timeout" > "$artifacts/corrected-policy-patch.json" <<'PY'
+import json,sys
+print(json.dumps({'spec':{'timeoutSeconds':int(sys.argv[1]),'retryToken':'corrected','env':[]}}))
+PY
+kubectl patch instrumentations.rio.otelx.github.io cluster --type=merge --patch-file="$artifacts/corrected-policy-patch.json"
 wait_phase Ready
 if [[ -n "${PREVIOUS_SOURCE:-}" ]]; then
   kubectl get deployments,statefulsets,daemonsets -n injector-component-test -o json > "$artifacts/migrated-workloads.json"
@@ -267,12 +285,12 @@ CHECK
     # checking overrides and saved successful snapshots in both directions.
     for payload_target in previous candidate; do
       if [[ "$payload_target" == previous ]]; then payload_ref=$PREVIOUS_PAYLOAD_IMAGE; else payload_ref=$payload_image; fi
-      python3 - "$artifacts/policy.json" "$payload_ref" "$payload_target" > "$artifacts/payload-$payload_target-policy.json" <<'CHECK'
+      python3 - "$artifacts/policy.json" "$payload_ref" "$payload_target" "$healthy_timeout" > "$artifacts/payload-$payload_target-policy.json" <<'CHECK'
 import json,sys
 p=json.load(open(sys.argv[1])); p['spec']['image']=sys.argv[2]
 for r in p['spec']['rules']:
     if 'image' in r: r['image']=sys.argv[2]
-p['spec']['timeoutSeconds']=120
+p['spec']['timeoutSeconds']=int(sys.argv[4])
 p['spec']['retryToken']='payload-'+sys.argv[3]
 print(json.dumps(p))
 CHECK
