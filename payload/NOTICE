@@ -27,7 +27,7 @@ Supplemental native .NET dependency license texts are under
 /licenses/upstream/dotnet; /licenses/upstream/manifest.json records immutable
 sources and hashes. These materials do not complete the redistribution review.
 Managed .NET package metadata, licenses, and third-party notices are under
-/licenses/upstream/dotnet/managed. Its inventory.json maps every managed DLL to
+/licenses/upstream/dotnet/managed. Its inventory.json maps every upstream managed DLL to
 verified original package bytes or the instrumentation source project and records
 the preserved texts' sources and hashes.
 Java's embedded META-INF/licenses material, .NET's LICENSE files, and the
@@ -37,3 +37,8 @@ preserved in /licenses/sources/alpine-source-inputs.tar.gz. Its SOURCE_INPUTS.js
 records the installed package versions, source-origin commits, and file hashes.
 See THIRD_PARTY.md in the source distribution for the inventory, generated
 notice snapshots, and outstanding review of embedded and base-image components.
+
+RIO adds its own .NET bootstrap and propagation assemblies (Apache-2.0).
+The upstream startup hook is retained unchanged as
+OpenTelemetry.AutoInstrumentation.StartupHook.original.dll alongside the RIO
+wrapper. Source and build details are in payload/dotnet in the source distribution.
