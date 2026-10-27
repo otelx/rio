@@ -14,6 +14,17 @@ COPY --from=runtime-base /lib/apk/db/installed /installed-packages
 COPY alpine-sources.lock.json scripts/alpine_sources.py ./
 RUN python alpine_sources.py /installed-packages alpine-sources.lock.json /alpine-source-inputs.tar.gz --base-image "$RUNTIME_IMAGE"
 
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0.427-bookworm-slim@sha256:ff39a765f04619c8d146796fc09b38499ae5984f4a2a4c3a0a57d0022855daee AS dotnet-propagation
+WORKDIR /source
+COPY --from=downloads /payload/dotnet/glibc/net /agent/net
+COPY dotnet/Rio.Propagation.csproj dotnet/PropagationPlugin.cs dotnet/NuGet.Config ./
+COPY dotnet/bootstrap/ ./bootstrap/
+COPY dotnet/tests/ ./tests/
+RUN dotnet publish Rio.Propagation.csproj --configuration Release --output /out/plugin -p:AgentDirectory=/agent/net \
+    && dotnet publish bootstrap/Rio.Bootstrap.csproj --configuration Release --output /out/bootstrap \
+    && dotnet publish tests/throwing-hook/ThrowingHook.csproj --configuration Release --output /out/test-hook \
+    && dotnet run --project tests/Rio.Bootstrap.Tests.csproj --configuration Release -- /out/bootstrap/Rio.Bootstrap.dll /out/test-hook/Rio.Bootstrap.ThrowingHook.dll
+
 FROM node:24@sha256:934240a162082fd8b8a2f90cd5114446443f1eba1c5378f6687167ca405e6584 AS node
 WORKDIR /build
 COPY node/package.json node/package-lock.json ./
@@ -64,6 +75,12 @@ COPY --from=downloads /payload/libotelinject.so /dist/injector/libotelinject.so
 COPY otelinject.conf /dist/injector/otelinject.conf
 COPY --from=downloads /payload/opentelemetry-javaagent.jar /dist/agents/java/opentelemetry-javaagent.jar
 COPY --from=downloads /payload/dotnet /dist/agents/dotnet
+RUN mv /dist/agents/dotnet/glibc/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll /dist/agents/dotnet/glibc/net/OpenTelemetry.AutoInstrumentation.StartupHook.original.dll \
+    && mv /dist/agents/dotnet/musl/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll /dist/agents/dotnet/musl/net/OpenTelemetry.AutoInstrumentation.StartupHook.original.dll
+COPY --from=dotnet-propagation /out/plugin/Rio.Propagation.dll /dist/agents/dotnet/glibc/net/Rio.Propagation.dll
+COPY --from=dotnet-propagation /out/plugin/Rio.Propagation.dll /dist/agents/dotnet/musl/net/Rio.Propagation.dll
+COPY --from=dotnet-propagation /out/bootstrap/Rio.Bootstrap.dll /dist/agents/dotnet/glibc/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll
+COPY --from=dotnet-propagation /out/bootstrap/Rio.Bootstrap.dll /dist/agents/dotnet/musl/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll
 COPY --from=node /build/node_modules /dist/agents/node/node_modules
 COPY --from=python-glibc /payload /dist/agents/python/glibc
 COPY --from=python-musl /payload /dist/agents/python/musl

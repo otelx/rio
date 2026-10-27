@@ -15,5 +15,9 @@ for libc in glibc musl; do
   test -s "$root/agents/ruby/$libc/opentelemetry-auto-instrumentation.rb"
   test -d "$root/agents/ruby/$libc/gems"
   test -s "$root/agents/dotnet/$libc/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll"
+  test -s "$root/agents/dotnet/$libc/net/OpenTelemetry.AutoInstrumentation.StartupHook.original.dll"
+  test -r "$root/agents/dotnet/$libc/net/OpenTelemetry.AutoInstrumentation.StartupHook.original.dll"
+  test -s "$root/agents/dotnet/$libc/net/Rio.Propagation.dll"
+  test -r "$root/agents/dotnet/$libc/net/Rio.Propagation.dll"
 done
 echo 'Injector and all five agent payloads are present.'

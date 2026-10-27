@@ -40,6 +40,13 @@
         "url": "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.17.0/opentelemetry-dotnet-instrumentation-linux-musl-x64.zip",
         "sha256": "36eb55ce2f7a9da8ffd70ccbd97761a1917d7f57709f1a6ca9e7029dfa120516"
       }
+    },
+    "rioPropagation": {
+      "version": "1",
+      "source": "payload/dotnet",
+      "targetFramework": "net8.0",
+      "bootstrapTargetFramework": "netstandard2.1",
+      "sdkImage": "mcr.microsoft.com/dotnet/sdk:8.0.427-bookworm-slim@sha256:ff39a765f04619c8d146796fc09b38499ae5984f4a2a4c3a0a57d0022855daee"
     }
   },
   "node": "0.78.0",

@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>Rio.Propagation</AssemblyName>
+    <AgentDirectory Condition="'$(AgentDirectory)' == ''">/agent/net</AgentDirectory>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="bootstrap/**/*.cs" />
+    <Compile Remove="tests/**/*.cs" />
+    <Reference Include="OpenTelemetry.AutoInstrumentation.PluginApi">
+      <HintPath>$(AgentDirectory)/OpenTelemetry.AutoInstrumentation.PluginApi.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="OpenTelemetry.Api">
+      <HintPath>$(AgentDirectory)/net8.0/OpenTelemetry.Api.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.Diagnostics.DiagnosticSource">
+      <HintPath>$(AgentDirectory)/net8.0/System.Diagnostics.DiagnosticSource.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>
