@@ -1,9 +1,18 @@
 # syntax=docker/dockerfile:1
+ARG RUNTIME_IMAGE=alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
+FROM ${RUNTIME_IMAGE} AS runtime-base
+
 FROM python:3.14.6-slim-trixie AS downloads
 ARG TARGETARCH
 WORKDIR /build
 COPY versions.json scripts/download.py ./
 RUN python download.py versions.json "$TARGETARCH" /payload
+
+FROM downloads AS alpine-sources
+ARG RUNTIME_IMAGE
+COPY --from=runtime-base /lib/apk/db/installed /installed-packages
+COPY alpine-sources.lock.json scripts/alpine_sources.py ./
+RUN python alpine_sources.py /installed-packages alpine-sources.lock.json /alpine-source-inputs.tar.gz --base-image "$RUNTIME_IMAGE"
 
 FROM node:24@sha256:934240a162082fd8b8a2f90cd5114446443f1eba1c5378f6687167ca405e6584 AS node
 WORKDIR /build
@@ -38,7 +47,7 @@ ENV BUNDLE_PATH=/build/bundle BUNDLE_FROZEN=true BUNDLE_APP_CONFIG=/build/.bundl
 RUN mkdir -p "$TMPDIR" && bundle install && cp -R /build/bundle/ruby/3.3.0 /payload
 COPY ruby/opentelemetry-auto-instrumentation.rb /payload/
 
-FROM alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
+FROM runtime-base
 LABEL org.opencontainers.image.source="https://github.com/otelx/rio" \
       org.opencontainers.image.title="RIO instrumentation" \
       org.opencontainers.image.description="OpenTelemetry Injector and language agents for automatic runtime instrumentation" \
@@ -55,6 +64,7 @@ COPY --from=ruby-musl /payload /dist/agents/ruby/musl
 COPY versions.json /dist/versions.json
 COPY LICENSE NOTICE /licenses/
 COPY licenses/ /licenses/upstream/
+COPY --from=alpine-sources /alpine-source-inputs.tar.gz /licenses/sources/alpine-source-inputs.tar.gz
 COPY copy-to-volume.sh verify-layout.sh /
 RUN chmod +x /copy-to-volume.sh /verify-layout.sh && /verify-layout.sh
 CMD ["/copy-to-volume.sh"]
