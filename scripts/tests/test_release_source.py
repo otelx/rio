@@ -12,7 +12,8 @@ GUARD = ROOT / "scripts/check-release-source.sh"
 
 class ReleaseSourceTests(unittest.TestCase):
     def setUp(self):
-        self.temporary = tempfile.TemporaryDirectory(prefix="rio-issue-4-")
+        (ROOT / ".artifacts").mkdir(exist_ok=True)
+        self.temporary = tempfile.TemporaryDirectory(prefix="issue-5-release-source-", dir=ROOT / ".artifacts")
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
         self.remote = self.root / "remote.git"
@@ -73,6 +74,13 @@ else:
     def test_annotated_tag_on_main(self):
         self.assertIn("Verified release source", self.guard())
 
+    def test_normal_and_other_prerelease_semver_tags(self):
+        for version in ("v1.0.0", "v1.2.3-rc.1+build.7"):
+            with self.subTest(version=version):
+                self.git("tag", version)
+                self.git("push", str(self.remote), "refs/tags/" + version)
+                self.guard(GITHUB_REF_NAME=version)
+
     def test_detached_ancestor_of_main(self):
         self.git("commit", "--allow-empty", "-m", "Later reviewed change")
         self.git("push", str(self.remote), "main")
@@ -123,7 +131,7 @@ else:
         for key, value in [("GITHUB_REPOSITORY", "other/fork"),
                            ("GITHUB_EVENT_NAME", "workflow_dispatch"),
                            ("GITHUB_REF_TYPE", "branch"),
-                           ("GITHUB_REF_NAME", "v1.0.0"),
+                           ("GITHUB_REF_NAME", "v01.0.0"),
                            ("GITHUB_REF_NAME", "../main")]:
             with self.subTest(key=key, value=value):
                 self.guard(False, **{key: value})
