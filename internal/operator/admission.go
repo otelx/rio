@@ -55,41 +55,61 @@ func (w *Webhook) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			if pod.Namespace == "" {
 				pod.Namespace = r.Namespace
 			}
-			snapshot := w.Store.Get()
-			if !snapshot.Synced {
+			patch, err := w.admit(req.Context(), &pod)
+			if err != nil {
 				response.Allowed = false
-				response.Result = &meta.Status{Message: "instrumentation policy has not synchronized"}
-			} else {
-				kind, name, err := w.owner(req.Context(), &pod)
-				if err == nil {
-					cfg := snapshot.Policy.Resolve(pod.Namespace, kind, name)
-					if pinned := pod.Annotations[ConfigAnnotation]; pinned != "" {
-						// Unmarshal into a fresh value: omitted fields in a saved
-						// revision must not inherit env/retry settings from the new CR.
-						cfg = Config{}
-						err = json.Unmarshal([]byte(pinned), &cfg)
-						if err == nil && pod.Annotations[RevisionAnnotation] != cfg.Revision() {
-							err = fmt.Errorf("instrumentation revision does not match its configuration")
-						}
-					}
-					if err == nil {
-						err = Mutate(&pod, cfg, snapshot.NativeImages[cfg.Image], name)
-					}
-				}
-				if err != nil {
-					response.Allowed = false
-					response.Result = &meta.Status{Message: err.Error()}
-					slog.Warn("injection rejected", "namespace", pod.Namespace, "pod", pod.Name, "error", err)
-				} else {
-					patch, _ := json.Marshal([]map[string]any{{"op": "add", "path": "/spec", "value": pod.Spec}, {"op": "add", "path": "/metadata/annotations", "value": pod.Annotations}})
-					pt := admission.PatchTypeJSONPatch
-					response.PatchType = &pt
-					response.Patch = patch
-				}
+				response.Result = &meta.Status{Message: err.Error()}
+				slog.Warn("injection rejected", "namespace", pod.Namespace, "pod", pod.Name, "error", err)
+			} else if patch != nil {
+				pt := admission.PatchTypeJSONPatch
+				response.PatchType = &pt
+				response.Patch = patch
 			}
 		}
 	}
 	_ = json.NewEncoder(rw).Encode(admission.AdmissionReview{TypeMeta: meta.TypeMeta{APIVersion: "admission.k8s.io/v1", Kind: "AdmissionReview"}, Response: response})
+}
+
+// admit returns no patch when instrumentation is irrelevant or policy/owner
+// information is unavailable. Explicit rejections are reserved for unsafe
+// mutation of a workload known to be selected by a synchronized policy.
+func (w *Webhook) admit(ctx context.Context, pod *core.Pod) ([]byte, error) {
+	if criticalPriority(pod.Spec.PriorityClassName) {
+		return nil, nil
+	}
+	snapshot := w.Store.Get()
+	if !snapshot.Synced || !snapshot.Policy.mayInjectPod(pod) {
+		return nil, nil
+	}
+	kind, name, err := w.owner(ctx, pod)
+	if err != nil {
+		// An unavailable owner cannot establish selection. Never turn that
+		// uncertainty into a rejection of an unrelated application Pod.
+		slog.Warn("skipping injection; owner unavailable", "namespace", pod.Namespace, "pod", pod.Name, "error", err)
+		return nil, nil
+	}
+	cfg := snapshot.Policy.Resolve(pod.Namespace, kind, name)
+	if !cfg.Enabled {
+		return nil, nil
+	}
+	if pinned := pod.Annotations[ConfigAnnotation]; pinned != "" {
+		// Decode into a fresh revision so omitted fields cannot inherit
+		// settings from the current policy during rollback.
+		cfg = Config{}
+		if err := json.Unmarshal([]byte(pinned), &cfg); err != nil {
+			return nil, err
+		}
+		if pod.Annotations[RevisionAnnotation] != cfg.Revision() {
+			return nil, fmt.Errorf("instrumentation revision does not match its configuration")
+		}
+	}
+	if !cfg.Enabled {
+		return nil, nil
+	}
+	if err := Mutate(pod, cfg, snapshot.NativeImages[cfg.Image], name); err != nil {
+		return nil, err
+	}
+	return json.Marshal([]map[string]any{{"op": "add", "path": "/spec", "value": pod.Spec}, {"op": "add", "path": "/metadata/annotations", "value": pod.Annotations}})
 }
 
 func (w *Webhook) owner(ctx context.Context, pod *core.Pod) (string, string, error) {
