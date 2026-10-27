@@ -59,7 +59,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends git build-essen
 COPY ruby/Gemfile ruby/Gemfile.lock ./
 ENV BUNDLE_PATH=/build/bundle BUNDLE_FROZEN=true BUNDLE_APP_CONFIG=/build/.bundle TMPDIR=/build/tmp
 RUN mkdir -p "$TMPDIR" && bundle install && cp -R /build/bundle/ruby/3.3.0 /payload
-COPY ruby/opentelemetry-auto-instrumentation.rb /payload/
+COPY ruby/opentelemetry-auto-instrumentation.rb ruby/rio-rack-metrics.rb /payload/
+COPY ruby/tests/ /build/tests/
+RUN RIO_METRICS_EXTENSION=/payload/rio-rack-metrics.rb bundle exec ruby /build/tests/rack_metrics_test.rb
 
 FROM ruby:3.3.12-alpine3.23@sha256:11da101dfad607c6193a921abc815c989bc9f19b43f5f686bbcc7d424298d596 AS ruby-musl
 WORKDIR /build
@@ -67,7 +69,9 @@ RUN apk add --no-cache git build-base
 COPY ruby/Gemfile ruby/Gemfile.lock ./
 ENV BUNDLE_PATH=/build/bundle BUNDLE_FROZEN=true BUNDLE_APP_CONFIG=/build/.bundle TMPDIR=/build/tmp
 RUN mkdir -p "$TMPDIR" && bundle install && cp -R /build/bundle/ruby/3.3.0 /payload
-COPY ruby/opentelemetry-auto-instrumentation.rb /payload/
+COPY ruby/opentelemetry-auto-instrumentation.rb ruby/rio-rack-metrics.rb /payload/
+COPY ruby/tests/ /build/tests/
+RUN RIO_METRICS_EXTENSION=/payload/rio-rack-metrics.rb bundle exec ruby /build/tests/rack_metrics_test.rb
 
 FROM runtime-base
 LABEL org.opencontainers.image.source="https://github.com/otelx/rio" \

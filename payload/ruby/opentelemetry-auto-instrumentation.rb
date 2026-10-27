@@ -12,6 +12,7 @@ require_bundler = ENV.delete('OTEL_RUBY_REQUIRE_BUNDLER')
 begin
   require entry
   require 'opentelemetry-instrumentation-logger'
+  require_relative 'rio-rack-metrics'
 ensure
   ENV['OTEL_RUBY_REQUIRE_BUNDLER'] = require_bundler unless require_bundler.nil?
 end

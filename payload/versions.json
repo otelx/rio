@@ -64,5 +64,11 @@
     "targetFramework": "net8.0",
     "bootstrapTargetFramework": "netstandard2.1",
     "sdkImage": "mcr.microsoft.com/dotnet/sdk:8.0.427-bookworm-slim@sha256:ff39a765f04619c8d146796fc09b38499ae5984f4a2a4c3a0a57d0022855daee"
+  },
+  "rubyRioRackMetrics": {
+    "version": "1.0.0",
+    "source": "payload/ruby/rio-rack-metrics.rb",
+    "rackInstrumentation": "0.30.0",
+    "metricsSdk": "0.13.1"
   }
 }

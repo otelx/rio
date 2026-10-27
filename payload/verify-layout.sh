@@ -13,6 +13,7 @@ for libc in glibc musl; do
   test -s "$root/agents/python/$libc/sitecustomize.py"
   test -d "$root/agents/python/$libc/opentelemetry/sdk"
   test -s "$root/agents/ruby/$libc/opentelemetry-auto-instrumentation.rb"
+  test -s "$root/agents/ruby/$libc/rio-rack-metrics.rb"
   test -d "$root/agents/ruby/$libc/gems"
   test -s "$root/agents/dotnet/$libc/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll"
   test -s "$root/agents/dotnet/$libc/net/OpenTelemetry.AutoInstrumentation.StartupHook.original.dll"

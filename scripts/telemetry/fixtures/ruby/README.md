@@ -23,19 +23,21 @@ The fixture reads its header arrays to preserve duplicate received values,
 which Rack's standard environment otherwise joins. This is observation only;
 the application never copies context headers into outgoing requests.
 
-## Automatic metrics blocker
+## Automatic HTTP metrics
 
-The shipped Rack instrumentation 0.30.0 and Sinatra instrumentation 0.29.0 do
-not create HTTP meters or instruments. Enabling the metrics exporter does not
-create measurements. The relevant upstream work remains
-[the metrics instrumentation design issue #1127](https://github.com/open-telemetry/opentelemetry-ruby-contrib/issues/1127),
-[Rack metrics prototype #1129](https://github.com/open-telemetry/opentelemetry-ruby-contrib/pull/1129),
-and [metrics event-handler prototype #1213](https://github.com/open-telemetry/opentelemetry-ruby-contrib/pull/1213).
-The later [Rack/Net::HTTP metrics proposal #1785](https://github.com/open-telemetry/opentelemetry-ruby-contrib/pull/1785)
-closed without merging. These states were checked on 2026-10-27. The fixture
-therefore declares no automatic metric source. Issue #22 must remain open for
-Ruby until a concrete automatic source ships and passes Collector assertions;
-application-created meters are not a substitute.
+The bundle's separately versioned RIO Rack metrics extension 1.0.0 measures
+ordinary Rack requests through response body completion using the distro's
+configured metrics provider and exporter. It emits the stable seconds histogram
+`http.server.request.duration`; the application creates no meters or records.
+The upstream Rack 0.30.0 gem itself still supplies traces only. See the
+[bundle extension contract](../../../../payload/ruby/README.md) for attributes,
+streaming semantics, signal controls and the precise implementation boundary.
+
+The shared metrics scenario requires a newer cumulative sample count after
+three fresh work requests, four inherited/rule enable/disable cases, a bare
+negative control, metrics-only export and unsampled incoming requests. The logs
+scenario separately requires metrics to remain available while log export is
+disabled. These scenarios establish only the exact matrix cells actually run.
 
 ## Validation boundary
 
