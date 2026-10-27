@@ -237,6 +237,14 @@ class Harness:
         (self.current / (signal + '.jsonl')).write_text(text)
         return read_records(text)
 
+    def reset_collector(self):
+        # Each matrix cell gets fresh emptyDir-backed files. This also bounds
+        # memory when runtime instrumentation emits many cumulative metrics.
+        (self.current / 'collector-before-reset.log').write_text(self.kube(
+            'logs', '-n', 'rio-telemetry', 'deployment/collector', '-c', 'collector', check=False))
+        self.kube('rollout', 'restart', 'deployment/collector', '-n', 'rio-telemetry')
+        self.kube('rollout', 'status', 'deployment/collector', '-n', 'rio-telemetry', '--timeout=180s', timeout=210)
+
     def poll(self, assertion, timeout=60):
         deadline = time.monotonic() + timeout
         error = None
@@ -254,6 +262,7 @@ class Harness:
                 self.current = self.out / f'{lang}-{libc}'
                 self.current.mkdir()
                 self.kube('delete', 'instrumentations.rio.otelx.github.io', 'cluster', '--ignore-not-found', '--wait=true', '--timeout=180s')
+                self.reset_collector()
                 base = f'{lang}-{libc}'
                 name = self.deploy(lang, libc, base + '-bare', False)
                 marker = uuid.uuid4().hex
@@ -274,6 +283,8 @@ class Harness:
                 self.request(name, marker)
                 self.poll(lambda: server_span(self.records('traces'), name, marker))
                 self.assert_silent(name, ('metrics', 'logs'), duration=3)
+                self.save_apps()
+                self.kube('delete', 'deployment', name, '-n', self.namespace, '--wait=true')
                 self.policy({'traces': False, 'metrics': False, 'logs': False})
                 name = self.deploy(lang, libc, base + '-disabled', True)
                 marker = uuid.uuid4().hex

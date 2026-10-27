@@ -56,6 +56,8 @@ def run(harness):
             base = f'logs-{language}-{libc}'
             harness.kube('delete', 'instrumentations.rio.otelx.github.io', 'cluster',
                          '--ignore-not-found', '--wait=true', '--timeout=180s')
+            if hasattr(harness, 'reset_collector'):
+                harness.reset_collector()
             bare = harness.deploy(language, libc, base + '-bare', False)
             marker = uuid.uuid4().hex
             harness.request(bare, marker)

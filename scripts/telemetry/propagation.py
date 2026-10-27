@@ -50,6 +50,8 @@ def run(h):
             h.current = h.out / f'propagation-{libc}-baggage-{enabled}'
             h.current.mkdir()
             h.kube('delete', 'deployment', '--all', '-n', h.namespace, '--wait=true')
+            if hasattr(h, 'reset_collector'):
+                h.reset_collector()
             h.policy({'traces': True, 'metrics': False, 'logs': False}, env={
                 'OTEL_PROPAGATORS': 'tracecontext,baggage' if enabled else 'tracecontext',
                 'OTEL_TRACES_SAMPLER': 'parentbased_always_on'})

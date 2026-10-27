@@ -121,6 +121,8 @@ def run(harness):
             harness.kube('delete', 'deployment', '--all', '-n', harness.namespace, '--wait=true')
             harness.kube('delete', 'instrumentations.rio.otelx.github.io', 'cluster',
                          '--ignore-not-found', '--wait=true', '--timeout=180s')
+            if hasattr(harness, 'reset_collector'):
+                harness.reset_collector()
             suffix = uuid.uuid4().hex[:6]
             name = harness.deploy(lang, libc, f'{lang}-{libc}-metrics-bare-{suffix}', False)
             harness.request(name, uuid.uuid4().hex)
