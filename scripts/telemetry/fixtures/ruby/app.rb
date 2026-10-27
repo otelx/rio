@@ -5,10 +5,13 @@ Bundler.require
 require 'json'
 require 'uri'
 
+$stdout.sync = true
+
 class Fixture < Sinatra::Base
   set :environment, :production
   set :host_authorization, permitted_hosts: []
   LOGGER = Logger.new($stdout)
+  LOGGER.formatter = proc { |_severity, _datetime, _progname, message| message.to_s }
 
   get '/health' do
     content_type :json

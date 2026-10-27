@@ -4,6 +4,8 @@ Ruby 3.3.12 serves Sinatra 4.2.1 on Rack 3.2.7, Rackup 2.3.1, and WEBrick 1.9.2.
 `Gemfile.lock` pins all application dependencies; neither the application nor its
 Gemfile contains OpenTelemetry packages or setup. Application logging uses
 Logger 1.7.0, and outgoing requests use Net::HTTP 0.10.0 with bounded timeouts.
+The standard Logger formatter emits the message alone so its captured body is
+exactly the marker message, with no timestamp prefix or trailing newline.
 The two runtime manifest digests in `fixture.json` match the shipped Ruby bundle
 build inputs and include Linux amd64 and arm64 variants.
 
