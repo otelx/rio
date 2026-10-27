@@ -5,7 +5,7 @@ import sys
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from telemetry.propagation import check_headers, generated_traceparent, relationship
+from telemetry.propagation import check_headers, fresh_root, generated_traceparent, relationship
 
 
 class PropagationAssertions(unittest.TestCase):
@@ -33,6 +33,34 @@ class PropagationAssertions(unittest.TestCase):
         self.callee['parentSpanId'] = '6' * 16
         with self.assertRaises(AssertionError):
             relationship(self.records, 'caller', 'callee', 'first', 'second')
+
+    def test_exported_client_tracestate_cannot_be_lost_or_changed(self):
+        for span in (self.caller, self.client, self.callee):
+            span['traceState'] = 'rio=state'
+        relationship(self.records, 'caller', 'callee', 'first', 'second', state='rio=state')
+        for value in (None, '', 'rio=other'):
+            if value is None:
+                self.client.pop('traceState', None)
+            else:
+                self.client['traceState'] = value
+            with self.subTest(value=value), self.assertRaises(AssertionError):
+                relationship(self.records, 'caller', 'callee', 'first', 'second', state='rio=state')
+
+    def test_absent_and_malformed_contexts_cannot_reuse_one_constant_root(self):
+        seen = {'9' * 32}  # Previously supplied valid incoming context.
+        first = {'traceId': self.trace}
+        fresh_root(first, seen)
+        with self.assertRaises(AssertionError):
+            fresh_root(dict(first), seen)
+        fresh_root({'traceId': '8' * 32}, seen)
+        self.assertEqual(seen, {'9' * 32, self.trace, '8' * 32})
+
+    def test_fresh_context_cannot_reuse_incoming_id_or_keep_remote_parent(self):
+        for parent in ({'traceId': self.trace},
+                       {'traceId': '8' * 32, 'parentSpanId': '3' * 16},
+                       {'traceId': '0' * 32}):
+            with self.subTest(parent=parent), self.assertRaises(AssertionError):
+                fresh_root(parent, {self.trace})
 
     def test_baggage_and_traceparent_duplicates_fail(self):
         headers = {'traceparent': [f'00-{self.trace}-{self.client["spanId"]}-01'],

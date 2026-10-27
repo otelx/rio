@@ -18,7 +18,14 @@ def generated_traceparent(client):
     return f'00-{client["traceId"]}-{client["spanId"]}-{flags:02x}'
 
 
-def relationship(records, caller, callee, first, second, incoming=None):
+def fresh_root(parent, seen_trace_ids):
+    assert valid_id(parent.get('traceId'), 32), parent
+    assert not parent.get('parentSpanId') or int(parent['parentSpanId'], 16) == 0, parent
+    assert parent['traceId'] not in seen_trace_ids, 'Contextless request reused an earlier trace ID'
+    seen_trace_ids.add(parent['traceId'])
+
+
+def relationship(records, caller, callee, first, second, incoming=None, state=None):
     parent = server_span(records, caller, first)
     child = server_span(records, callee, second)
     assert parent['traceId'] == child['traceId'], (parent, child)
@@ -30,6 +37,9 @@ def relationship(records, caller, callee, first, second, incoming=None):
                and s.get('parentSpanId') == parent['spanId'] and s['spanId'] == child.get('parentSpanId')]
     assert len(clients) == 1, (parent, child, clients)
     assert valid_id(clients[0]['spanId'], 16)
+    if state is not None:
+        for span in (parent, clients[0], child):
+            assert span.get('traceState') == state, span
     return parent, clients[0], child
 
 
@@ -51,6 +61,7 @@ def run(h):
     # A subset run exercises its corresponding ring, never implies missing pairs.
     pairs = list(zip(languages, languages[1:] + languages[:1]))
     summary = []
+    seen_trace_ids = set()
     for lang in languages:
         h.config[lang].setdefault('env', {})['RIO_FIXTURE_DELAY_MS'] = '750'
     for libc in h.args.libcs:
@@ -67,6 +78,7 @@ def run(h):
             for caller, callee in pairs:
                 # Overlap distinct contexts and baggage; each application must preserve isolation.
                 cases = [(uuid.uuid4().hex, uuid.uuid4().hex[:16], uuid.uuid4().hex, uuid.uuid4().hex) for _ in range(3)]
+                seen_trace_ids.update(case[0] for case in cases)
                 def request(case):
                     trace, remote, first, second = case
                     state = 'rio=' + first
@@ -80,11 +92,10 @@ def run(h):
                 caller_spans = []
                 for case, state, baggage, body in responses:
                     trace, remote, first, second = case
-                    parent, client, child = h.poll(lambda: relationship(h.records('traces'), names[caller], names[callee], first, second, (trace, remote)))
+                    parent, client, child = h.poll(lambda: relationship(h.records('traces'), names[caller], names[callee], first, second, (trace, remote), state=state))
                     caller_spans.append(parent)
                     assert body['headers']['traceparent'] == [f'00-{trace}-{remote}-01'], body
                     check_headers(body, trace, client, state, {baggage} if enabled else set())
-                    assert parent.get('traceState') == state and child.get('traceState') == state, (parent, child)
                     for span in (parent, client, child):
                         assert int(span.get('flags', 0)) & 1, span
                 assert max(int(s['startTimeUnixNano']) for s in caller_spans) < min(int(s['endTimeUnixNano']) for s in caller_spans), 'Requests did not overlap'
@@ -94,8 +105,7 @@ def run(h):
                         body = h.request(names[caller], first, context,
                             f'http://{names[callee]}.{h.namespace}.svc:8080/work/{second}')
                         parent, client, child = h.poll(lambda: relationship(h.records('traces'), names[caller], names[callee], first, second))
-                        assert not parent.get('parentSpanId') or int(parent['parentSpanId'], 16) == 0, parent
-                        assert parent['traceId'] not in {case[0] for case in cases}, parent
+                        fresh_root(parent, seen_trace_ids)
                         assert not body['downstream']['headers'].get('tracestate'), body
                         assert not baggage_values(body['downstream']['headers']), body
                         assert body['downstream']['headers']['traceparent'] == [generated_traceparent(client)], body
