@@ -144,7 +144,7 @@ func TestAdmissionKubernetesAPI(t *testing.T) {
 	}
 	// Admission configuration propagates asynchronously. Require a real call
 	// before asserting startup behavior so Ignore cannot hide a broken fixture.
-	eventuallyAdmission(t, ctx, func() bool {
+	eventuallyAPI(t, ctx, func() bool {
 		before := calls.Load()
 		unchanged(other, pod("startup"))
 		return calls.Load() > before
@@ -181,20 +181,30 @@ func TestAdmissionKubernetesAPI(t *testing.T) {
 	if !store.Get().Synced {
 		t.Fatal("malformed state blocked policy synchronization")
 	}
-	cr, err = dyn.Resource(PolicyResource).Get(ctx, PolicyName, meta.GetOptions{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	reports, _, _ := unstructured.NestedSlice(cr.Object, "status", "workloads")
-	phases := map[string]string{}
-	for _, entry := range reports {
-		report := entry.(map[string]any)
-		phases[report["namespace"].(string)] = report["phase"].(string)
-	}
-	if phases[other] != "Error" || phases[selected] != "RollingOut" {
-		t.Fatalf("state isolation failed: %v", reports)
-	}
-	t.Log("malformed persisted state reported; healthy selected workload rolled out and policy published")
+	// The Deployment controller can update status between our list and write.
+	// A conflict is workload-local and retries on the next reconciliation; wait
+	// for convergence rather than assuming the first write must win that race.
+	eventuallyAPI(t, ctx, func() bool {
+		if err := controller.Reconcile(ctx); err != nil {
+			t.Fatal(err)
+		}
+		cr, err = dyn.Resource(PolicyResource).Get(ctx, PolicyName, meta.GetOptions{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		reports, _, _ := unstructured.NestedSlice(cr.Object, "status", "workloads")
+		phases := map[string]string{}
+		for _, entry := range reports {
+			report := entry.(map[string]any)
+			phases[report["namespace"].(string)] = report["phase"].(string)
+		}
+		if phases[other] != "Error" || phases[selected] != "Ready" {
+			t.Logf("waiting for healthy workload alongside malformed state: %v", reports)
+			return false
+		}
+		return true
+	})
+	t.Log("malformed persisted state reported; healthy selected workload reached Ready and policy published")
 	got, err := create(selected, pod("selected"))
 	if err != nil || got.Annotations[AppliedAnnotation] == "" {
 		t.Fatalf("webhook did not inject selected Pod: %v %v", got, err)
@@ -291,7 +301,7 @@ func TestAdmissionKubernetesAPI(t *testing.T) {
 
 func ptrInt32(n int32) *int32 { return &n }
 
-func eventuallyAdmission(t *testing.T, ctx context.Context, check func() bool) {
+func eventuallyAPI(t *testing.T, ctx context.Context, check func() bool) {
 	t.Helper()
 	deadline := time.Now().Add(15 * time.Second)
 	for time.Now().Before(deadline) && ctx.Err() == nil {
@@ -300,7 +310,7 @@ func eventuallyAdmission(t *testing.T, ctx context.Context, check func() bool) {
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
-	t.Fatal("API server did not dispatch to the test webhook")
+	t.Fatal("Kubernetes API condition did not converge before the deadline")
 }
 
 func admissionTestCertificate(t *testing.T, ip net.IP) (tls.Certificate, []byte) {
