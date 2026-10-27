@@ -41,8 +41,8 @@ jobs:
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     timeout-minutes: 30
     env:
-      OPERATOR_IMAGE: ghcr.io/otelx/rio:dev-${{ matrix.arch }}
-      PAYLOAD_IMAGE: ghcr.io/otelx/rio-payload:dev-${{ matrix.arch }}
+      OPERATOR_IMAGE: ghcr.io/otelx/rio/operator:dev-${{ matrix.arch }}
+      PAYLOAD_IMAGE: ghcr.io/otelx/rio/instrumentation:dev-${{ matrix.arch }}
     strategy:
       fail-fast: false
       matrix:
@@ -52,7 +52,7 @@ jobs:
         with:
           persist-credentials: false
       - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
-      - name: Build controller
+      - name: Build operator image
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
           context: .
@@ -61,7 +61,7 @@ jobs:
           platforms: linux/${{ matrix.arch }}
           cache-from: type=gha,scope=operator-${{ matrix.arch }}
           cache-to: type=gha,mode=max,scope=operator-${{ matrix.arch }}
-      - name: Build payload
+      - name: Build instrumentation image
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
           context: payload
@@ -94,8 +94,8 @@ jobs:
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     timeout-minutes: 30
     env:
-      OPERATOR_IMAGE: ghcr.io/otelx/rio:dev-${{ matrix.arch }}
-      PAYLOAD_IMAGE: ghcr.io/otelx/rio-payload:dev-${{ matrix.arch }}
+      OPERATOR_IMAGE: ghcr.io/otelx/rio/operator:dev-${{ matrix.arch }}
+      PAYLOAD_IMAGE: ghcr.io/otelx/rio/instrumentation:dev-${{ matrix.arch }}
     strategy:
       fail-fast: false
       matrix:
@@ -172,8 +172,8 @@ jobs:
       - name: Resolve and execute both architectures through common tags
         run: |
           for arch in amd64 arm64; do
-            docker run --rm --pull always --platform "linux/$arch" "localhost:5000/rio-ci/rio:$GITHUB_SHA" --help
-            docker run --rm --pull always --platform "linux/$arch" "localhost:5000/rio-ci/rio-payload:$GITHUB_SHA" /bin/sh -ec '
+            docker run --rm --pull always --platform "linux/$arch" "localhost:5000/rio-ci/rio/operator:$GITHUB_SHA" --help
+            docker run --rm --pull always --platform "linux/$arch" "localhost:5000/rio-ci/rio/instrumentation:$GITHUB_SHA" /bin/sh -ec '
               /verify-layout.sh
               output=$(LD_PRELOAD=/dist/injector/libotelinject.so /bin/sh -c true 2>&1)
               test -z "$output"

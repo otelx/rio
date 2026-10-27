@@ -21,7 +21,7 @@ arch=${platform#linux/}
 artifacts="$root/.artifacts/image-smoke/$arch"
 mkdir -p "$artifacts/payload" "$artifacts/tmp"
 export TMPDIR="$artifacts/tmp"
-payload=${PAYLOAD_IMAGE:-ghcr.io/otelx/rio-payload:dev}
+payload=${PAYLOAD_IMAGE:-ghcr.io/otelx/rio/instrumentation:dev}
 mount=/__otel_sdk_auto_instrumentation__
 docker run --rm --platform "$platform" "$payload" /verify-layout.sh
 docker run --rm --platform "$platform" --mount "type=bind,src=$artifacts/payload,dst=$mount" "$payload" /copy-to-volume.sh

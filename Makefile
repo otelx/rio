@@ -5,8 +5,8 @@ export GOMODCACHE := $(ARTIFACTS)/go-mod-cache
 export GOPATH := $(ARTIFACTS)/go
 export GOTMPDIR := $(ARTIFACTS)/tmp
 export TMPDIR := $(ARTIFACTS)/tmp
-OPERATOR_IMAGE ?= ghcr.io/otelx/rio:dev
-PAYLOAD_IMAGE ?= ghcr.io/otelx/rio-payload:dev
+OPERATOR_IMAGE ?= ghcr.io/otelx/rio/operator:dev
+PAYLOAD_IMAGE ?= ghcr.io/otelx/rio/instrumentation:dev
 PLATFORMS ?= linux/amd64,linux/arm64
 export OPERATOR_IMAGE PAYLOAD_IMAGE
 

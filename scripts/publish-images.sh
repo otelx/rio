@@ -15,7 +15,7 @@ for required in docker python3 mktemp; do
 done
 trap 'printf "Image publication failed at line %s\n" "$LINENO" >&2' ERR
 # Check every input before publishing any image.
-for image in rio rio-payload; do
+for image in rio/operator rio/instrumentation; do
   for arch in amd64 arm64; do
     source="ghcr.io/otelx/$image:dev-$arch"
     actual=$(docker image inspect --format '{{.Os}}/{{.Architecture}}' "$source")
@@ -24,7 +24,7 @@ for image in rio rio-payload; do
 done
 temporary=$(mktemp -d)
 trap 'rm -rf -- "$temporary"' EXIT
-for image in rio rio-payload; do
+for image in rio/operator rio/instrumentation; do
   sources=()
   for arch in amd64 arm64; do
     reference="$registry/$image:$version-$arch"

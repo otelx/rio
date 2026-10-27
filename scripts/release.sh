@@ -37,8 +37,10 @@ Start with the [quickstart](https://github.com/otelx/rio/blob/$version/docs/quic
 
 Images validated by this release workflow:
 
-- \`ghcr.io/otelx/rio:$version\`
-- \`ghcr.io/otelx/rio-payload:$version\`
+- Operator: \`ghcr.io/otelx/rio/operator:$version\`
+- Instrumentation (OpenTelemetry Injector and language agents): \`ghcr.io/otelx/rio/instrumentation:$version\`
+
+**Breaking image rename:** Update the operator Deployment from \`ghcr.io/otelx/rio\` to \`ghcr.io/otelx/rio/operator\`. Update the instrumentation policy's \`spec.image\` and any rule image overrides from \`ghcr.io/otelx/rio-payload\` to \`ghcr.io/otelx/rio/instrumentation\`, using this release's tag. New releases publish only the new paths, without compatibility aliases. Previously published images retain their original names. See the [upgrade instructions](https://github.com/otelx/rio/blob/$version/docs/configuration.md#upgrading-from-alpha1-or-alpha2).
 
 See [CHANGELOG.md](https://github.com/otelx/rio/blob/$version/CHANGELOG.md) for release details.
 EOF

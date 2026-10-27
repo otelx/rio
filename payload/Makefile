@@ -1,6 +1,6 @@
 ROOT := $(abspath ..)
 ARTIFACTS := $(ROOT)/.artifacts
-IMAGE ?= ghcr.io/otelx/rio-payload:dev
+IMAGE ?= ghcr.io/otelx/rio/instrumentation:dev
 PLATFORMS ?= linux/amd64,linux/arm64
 export TMPDIR := $(ARTIFACTS)/tmp
 export UV_CACHE_DIR := $(ARTIFACTS)/uv-cache

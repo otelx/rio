@@ -40,6 +40,8 @@ COPY ruby/opentelemetry-auto-instrumentation.rb /payload/
 
 FROM alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
 LABEL org.opencontainers.image.source="https://github.com/otelx/rio" \
+      org.opencontainers.image.title="RIO instrumentation" \
+      org.opencontainers.image.description="OpenTelemetry Injector and language agents for automatic runtime instrumentation" \
       org.opencontainers.image.licenses="Apache-2.0"
 COPY --from=downloads /payload/libotelinject.so /dist/injector/libotelinject.so
 COPY otelinject.conf /dist/injector/otelinject.conf

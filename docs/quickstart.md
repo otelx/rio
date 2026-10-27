@@ -2,6 +2,8 @@
 
 Run this example in a new, disposable kind cluster. It uses a Node.js HTTP service and an OpenTelemetry Collector with the debug exporter. Successful completion shows HTTP spans produced by a language agent loaded through the Injector.
 
+This example uses `v0.1.0-alpha.3` and its images, `ghcr.io/otelx/rio/operator` and `ghcr.io/otelx/rio/instrumentation`. For a local build, use the [source build instructions](development.md).
+
 ## Prerequisites
 
 Install Docker, [kind](https://kind.sigs.k8s.io/), kubectl, Git, Bash, Python 3, and OpenSSL. Docker must be running. The example uses Linux containers and Kubernetes 1.35. The release targets Linux amd64 and arm64; the controller and payload image tags select the matching architecture. See [compatibility](compatibility.md) for runtime and operational limits.
@@ -11,7 +13,7 @@ Cluster creation, installation, and application rollout require cluster-admin ac
 ## 1. Create the cluster
 
 ```bash
-git clone --branch v0.1.0-alpha.2 https://github.com/otelx/rio.git
+git clone --branch v0.1.0-alpha.3 https://github.com/otelx/rio.git
 cd rio
 mkdir -p .artifacts/tmp
 export TMPDIR="$PWD/.artifacts/tmp"

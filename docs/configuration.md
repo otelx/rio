@@ -16,7 +16,7 @@ kind: Instrumentation
 metadata:
   name: cluster
 spec:
-  image: ghcr.io/otelx/rio-payload:v0.1.0-alpha.2
+  image: ghcr.io/otelx/rio/instrumentation:v0.1.0-alpha.3
   endpoint: http://collector.observability.svc.cluster.local:4318
   signals:
     traces: true
@@ -59,6 +59,19 @@ kubectl logs -n rio-system deployment/rio
 ```
 
 The webhook uses `failurePolicy: Ignore`. If it is unavailable, Kubernetes may create healthy uninstrumented Pods. The operator reports `InjectionMissing` instead of claiming that instrumentation succeeded or rolling back a healthy application. Correct the webhook and request a new revision to retry.
+
+## Upgrading from alpha.1 or alpha.2
+
+The `v0.1.0-alpha.3` release changes both image paths:
+
+| Component | Previous image | New image |
+| --- | --- | --- |
+| Operator | `ghcr.io/otelx/rio` | `ghcr.io/otelx/rio/operator` |
+| Instrumentation | `ghcr.io/otelx/rio-payload` | `ghcr.io/otelx/rio/instrumentation` |
+
+Use the `v0.1.0-alpha.3` installation files and run `./scripts/install.sh` to update the operator Deployment. Update your `Instrumentation` manifest's `spec.image` and any `rules[].image` overrides to the new instrumentation path and release tag, then apply the policy. The policy change triggers instrumentation rollouts for supported managed workloads. Recreate other selected Pods to apply the new image to them. Update image references in deployment automation and registry mirrors as well.
+
+New releases publish only the new paths, without compatibility aliases. Previously published images and release tags retain their original names. For local development, follow the [source build instructions](development.md).
 
 ## Automatic payload delivery
 

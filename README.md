@@ -31,7 +31,14 @@ RIO uses one **cluster-scoped** `Instrumentation` resource named `cluster`. Name
 3. **Activate:** the upstream Injector detects the process runtime and loads its language agent. The payload bundles Java, Node.js, .NET, Python, and Ruby agents.
 4. **Manage:** roll supported workloads when their effective configuration changes; restore the previous instrumentation configuration if the rollout fails.
 
-The controller and payload are maintained in this repository and built as two images: `ghcr.io/otelx/rio` and `ghcr.io/otelx/rio-payload`. Agent and Injector source remain upstream dependencies, pinned in [payload/versions.json](payload/versions.json) and language lockfiles.
+This repository builds two images:
+
+| Image | Purpose |
+| --- | --- |
+| `ghcr.io/otelx/rio/operator` | Kubernetes controller and admission webhook that select workloads and manage instrumentation rollouts and recovery. |
+| `ghcr.io/otelx/rio/instrumentation` | OpenTelemetry Injector and language agents delivered into application Pods for automatic runtime instrumentation. |
+
+The operator Deployment uses `rio/operator`; the `Instrumentation` policy's `spec.image` selects `rio/instrumentation`. Agent and Injector source remain upstream dependencies, pinned in [payload/versions.json](payload/versions.json) and language lockfiles. The image names changed in `v0.1.0-alpha.3`; see [upgrade instructions](docs/configuration.md#upgrading-from-alpha1-or-alpha2).
 
 RIO targets Linux amd64 and arm64, including glibc and Alpine/musl application images. Starting with `v0.1.0-alpha.2`, multi-platform release tags support mixed Linux clusters. The existing `v0.1.0-alpha.1` images are amd64 only; see [compatibility](docs/compatibility.md) for the validated runtime versions and release limits.
 

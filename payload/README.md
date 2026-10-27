@@ -1,6 +1,6 @@
-# RIO payload image
+# RIO instrumentation image
 
-This component builds the image consumed by [RIO](../README.md). It bundles the upstream OpenTelemetry Injector and agents for Java, Node.js, .NET, Python, and Ruby. The Injector detects the runtime when each application process starts.
+This component builds `ghcr.io/otelx/rio/instrumentation`, the instrumentation image consumed by the [RIO operator](../README.md) (`ghcr.io/otelx/rio/operator`). It bundles the upstream OpenTelemetry Injector and agents for Java, Node.js, .NET, Python, and Ruby. The Injector detects the runtime when each application process starts.
 
 One filesystem layout supports native Kubernetes image volumes and the init-container copy fallback:
 
@@ -52,7 +52,7 @@ make -C payload archive
 This uses Docker Buildx and requires builders capable of executing amd64 and arm64 stages (native workers or emulation). Output goes to `.artifacts/images/payload.oci.tar`. To publish a multi-platform tag when a registry is available, explicitly run:
 
 ```bash
-make -C payload publish IMAGE=REGISTRY/rio-payload:VERSION
+make -C payload publish IMAGE=REGISTRY/rio/instrumentation:VERSION
 ```
 
 No registry publishing is part of the normal local build. The build context is limited to this component; no presentation files are included.
@@ -62,7 +62,7 @@ No registry publishing is part of the normal local build. The build context is l
 Every image build runs `verify-layout.sh`, checking that all five agent payloads are present. Actual startup checks run through the Injector's `LD_PRELOAD` path:
 
 ```bash
-PAYLOAD_IMAGE=ghcr.io/otelx/rio-payload:dev payload/scripts/smoke.sh
+PAYLOAD_IMAGE=ghcr.io/otelx/rio/instrumentation:dev payload/scripts/smoke.sh
 ```
 
 The smoke test checks Java 21, Node 24, Python 3.14, Ruby 3.3, and a .NET 8 console fixture in both glibc and Alpine/musl images. It verifies that the agents initialize and that the copied-volume layout works. `PLATFORM=linux/arm64` or `PLATFORM=linux/amd64` selects an architecture explicitly; executing a foreign architecture requires emulation. CI runs these checks on native workers for both architectures. Logs and copied files are separated by architecture under `.artifacts/image-smoke/`.

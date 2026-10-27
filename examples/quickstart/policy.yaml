@@ -3,7 +3,7 @@ kind: Instrumentation
 metadata:
   name: cluster
 spec:
-  image: ghcr.io/otelx/rio-payload:v0.1.0-alpha.2
+  image: ghcr.io/otelx/rio/instrumentation:v0.1.0-alpha.3
   endpoint: http://collector.rio-telemetry.svc.cluster.local:4318
   signals: {traces: true, metrics: false, logs: false}
   timeoutSeconds: 120

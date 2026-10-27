@@ -29,8 +29,8 @@ mkdir -p "$artifacts/tmp"
 export TMPDIR="$artifacts/tmp"
 export KUBECONFIG="$artifacts/kubeconfig"
 kubectl() { command kubectl --cache-dir="$artifacts/kubectl-cache" "$@"; }
-operator_image=${OPERATOR_IMAGE:-ghcr.io/otelx/rio:dev}
-payload_image=${PAYLOAD_IMAGE:-ghcr.io/otelx/rio-payload:dev}
+operator_image=${OPERATOR_IMAGE:-ghcr.io/otelx/rio/operator:dev}
+payload_image=${PAYLOAD_IMAGE:-ghcr.io/otelx/rio/instrumentation:dev}
 node_image=${NODE_IMAGE:-kindest/node:v1.35.0}
 create_cluster=true
 existing_clusters=$(kind get clusters)
@@ -198,7 +198,7 @@ CHECK
     python3 - "$root/examples/quickstart/policy.yaml" "$payload_image" > "$artifacts/quickstart-policy.yaml" <<'RENDER'
 from pathlib import Path
 import sys
-print(Path(sys.argv[1]).read_text().replace('ghcr.io/otelx/rio-payload:v0.1.0-alpha.2', sys.argv[2]))
+print(Path(sys.argv[1]).read_text().replace('ghcr.io/otelx/rio/instrumentation:v0.1.0-alpha.3', sys.argv[2]))
 RENDER
     kubectl apply -f "$artifacts/quickstart-policy.yaml"
     kubectl wait --for=jsonpath='{.status.phase}'=Ready instrumentations.rio.otelx.github.io/cluster --timeout=300s

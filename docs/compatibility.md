@@ -10,6 +10,7 @@ RIO is experimental. The initial release supports evaluation; it does not claim 
 - Windows containers are unsupported. RIO does not change application scheduling.
 - Starting with `v0.1.0-alpha.2`, the controller and payload release tags contain amd64 and arm64 images. Mixed Linux clusters use the same tags on both architectures; the container runtime selects the matching image, and capability probes must succeed on every Linux node before native delivery is selected. Application images must also provide the architectures on which they can be scheduled.
 - The existing `v0.1.0-alpha.1` images are amd64 only. Use `v0.1.0-alpha.2` or later for arm64; existing release tags are not replaced.
+- Starting with `v0.1.0-alpha.3`, releases use `ghcr.io/otelx/rio/operator` and `ghcr.io/otelx/rio/instrumentation`. Earlier releases retain their original image paths. See [upgrade instructions](configuration.md#upgrading-from-alpha1-or-alpha2).
 
 ## Runtimes and signals
 

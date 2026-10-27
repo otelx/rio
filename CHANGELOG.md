@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.0-alpha.3
+
+- **Breaking:** Rename the operator image from `ghcr.io/otelx/rio` to `ghcr.io/otelx/rio/operator`, and the instrumentation image from `ghcr.io/otelx/rio-payload` to `ghcr.io/otelx/rio/instrumentation`. Builds and releases use the new names without compatibility aliases. Update the operator Deployment image and instrumentation policy image references, including any rule overrides; see [upgrade instructions](docs/configuration.md#upgrading-from-alpha1-or-alpha2).
+- Add image titles and descriptions identifying the operator and the instrumentation bundle.
+
 ## v0.1.0-alpha.2
 
 - Linux arm64 controller and payload images, with native architecture CI and multi-platform release tags for amd64 and arm64.
