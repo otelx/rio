@@ -1,6 +1,6 @@
 # Dependency security
 
-RIO follows the [OpenSSF Best Practices vulnerability analysis and dependency maintenance criteria](https://www.bestpractices.dev/en/criteria/0). Scanner matches are evidence for review, not proof of exploitability. Only the latest published alpha is maintained; development fixes land on `main` before a separately approved release. An old image tag is immutable and does not acquire fixes from `main`.
+RIO follows the [OpenSSF Best Practices vulnerability analysis and dependency maintenance criteria](https://www.bestpractices.dev/en/criteria/0). Scanner matches are evidence for review, not proof of exploitability. [Security reporting](../SECURITY.md) defines the maintained release line; development fixes land on `main` before a separately approved release. An old image tag is immutable and does not acquire fixes from `main`.
 
 ## Ownership and cadence
 
