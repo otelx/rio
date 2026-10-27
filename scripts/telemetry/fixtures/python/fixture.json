@@ -1,0 +1,26 @@
+{
+  "language": "python",
+  "runtime": "Python 3.14.6",
+  "framework": "aiohttp 3.13.3 (HTTP server and ClientSession client)",
+  "agent": "OpenTelemetry Python distro/instrumentations 0.66b0, SDK 1.45.0",
+  "images": {
+    "glibc": "python:3.14.6-trixie@sha256:55dd7c1ea6c2b2c45a26d797187706eb9e5e0046f8e54fd759e38647b505c36b",
+    "musl": "python:3.14.6-alpine3.23@sha256:b165067c5afc37fa5608a3c05609cc3d51aafd808a30fbfd822ee594fef55ad4"
+  },
+  "env": {
+    "OTEL_SEMCONV_STABILITY_OPT_IN": "http"
+  },
+  "metrics": {
+    "name": "http.server.request.duration",
+    "type": "histogram",
+    "unit": "s",
+    "temporality": "cumulative",
+    "activity": "aiohttp request duration histogram count increases after /work requests"
+  },
+  "logs": {
+    "library": "Python standard-library logging (3.14.6)",
+    "body": "rio-fixture MARKER",
+    "severity": "INFO",
+    "correlation": true
+  }
+}
