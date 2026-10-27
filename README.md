@@ -10,7 +10,7 @@ RIO lets a platform team select application namespaces using one central policy.
 
 ## Try it
 
-Follow the **[quickstart](docs/quickstart.md)** to run a small Node.js service, select its namespace, and inspect real HTTP spans in an OpenTelemetry Collector. The example does not depend on a vendor backend or the presentation repository.
+Follow the **[quickstart](docs/quickstart.md)** to run a small Node.js service, select its namespace, and inspect HTTP spans in an OpenTelemetry Collector.
 
 The central selection looks like this; the full policy also supplies a payload image, OTLP endpoint, and signal settings:
 
@@ -31,16 +31,16 @@ RIO uses one **cluster-scoped** `Instrumentation` resource named `cluster`. Name
 3. **Activate:** the upstream Injector detects the process runtime and loads its language agent. The payload bundles Java, Node.js, .NET, Python, and Ruby agents.
 4. **Manage:** roll supported workloads when their effective configuration changes; restore the previous instrumentation configuration if the rollout fails.
 
-This repository builds two images:
+RIO uses two container images:
 
 | Image | Purpose |
 | --- | --- |
 | `ghcr.io/otelx/rio/operator` | Kubernetes controller and admission webhook that select workloads and manage instrumentation rollouts and recovery. |
 | `ghcr.io/otelx/rio/instrumentation` | OpenTelemetry Injector and language agents delivered into application Pods for automatic runtime instrumentation. |
 
-The operator Deployment uses `rio/operator`; the `Instrumentation` policy's `spec.image` selects `rio/instrumentation`. Agent and Injector source remain upstream dependencies, pinned in [payload/versions.json](payload/versions.json) and language lockfiles. The image names changed in `v0.1.0-alpha.3`; see [upgrade instructions](docs/configuration.md#upgrading-from-alpha1-or-alpha2).
+The operator Deployment uses `rio/operator`; the `Instrumentation` policy's `spec.image` selects `rio/instrumentation`.
 
-RIO targets Linux amd64 and arm64, including glibc and Alpine/musl application images. Use `v0.1.0-alpha.3` or later under the image paths above. The original image packages for alpha.1 and alpha.2 have been retired and deleted; their source tags and release archives remain available. See [compatibility](docs/compatibility.md) for the validated runtime versions and release limits.
+RIO targets Linux amd64 and arm64, including glibc and Alpine/musl application images. See [compatibility](docs/compatibility.md) for supported environments and limitations.
 
 ## Learn more
 
@@ -53,9 +53,7 @@ RIO targets Linux amd64 and arm64, including glibc and Alpine/musl application i
 
 ## Relationship to OpenTelemetry
 
-RIO is an independent **otelx** project using OpenTelemetry components. It is not an official OpenTelemetry subproject or a distribution of the upstream [OpenTelemetry Operator](https://github.com/open-telemetry/opentelemetry-operator). That Operator already supports language-specific workload and namespace opt-in. RIO explores central namespace selection, runtime detection, and instrumentation rollout management together. OpenTelemetry eBPF Instrumentation (OBI) is separate and is not installed or coordinated by RIO.
-
-RIO grew out of the namespace-driven integration demonstrated in [OpenTelemetry Far and Wide](https://github.com/MrAlias/OpenTelemetry-Far-and-Wide). Its design builds on Grafana's composite SDK injection prototype, with credit to Jack Berg and Nikola Grcevski. See [provenance](docs/provenance.md) for precise source references and the distinction between that prototype and this controller.
+RIO is an independent **otelx** project using upstream OpenTelemetry components. See [provenance](docs/provenance.md) for origins and attribution.
 
 ## License
 
