@@ -4,6 +4,8 @@ root=${1:-/dist}
 test -s "$root/versions.json"
 test -s "$root/injector/libotelinject.so"
 test -s "$root/injector/otelinject.conf"
+test -r "$root/injector/otelinject.conf"
+test -r "$root/injector/libotelinject.so"
 test -s "$root/agents/java/opentelemetry-javaagent.jar"
 test -s "$root/agents/node/node_modules/@opentelemetry/auto-instrumentations-node/build/src/register.js"
 for libc in glibc musl; do

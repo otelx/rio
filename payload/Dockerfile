@@ -55,5 +55,9 @@ COPY --from=ruby-musl /payload /dist/agents/ruby/musl
 COPY versions.json /dist/versions.json
 COPY LICENSE NOTICE /licenses/
 COPY copy-to-volume.sh verify-layout.sh /
-RUN chmod +x /copy-to-volume.sh /verify-layout.sh && /verify-layout.sh
+# COPY preserves the checkout's umask-derived modes. All application users need
+# to traverse agent directories and read the Injector configuration and agents.
+RUN find /dist -type d ! -perm -005 -exec chmod a+rx {} + \
+    && find /dist -type f ! -perm -004 -exec chmod a+r {} + \
+    && chmod a+rx /copy-to-volume.sh /verify-layout.sh && /verify-layout.sh
 CMD ["/copy-to-volume.sh"]
