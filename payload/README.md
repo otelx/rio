@@ -2,6 +2,8 @@
 
 This component builds `ghcr.io/otelx/rio/instrumentation`, the instrumentation image consumed by the [RIO operator](../README.md) (`ghcr.io/otelx/rio/operator`). It bundles the upstream OpenTelemetry Injector and agents for Java, Node.js, .NET, Python, and Ruby. The Injector detects the runtime when each application process starts.
 
+Bundled language paths have different validation levels: only Node.js 24 built-in HTTP server trace export has application integration coverage. Java, .NET, Python, and Ruby remain **experimental**, as do metrics/log capture and export for every language. Propagation has no integration assertions. Use the [support matrix and signal guarantees](../docs/compatibility.md#runtimes-and-signals), and match the instrumentation image's full release version to `rio/operator`.
+
 One filesystem layout supports native Kubernetes image volumes and the init-container copy fallback:
 
 ```text

@@ -6,6 +6,8 @@ The payload comes from [the image component](../payload/README.md). Application 
 
 Start with the [quickstart](quickstart.md) for a complete local installation.
 
+The [support contract](compatibility.md) defines the validated runtime/signal scope, matching operator/instrumentation versions, cross-release migration limits, and the compatibility policy for this API and persisted annotations. The API remains `v1alpha1` for the first normal `v0.1.0` release.
+
 ## Configuration
 
 Install [the CRD](../config/crd.yaml) and use [the example policy](../config/example.yaml). The API group is `rio.otelx.github.io/v1alpha1`, deliberately separate from the upstream OpenTelemetry Operator APIs.
@@ -80,6 +82,8 @@ Use the `v0.1.0-alpha.3` installation files and run `./scripts/install.sh` to up
 The retired `ghcr.io/otelx/rio` and `ghcr.io/otelx/rio-payload` packages have been deleted. Images for alpha.1 and alpha.2 can no longer be pulled from GHCR. Use alpha.3 or later under the new paths; source tags and release archives remain available. For local development, follow the [source build instructions](development.md).
 
 Update old policy image references, including rule overrides, before recreating or rescheduling instrumented Pods. Saved recovery revisions may also reference retired images; a recovery that needs to pull a deleted image cannot succeed unless that image is already cached or supplied through a maintained registry mirror. Cross-release upgrade and recovery validation is tracked in [issue #6](https://github.com/otelx/rio/issues/6).
+
+The steps above describe the image rename, not a validated in-place cross-release upgrade. For the supported migration approach and treatment of saved state, follow [operator/instrumentation versions and upgrades](compatibility.md#operatorinstrumentation-versions-and-upgrades). Cached retired images do not provide a durable recovery guarantee.
 
 ## Automatic payload delivery
 
