@@ -200,7 +200,12 @@ func TestAdmissionRejectsForgedStaleCopiedAndMalformedSnapshots(t *testing.T) {
 			w, p, _ := snapshotFixture(t, "Deployment", cfg)
 			tc.change(w, p)
 			r := admissionResult(t, w, p, tc.user)
-			if r.Allowed {
+			skip := tc.name == "copied-namespace" || tc.name == "recreated-owner" || tc.name == "forged-api-group"
+			if skip {
+				if !r.Allowed || r.Patch != nil {
+					t.Fatalf("unavailable owner must skip injection: %+v", r)
+				}
+			} else if r.Allowed {
 				t.Fatalf("forged snapshot accepted: %s", r.Patch)
 			}
 		})
@@ -242,8 +247,12 @@ func TestDirectAndUnmanagedPodsUseCentralPolicy(t *testing.T) {
 				forged := Config{Enabled: true, Image: "forged"}
 				encoded, _ := json.Marshal(forged)
 				pod.Annotations = map[string]string{ConfigAnnotation: string(encoded), RevisionAnnotation: forged.Revision(), OwnerAnnotation: "fake"}
-				if admissionResult(t, w, pod, "system:kube-controller-manager").Allowed {
-					t.Fatal("unmanaged pin accepted")
+				forgedResponse := admissionResult(t, w, pod, "system:kube-controller-manager")
+				if selected && forgedResponse.Allowed {
+					t.Fatal("selected unmanaged pin accepted")
+				}
+				if !selected && (!forgedResponse.Allowed || forgedResponse.Patch != nil) {
+					t.Fatal("unselected annotations must not select injection or block admission")
 				}
 			})
 		}
@@ -365,7 +374,7 @@ func TestInvalidWorkloadStateDoesNotBlockOtherWorkloads(t *testing.T) {
 	found := false
 	for _, entry := range status {
 		row := entry.(map[string]any)
-		if row["name"] == "forged" && row["phase"] == "InvalidState" {
+		if row["name"] == "forged" && row["phase"] == "Error" {
 			found = true
 		}
 	}

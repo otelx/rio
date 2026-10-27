@@ -1,7 +1,9 @@
 package operator
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -54,29 +56,54 @@ func (w *Webhook) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			if pod.Namespace == "" {
 				pod.Namespace = r.Namespace
 			}
-			snapshot := w.Store.Get()
-			if !snapshot.Synced {
+			patch, err := w.admit(req.Context(), &pod, r.UserInfo.Username)
+			if err != nil {
 				response.Allowed = false
-				response.Result = &meta.Status{Message: "instrumentation policy has not synchronized"}
-			} else {
-				cfg, service, err := w.configuration(req.Context(), &pod, r.UserInfo.Username, snapshot.Policy)
-				if err == nil {
-					err = Mutate(&pod, cfg, snapshot.NativeImages[cfg.Image], service)
-				}
-				if err != nil {
-					response.Allowed = false
-					response.Result = &meta.Status{Message: err.Error()}
-					slog.Warn("injection rejected", "namespace", pod.Namespace, "pod", pod.Name, "error", err)
-				} else {
-					patch, _ := json.Marshal([]map[string]any{{"op": "add", "path": "/spec", "value": pod.Spec}, {"op": "add", "path": "/metadata/annotations", "value": pod.Annotations}})
-					pt := admission.PatchTypeJSONPatch
-					response.PatchType = &pt
-					response.Patch = patch
-				}
+				response.Result = &meta.Status{Message: err.Error()}
+				slog.Warn("injection rejected", "namespace", pod.Namespace, "pod", pod.Name, "error", err)
+			} else if patch != nil {
+				pt := admission.PatchTypeJSONPatch
+				response.PatchType = &pt
+				response.Patch = patch
 			}
 		}
 	}
 	_ = json.NewEncoder(rw).Encode(admission.AdmissionReview{TypeMeta: meta.TypeMeta{APIVersion: "admission.k8s.io/v1", Kind: "AdmissionReview"}, Response: response})
+}
+
+// admit returns no patch when instrumentation is irrelevant or policy/owner
+// information is unavailable. Explicit rejections are reserved for unsafe
+// mutation of a workload known to be selected by a synchronized policy.
+func (w *Webhook) admit(ctx context.Context, pod *core.Pod, user string) ([]byte, error) {
+	if criticalPriority(pod.Spec.PriorityClassName) {
+		return nil, nil
+	}
+	snapshot := w.Store.Get()
+	potential := pod
+	if !controllerUser(user) && meta.GetControllerOf(pod) != nil {
+		// Owner references supplied by another identity cannot select workload rules.
+		potential = pod.DeepCopy()
+		potential.OwnerReferences = nil
+	}
+	if !snapshot.Synced || !snapshot.Policy.mayInjectPod(potential) {
+		return nil, nil
+	}
+	cfg, service, err := w.configuration(ctx, pod, user, snapshot.Policy)
+	var lookup *ownerLookupError
+	if errors.As(err, &lookup) {
+		slog.Warn("skipping injection; owner unavailable", "namespace", pod.Namespace, "pod", pod.Name, "error", err)
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	if !cfg.Enabled {
+		return nil, nil
+	}
+	if err := Mutate(pod, cfg, snapshot.NativeImages[cfg.Image], service); err != nil {
+		return nil, err
+	}
+	return json.Marshal([]map[string]any{{"op": "add", "path": "/spec", "value": pod.Spec}, {"op": "add", "path": "/metadata/annotations", "value": pod.Annotations}})
 }
 
 func Mutate(pod *core.Pod, cfg Config, native bool, service string) error {

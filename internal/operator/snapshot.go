@@ -28,20 +28,32 @@ func controllerUser(user string) bool {
 	return false
 }
 
+type ownerLookupError struct{ err error }
+
+func (e *ownerLookupError) Error() string { return e.err.Error() }
+func (e *ownerLookupError) Unwrap() error { return e.err }
+
 func (w *Webhook) configuration(ctx context.Context, pod *core.Pod, user string, policy *Policy) (Config, string, error) {
 	kind, name := "Pod", pod.Name
 	if name == "" {
 		name = strings.TrimSuffix(pod.GenerateName, "-")
 	}
 	var workload *unstructured.Unstructured
-	if controllerUser(user) {
-		var err error
-		kind, name, workload, err = w.owner(ctx, pod)
+	if controllerUser(user) || meta.GetControllerOf(pod) != nil {
+		ownerKind, ownerName, ownerWorkload, err := w.owner(ctx, pod)
 		if err != nil {
-			return Config{}, name, err
+			return Config{}, name, &ownerLookupError{err: err}
+		}
+		if controllerUser(user) {
+			kind, name, workload = ownerKind, ownerName, ownerWorkload
 		}
 	}
 	cfg := policy.Resolve(pod.Namespace, kind, name)
+	// Preserve admission isolation: annotations never select an otherwise
+	// unselected Pod, and are irrelevant when no injection is authorized.
+	if !cfg.Enabled {
+		return cfg, name, nil
+	}
 	hasSnapshot := false
 	for _, key := range []string{ConfigAnnotation, OwnerAnnotation, RevisionAnnotation} {
 		if _, ok := pod.Annotations[key]; ok {

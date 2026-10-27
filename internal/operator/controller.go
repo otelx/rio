@@ -49,7 +49,14 @@ func (c *Controller) Run(ctx context.Context) {
 	}
 }
 
-func (c *Controller) Reconcile(ctx context.Context) error {
+func (c *Controller) Reconcile(ctx context.Context) (reconcileErr error) {
+	// Do not admit against stale policy after a global synchronization failure.
+	// Workload-local errors are reported below and do not invalidate the snapshot.
+	defer func() {
+		if reconcileErr != nil {
+			c.Store.Set(Snapshot{})
+		}
+	}()
 	cr, err := c.Dynamic.Resource(PolicyResource).Get(ctx, PolicyName, meta.GetOptions{})
 	var policy *Policy
 	if errors.IsNotFound(err) {
@@ -82,7 +89,8 @@ func (c *Controller) Reconcile(ctx context.Context) error {
 			return e
 		}
 		for i := range list.Items {
-			if !excluded(list.Items[i].GetNamespace(), c.Namespace) {
+			priority, _, _ := unstructured.NestedString(list.Items[i].Object, "spec", "template", "spec", "priorityClassName")
+			if !excluded(list.Items[i].GetNamespace(), c.Namespace) && !criticalPriority(priority) {
 				workloads = append(workloads, workload{&list.Items[i], typ.kind, gvr})
 			}
 		}
@@ -99,11 +107,11 @@ func (c *Controller) Reconcile(ctx context.Context) error {
 			}
 		}
 	}
-	invalidState := map[*unstructured.Unstructured]error{}
 	for _, w := range workloads {
 		s, e := c.Authority.readState(w.object)
 		if e != nil {
-			invalidState[w.object] = e
+			// Report this workload in the main loop; its state must not
+			// prevent publication of the policy used by healthy workloads.
 			continue
 		}
 		if s != nil {
@@ -136,18 +144,19 @@ func (c *Controller) Reconcile(ctx context.Context) error {
 	reports := []any{}
 	phase := "Ready"
 	cleanupComplete := true
+	reportError := func(w workload, err error) {
+		slog.Warn("workload reconciliation failed", "kind", w.kind, "namespace", w.object.GetNamespace(), "name", w.object.GetName(), "error", err)
+		reports = append(reports, map[string]any{"namespace": w.object.GetNamespace(), "kind": w.kind, "name": w.object.GetName(), "phase": "Error", "message": err.Error()})
+		phase = "Degraded"
+		cleanupComplete = false
+	}
 	for _, w := range workloads {
 		obj := w.object
-		if problem := invalidState[obj]; problem != nil {
-			reports = append(reports, map[string]any{"namespace": obj.GetNamespace(), "kind": w.kind, "name": obj.GetName(), "phase": "InvalidState", "message": problem.Error()})
-			phase = "Degraded"
-			cleanupComplete = false
-			continue
-		}
 		wanted := policy.Resolve(obj.GetNamespace(), w.kind, obj.GetName())
 		state, e := c.Authority.readState(obj)
 		if e != nil {
-			return e
+			reportError(w, e)
+			continue
 		}
 		if state == nil && !wanted.Enabled {
 			continue
@@ -178,11 +187,13 @@ func (c *Controller) Reconcile(ctx context.Context) error {
 		next, templateChanged := Advance(state, wanted, health, time.Now().UTC())
 		if state == nil || !reflect.DeepEqual(*state, next) {
 			if err = c.Authority.writeState(obj, next, templateChanged); err != nil {
-				return err
+				reportError(w, err)
+				continue
 			}
 			obj, err = c.Dynamic.Resource(w.resource).Namespace(obj.GetNamespace()).Update(ctx, obj, meta.UpdateOptions{})
 			if err != nil {
-				return err
+				reportError(w, err)
+				continue
 			}
 			slog.Info("instrumentation state", "kind", w.kind, "namespace", obj.GetNamespace(), "name", obj.GetName(), "phase", next.Phase, "revision", next.Current.Revision())
 		}
@@ -191,7 +202,8 @@ func (c *Controller) Reconcile(ctx context.Context) error {
 			// Delete only unready Pods from the failed revision, after persisting
 			// the restored template, with UID preconditions and normal grace periods.
 			if err = c.recoverStatefulSet(ctx, obj, pods.Items, next); err != nil {
-				return err
+				reportError(w, err)
+				continue
 			}
 		}
 		report["phase"] = next.Phase
