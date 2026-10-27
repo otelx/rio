@@ -6,6 +6,8 @@ if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
   printf 'Run scripts/e2e-upgrade.sh; this helper must be sourced by e2e.sh.\n' >&2
   exit 2
 fi
+authority_uid=$(kubectl get secret rio-snapshot-authority -n rio-system -o jsonpath='{.metadata.uid}')
+[[ -n "$authority_uid" ]] || { printf 'Missing snapshot authority before renewal checks\n' >&2; exit 1; }
 for certificate_case in expiring expired; do
   cert_dir="$artifacts/certificate-$certificate_case"
   mkdir -p "$cert_dir"
@@ -93,3 +95,7 @@ PY
   kubectl patch mutatingwebhookconfiguration rio --type=json -p '[{"op":"replace","path":"/webhooks/0/failurePolicy","value":"Ignore"}]'
   rm -f -- "$cert_dir/tls.key"
 done
+
+[[ $(kubectl get secret rio-snapshot-authority -n rio-system -o jsonpath='{.metadata.uid}') == "$authority_uid" ]] || {
+  printf 'Certificate renewal replaced the snapshot authority\n' >&2; exit 1;
+}

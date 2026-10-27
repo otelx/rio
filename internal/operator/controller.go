@@ -20,6 +20,7 @@ import (
 )
 
 type Controller struct {
+	Authority    *Authority
 	Kube         kubernetes.Interface
 	Dynamic      dynamic.Interface
 	Namespace    string
@@ -107,7 +108,7 @@ func (c *Controller) Reconcile(ctx context.Context) (reconcileErr error) {
 		}
 	}
 	for _, w := range workloads {
-		s, e := readState(w.object)
+		s, e := c.Authority.readState(w.object)
 		if e != nil {
 			// Report this workload in the main loop; its state must not
 			// prevent publication of the policy used by healthy workloads.
@@ -152,7 +153,7 @@ func (c *Controller) Reconcile(ctx context.Context) (reconcileErr error) {
 	for _, w := range workloads {
 		obj := w.object
 		wanted := policy.Resolve(obj.GetNamespace(), w.kind, obj.GetName())
-		state, e := readState(obj)
+		state, e := c.Authority.readState(obj)
 		if e != nil {
 			reportError(w, e)
 			continue
@@ -185,7 +186,7 @@ func (c *Controller) Reconcile(ctx context.Context) (reconcileErr error) {
 		}
 		next, templateChanged := Advance(state, wanted, health, time.Now().UTC())
 		if state == nil || !reflect.DeepEqual(*state, next) {
-			if err = writeState(obj, next, templateChanged); err != nil {
+			if err = c.Authority.writeState(obj, next, templateChanged); err != nil {
 				reportError(w, err)
 				continue
 			}
@@ -211,15 +212,12 @@ func (c *Controller) Reconcile(ctx context.Context) (reconcileErr error) {
 		if next.FailedRevision != "" {
 			report["failedRevision"] = next.FailedRevision
 		}
-		if next.Phase == "Ready" && next.Current.Enabled {
-			for _, pod := range pods.Items {
-				if pod.Annotations[OwnerAnnotation] == string(obj.GetUID()) && pod.Annotations[RevisionAnnotation] == next.Current.Revision() && pod.DeletionTimestamp == nil && pod.Annotations[AppliedAnnotation] != next.Current.Revision() {
-					report["phase"] = "InjectionMissing"
-					report["message"] = "healthy pod did not receive the requested injection; inspect webhook events"
-					phase = "Degraded"
-				}
-			}
+		if next.Phase == "InjectionMissing" || next.Phase == "RollbackInjectionMissing" || (state != nil && next.Current.Revision() == state.Current.Revision() && next.Current.Enabled && health.Ready && health.InjectionMissing) {
+			report["phase"] = "InjectionMissing"
+			report["message"] = "healthy pods did not receive the requested instrumentation; inspect webhook events; the last successful configuration is preserved"
+			phase = "Degraded"
 		}
+
 		reports = append(reports, report)
 		if next.Phase == "RollingOut" || next.Phase == "RollingBack" {
 			if phase == "Ready" {
