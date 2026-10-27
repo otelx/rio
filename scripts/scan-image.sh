@@ -49,5 +49,5 @@ else
     --format json --output "$out/dotnet-scan.json" "$out/dotnet.spdx.json"
   python3 "$root/scripts/security-gate.py" "$out/dotnet-scan.json" dotnet "$root/security/exceptions.json" || status=1
 fi
-trivy --version > "$out/trivy-version.txt"
+trivy --cache-dir "$root/.artifacts/trivy-cache" --version > "$out/trivy-version.txt"
 exit "$status"
