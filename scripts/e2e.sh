@@ -344,7 +344,7 @@ CHECK
     # Start a fresh Collector so spans from the previous libc cannot pass this check.
     kubectl rollout restart deployment/collector -n rio-telemetry
     kubectl rollout status deployment/collector -n rio-telemetry --timeout=180s
-    kubectl get pods -n rio-telemetry -l app=collector -o json > "$logs/collector-pods.json"
+    kubectl get pods -n rio-telemetry -l app=rio-collector -o json > "$logs/collector-pods.json"
     collector_pod=$(python3 - "$logs/collector-pods.json" <<'CHECK'
 import json,sys
 pods=[p for p in json.load(open(sys.argv[1]))['items'] if not p['metadata'].get('deletionTimestamp')]
