@@ -1,0 +1,29 @@
+{
+  "language": "dotnet",
+  "runtime": ".NET 8.0.33",
+  "framework": "ASP.NET Core 8.0.33 (Kestrel), System.Net.Http.HttpClient, Microsoft.Extensions.Logging 8.0.33",
+  "agent": "OpenTelemetry .NET automatic instrumentation 1.17.0",
+  "images": {
+    "glibc": "mcr.microsoft.com/dotnet/aspnet:8.0.33-bookworm-slim@sha256:63a1e42746a20795273c219f1577a8826644f12f67d829e818d8ccec92915493",
+    "musl": "mcr.microsoft.com/dotnet/aspnet:8.0.33-alpine3.24@sha256:fc9d161eefc515dd65749a45189ac9691cf9954a044fef23ac278e039c6e2ac4"
+  },
+  "build_image": "mcr.microsoft.com/dotnet/sdk:8.0.427-bookworm-slim@sha256:ff39a765f04619c8d146796fc09b38499ae5984f4a2a4c3a0a57d0022855daee",
+  "env": {
+    "OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE": "true"
+  },
+  "metrics": {
+    "source": "ASP.NET Core server request metrics (automatic agent ASPNETCORE instrumentation)",
+    "name": "http.server.request.duration",
+    "type": "histogram",
+    "unit": "s",
+    "temporality": "cumulative",
+    "activity": "GET /work/MARKER increases count and produces a nonnegative duration sample"
+  },
+  "logs": {
+    "library": "Microsoft.Extensions.Logging.ILogger from ASP.NET Core 8.0.33",
+    "body": "rio-fixture MARKER",
+    "severity": "INFO",
+    "correlation": true,
+    "source": "Shipped agent ILOGGER instrumentation; ordinary console logging remains enabled"
+  }
+}
