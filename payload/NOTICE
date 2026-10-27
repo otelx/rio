@@ -4,6 +4,12 @@ Licensed under the Apache License, Version 2.0; see LICENSE.
 Python requirements originate from the OpenTelemetry Authors' Operator v0.160.0:
 https://github.com/open-telemetry/opentelemetry-operator/blob/v0.160.0/autoinstrumentation/python/requirements.txt
 
+RIO modifies Python OTLP exporter 1.45.0 to preserve span/link W3C trace flags
+alongside remote-parent flags. This backports the behavior proposed upstream:
+https://github.com/open-telemetry/opentelemetry-python/issues/4666
+https://github.com/open-telemetry/opentelemetry-python/pull/5667
+The upstream Apache-2.0 source and package license remain in the payload.
+
 The Ruby dependency graph was adapted from Grafana Beyla's Apache-2.0 image build,
 with its OpenTelemetry Ruby source revision updated and locked:
 https://github.com/grafana/beyla/tree/main/pkg/webhook/image/ruby

@@ -14,12 +14,16 @@ FROM python:3.14.6-trixie@sha256:55dd7c1ea6c2b2c45a26d797187706eb9e5e0046f8e54fd
 WORKDIR /build
 COPY python/requirements.lock ./
 RUN mkdir -p /build/tmp && TMPDIR=/build/tmp pip install --no-cache-dir --require-hashes --no-compile --target /payload -r requirements.lock
+COPY python/patch_trace_flags.py python/test_trace_flags.py ./
+RUN python patch_trace_flags.py /payload && PYTHONPATH=/payload OTEL_SDK_DISABLED=true python test_trace_flags.py
 COPY python/sitecustomize.py /payload/
 
 FROM python:3.14.6-alpine3.23@sha256:b165067c5afc37fa5608a3c05609cc3d51aafd808a30fbfd822ee594fef55ad4 AS python-musl
 WORKDIR /build
 COPY python/requirements.lock ./
 RUN mkdir -p /build/tmp && TMPDIR=/build/tmp pip install --no-cache-dir --require-hashes --no-compile --target /payload -r requirements.lock
+COPY python/patch_trace_flags.py python/test_trace_flags.py ./
+RUN python patch_trace_flags.py /payload && PYTHONPATH=/payload OTEL_SDK_DISABLED=true python test_trace_flags.py
 COPY python/sitecustomize.py /payload/
 
 FROM ruby:3.3.12-slim-bookworm@sha256:df209d82bb55aeb26b9b08922ee22c15f19b3458455690132dc07a5c52dc1c99 AS ruby-glibc
