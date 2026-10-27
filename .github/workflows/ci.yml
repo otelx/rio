@@ -6,6 +6,8 @@ on:
     tags: ['v*']
   pull_request:
   workflow_dispatch:
+  schedule:
+    - cron: '23 7 * * 1'
 
 permissions:
   contents: read
@@ -28,6 +30,11 @@ jobs:
           go-version-file: go.mod
           cache: false
       - run: make test vet build
+      - name: Scan controller source and verify security policy
+        run: |
+          scripts/install-security-tools.sh
+          .artifacts/bin/govulncheck ./...
+          python3 -m unittest discover -s scripts -p 'test_security.py'
       - name: Check source formatting and shell scripts
         run: |
           test -z "$(gofmt -l cmd internal)"
@@ -52,6 +59,10 @@ jobs:
         with:
           persist-credentials: false
       - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: go.mod
+          cache: false
       - name: Build operator image
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
@@ -70,6 +81,22 @@ jobs:
           platforms: linux/${{ matrix.arch }}
           cache-from: type=gha,scope=payload-${{ matrix.arch }}
           cache-to: type=gha,mode=max,scope=payload-${{ matrix.arch }}
+      - name: Scan final images and controller binary
+        run: |
+          scripts/install-security-tools.sh
+          status=0
+          scripts/scan-image.sh operator "$OPERATOR_IMAGE" .artifacts/security/operator || status=1
+          scripts/scan-image.sh instrumentation "$PAYLOAD_IMAGE" .artifacts/security/instrumentation || status=1
+          exit "$status"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: security-current-${{ matrix.arch }}
+          path: |
+            .artifacts/security/**/*.json
+            .artifacts/security/**/*.txt
+          include-hidden-files: true
+          retention-days: 30
       - name: Verify all five language loaders with glibc and musl
         run: make smoke
       - name: Archive tested images
@@ -179,6 +206,47 @@ jobs:
               test -z "$output"
             '
           done
+
+  published-security:
+    name: Scan supported release (${{ matrix.arch }})
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Scan latest published release, including prereleases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          scripts/install-security-tools.sh
+          version=$(gh release list --repo "$GITHUB_REPOSITORY" --exclude-drafts --limit 1 --json tagName --jq '.[0].tagName')
+          [[ "$version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-alpha\.[0-9]+)?$ ]]
+          status=0
+          for role in operator instrumentation; do
+            image="ghcr.io/otelx/rio/$role:$version"
+            docker pull --platform 'linux/${{ matrix.arch }}' "$image"
+            scripts/scan-image.sh "$role" "$image" ".artifacts/security/$role" || status=1
+          done
+          exit "$status"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: security-published-${{ matrix.arch }}
+          path: |
+            .artifacts/security/**/*.json
+            .artifacts/security/**/*.txt
+          include-hidden-files: true
+          retention-days: 30
 
   release:
     name: Publish validated alpha release

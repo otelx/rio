@@ -1,0 +1,12 @@
+{
+  "2.30.0": {
+    "url": "https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.30.0/opentelemetry-java-instrumentation-SBOM.zip",
+    "sha256": "3351dfd5c9a38af2c3a70f8a03f2f58e4f8f4936fa5d54cdaacdb5d9f491d830",
+    "jarSha256": "9d6bc2ad8dd8fb7f730984988e57b8ac0a82d81c7b3b8ae795378718733a509d"
+  },
+  "2.33.1": {
+    "url": "https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.33.1/opentelemetry-java-instrumentation-SBOM.zip",
+    "sha256": "e9aad89ce31147cb7280dd59281cd2766e623da9f56454389b93d4bd7e17d9f3",
+    "jarSha256": "e43a270df53c6f423e0ab157be9c27ccc01d5dc3232e162fe54777573db2f149"
+  }
+}

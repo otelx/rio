@@ -1,0 +1,32 @@
+version: 2
+updates:
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+    assignees: [MrAlias]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    assignees: [MrAlias]
+  - package-ecosystem: docker
+    directories: [/, /payload, /payload/tests/dotnet]
+    schedule:
+      interval: weekly
+    assignees: [MrAlias]
+  - package-ecosystem: npm
+    directory: /payload/node
+    schedule:
+      interval: weekly
+    assignees: [MrAlias]
+  - package-ecosystem: pip
+    directory: /payload/python
+    schedule:
+      interval: weekly
+    assignees: [MrAlias]
+  - package-ecosystem: bundler
+    directory: /payload/ruby
+    schedule:
+      interval: weekly
+    assignees: [MrAlias]
