@@ -25,6 +25,8 @@ EXPECT_DELIVERY=imageVolume make e2e
 CLUSTER_NAME=rio-fallback IMAGE_VOLUME_ENABLED=false EXPECT_DELIVERY=initContainer make e2e
 ```
 
+`make e2e-upgrade` builds alpha.2 source at `be271b81fae80b7bd041a81e98b3abccb18997a1` into local `issue-6` fixture tags and builds candidate images. Set `UPGRADE_BASELINE=alpha3` to test the latest released alpha.3 source at `431f265d139206e98b34b8ce1ed6ddf2c2a0fd8c` instead; CI tests both baselines on both architectures and delivery paths. It never republishes retired packages. Fetch the baseline source commit if using a shallow checkout. It runs the existing lifecycle and telemetry suite with persisted successful/blocked release state, upgrades the controller, migrates both default and rule-override payload references through an uninstrumented baseline, removes the retired alpha.2 payload fixture from the nodes, tests failed migration recovery, exercises explicit payload rollback/restoration for the available alpha.3 baseline, rolls the controller back with the candidate CRD/state/payload, returns to the candidate, renews expiring/expired certificates, verifies real admission, and uninstalls. Set `IMAGE_VOLUME_ENABLED=false EXPECT_DELIVERY=initContainer` to exercise fallback. The historical fixture source and failed-cluster evidence stay under `.artifacts/`; private test keys are not CI artifacts. Alpha.1 is not a tested rollback baseline. This suite requires network access for pinned historical build inputs and the existing telemetry fixtures.
+
 Run clusters sequentially on a local machine. The integration script creates its own kind cluster and private kubeconfig, refuses to replace an existing cluster, and preserves failed runs for inspection. Successful runs remove their cluster. `KEEP_CLUSTER=true` preserves a successful run. To rerun a retained cluster, use `REUSE_CLUSTER=true` and its original `CLUSTER_NAME`; the saved private kubeconfig is required.
 
 The admission suite creates a separate disposable kind cluster and runs the real TLS webhook against Kubernetes Pod creation requests. It covers startup, invalid policy, synchronization failure, missing owners, malformed workload state alongside a healthy selected workload, system namespace and critical-priority matching exclusions, explicit rejection with `failurePolicy: Ignore`, and transport failure with `Ignore`. It needs no payload images. Its host webhook endpoint uses the Linux Docker bridge gateway; run it on a Linux Docker host. Evidence is saved under `.artifacts/admission/`.
@@ -72,3 +74,5 @@ Before a normal release, update the [support matrix](compatibility.md) using the
 candidate's image IDs and runtime/libc logs. Keep the CRD at `v1alpha1`. Expand
 language or signal support only after end-to-end validation. Cross-release upgrade
 or downgrade support requires tests with persisted rollout state.
+The upgrade suite pins alpha.2 and alpha.3; update and rerun its baselines before
+claiming other transitions.

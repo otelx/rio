@@ -153,7 +153,7 @@ jobs:
           echo "$GOBIN" >> "$GITHUB_PATH"
       - name: Verify admission failure isolation through the Kubernetes API
         env:
-          CLUSTER_NAME: rio-issue-1-admission-${{ matrix.arch }}-${{ matrix.delivery }}
+          CLUSTER_NAME: rio-issue-6-issue-1-${{ matrix.arch }}-${{ matrix.delivery }}
         run: |
           export CLUSTER_NAME="${CLUSTER_NAME,,}"
           make admission-e2e
@@ -178,6 +178,64 @@ jobs:
           name: diagnostics-${{ matrix.arch }}-${{ matrix.delivery }}
           path: |
             .artifacts/admission/**/*.log
+            .artifacts/e2e/**/*.log
+            .artifacts/e2e/**/*.json
+          include-hidden-files: true
+          if-no-files-found: ignore
+
+  upgrades:
+    name: Upgrade and certificates (${{ matrix.baseline }}, ${{ matrix.arch }}, ${{ matrix.delivery }})
+    needs: images
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        baseline: [alpha2, alpha3]
+        arch: [amd64, arm64]
+        delivery: [imageVolume, initContainer]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Install kind
+        env:
+          GOBIN: ${{ github.workspace }}/.artifacts/bin
+        run: |
+          mkdir -p .artifacts/tmp
+          export TMPDIR="$PWD/.artifacts/tmp"
+          go install sigs.k8s.io/kind@v0.33.0
+          echo "$GOBIN" >> "$GITHUB_PATH"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: tested-release-images-${{ matrix.arch }}
+          path: .artifacts/release
+      - name: Load tested candidates under isolated fixture tags
+        run: |
+          gzip -dc .artifacts/release/release-images.tar.gz | docker load
+          docker tag ghcr.io/otelx/rio/operator:dev-${{ matrix.arch }} ghcr.io/otelx/rio/operator:issue-6-candidate
+          docker tag ghcr.io/otelx/rio/instrumentation:dev-${{ matrix.arch }} ghcr.io/otelx/rio/instrumentation:issue-6-candidate
+      - name: Verify upgrades, rollback, renewal, and cleanup
+        env:
+          CLUSTER_NAME: rio-issue-6-${{ matrix.baseline }}-${{ matrix.arch }}-${{ matrix.delivery }}
+          UPGRADE_BASELINE: ${{ matrix.baseline }}
+          IMAGE_VOLUME_ENABLED: ${{ matrix.delivery == 'imageVolume' }}
+          EXPECT_ARCHITECTURES: ${{ matrix.arch }}
+          EXPECT_DELIVERY: ${{ matrix.delivery }}
+          BUILD_CANDIDATE_IMAGES: 'false'
+        run: |
+          export CLUSTER_NAME="${CLUSTER_NAME,,}"
+          make e2e-upgrade
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: upgrade-diagnostics-${{ matrix.baseline }}-${{ matrix.arch }}-${{ matrix.delivery }}
+          path: |
             .artifacts/e2e/**/*.log
             .artifacts/e2e/**/*.json
           include-hidden-files: true
@@ -227,7 +285,7 @@ jobs:
       group: release-publication
       cancel-in-progress: false
     if: startsWith(github.ref, 'refs/tags/') && github.event_name == 'push'
-    needs: [quality, integration, platforms]
+    needs: [quality, integration, upgrades, platforms]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
