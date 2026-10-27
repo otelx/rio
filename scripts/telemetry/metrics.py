@@ -7,28 +7,10 @@ import uuid
 from telemetry.assertions import items, log_record, server_span
 
 
-# The pinned Rack instrumentation creates traces only. Merely loading the Ruby
-# metrics SDK/exporter does not install an automatic application measurement.
-BLOCKED = {
-    'ruby': {
-        'reason': 'Bundled Rack 0.30.0 has no automatic HTTP metric instruments; '
-                  'the Ruby bundle contains no automatic runtime metric source.',
-        'sources': [
-            'https://github.com/open-telemetry/opentelemetry-ruby-contrib/pull/1129',
-            'https://github.com/open-telemetry/opentelemetry-ruby-contrib/pull/1213',
-            'https://github.com/open-telemetry/opentelemetry-ruby-contrib/tree/'
-            'opentelemetry-instrumentation-rack/v0.30.0/instrumentation/rack/lib',
-            'https://github.com/open-telemetry/opentelemetry-ruby-instrumentation/'
-            'blob/68af0a92d6d9c2cd0ee38a9327e98797673227d1/'
-            'lib/opentelemetry-auto-instrumentation.rb',
-        ],
-        'remaining': 'Implement or bundle automatic Rack HTTP duration '
-                     'instrumentation (or a real automatic runtime source), '
-                     'then validate sample changes and all signal overrides '
-                     'through admission on the complete delivery/arch/libc matrix. '
-                     'Keep https://github.com/otelx/rio/issues/22 open.',
-    }
-}
+# Each bundled language now declares an automatic source. Keep unresolved
+# sources explicit if a future bundle cannot provide one; passing a selected
+# matrix subset still does not establish unexecuted environments.
+BLOCKED = {}
 
 
 def histogram_snapshot(records, service, spec):
@@ -100,6 +82,36 @@ def _save_apps(harness):
         harness.save_apps()
 
 
+def independence_cases(harness, lang, libc, suffix, spec):
+    """Prove automatic activity without trace/log capture, using real requests."""
+    # Automatic measurement must work without recording spans or log
+    # capture. Exporter suppression and parent-based non-sampling are
+    # separate controls; both must retain real activity increments.
+    for case, traces, unsampled in (
+        ('metrics-only', False, False),
+        ('unsampled', True, True),
+    ):
+        harness.policy({'traces': traces, 'metrics': True, 'logs': False},
+                       env={'OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE': 'cumulative',
+                            'OTEL_METRIC_EXPORT_INTERVAL': '1000',
+                            'OTEL_TRACES_SAMPLER': 'parentbased_always_on'})
+        name = harness.deploy(lang, libc, f'{lang}-{libc}-{case}-{suffix}', True)
+        headers = {'traceparent': f'00-{uuid.uuid4().hex}-{uuid.uuid4().hex[:16]}-00'} if unsampled else {}
+        harness.request(name, uuid.uuid4().hex, headers)
+        before = harness.poll(lambda: histogram_snapshot(harness.records('metrics'), name, spec))
+        for _ in range(3):
+            harness.request(name, uuid.uuid4().hex, headers)
+        after = harness.poll(lambda: activity_increase(harness.records('metrics'), name, spec, before, 3))
+        harness.assert_silent(name, ('traces', 'logs'), duration=8)
+        (harness.current / f'{case}-activity.json').write_text(json.dumps({
+            'service': name, 'before': before, 'after': after,
+            'requests': 3, 'tracesAbsent': True, 'logsAbsent': True}, indent=2))
+        _save_apps(harness)
+        harness.kube('delete', 'deployment', name, '-n', harness.namespace, '--wait=true')
+        print(f'PASS automatic metrics {case}: {lang}/{libc}/'
+              f'{harness.args.arch}/{harness.args.delivery}', flush=True)
+
+
 def run(harness):
     """Run implemented cells and return explicit unresolved language coverage.
 
@@ -154,8 +166,11 @@ def run(harness):
                 harness.kube('delete', 'deployment', name, '-n', harness.namespace, '--wait=true')
                 print(f'PASS automatic metrics {case}: {lang}/{libc}/'
                       f'{harness.args.arch}/{harness.args.delivery}', flush=True)
+            independence_cases(harness, lang, libc, suffix, spec)
             coverage[lang]['cells'].append({'libc': libc, 'arch': harness.args.arch,
-                                           'delivery': harness.args.delivery, 'status': 'passed'})
+                                           'delivery': harness.args.delivery, 'status': 'passed',
+                                           'signalCases': ['inherited-on', 'rule-on', 'inherited-off',
+                                                           'rule-off', 'metrics-only', 'unsampled']})
         coverage[lang]['status'] = 'passed-selected-cells'
     (harness.out / 'metrics-coverage.json').write_text(json.dumps(coverage, indent=2))
     return {lang: value for lang, value in coverage.items() if value['status'] == 'blocked'}
