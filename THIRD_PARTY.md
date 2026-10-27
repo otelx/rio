@@ -12,7 +12,7 @@ other packages with their own terms. An image label is not a license inventory.
 | Node.js agent and dependencies | `payload/node/package-lock.json` | npm package license and notice files remain under `/dist/agents/node/node_modules`. |
 | Python agents and dependencies, glibc and musl | `payload/python/requirements.lock` | Wheel license/notice and dist-info material remains under `/dist/agents/python/{glibc,musl}`. |
 | Ruby agents and dependencies, glibc and musl | `payload/ruby/Gemfile.lock`, source revision in `payload/versions.json` | Gem license and notice files remain under `/dist/agents/ruby/{glibc,musl}`. |
-| Alpine runtime packages | Pinned final base in `payload/Dockerfile`; `/lib/apk/db/installed` in the final image; image SBOM | Package database is preserved in generated `base-packages.txt`. Complete license texts and corresponding-source availability still require review. |
+| Alpine runtime packages | Pinned `RUNTIME_IMAGE` in `payload/Dockerfile`; `/lib/apk/db/installed`; `payload/alpine-sources.lock.json` | `/licenses/sources/alpine-source-inputs.tar.gz` preserves upstream source archives, patches, build recipes, and packaging scripts for every installed origin. The source distribution includes the same bundle through the final-image snapshot. |
 
 Build-only Go, Node, Python, Ruby, and download-stage operating systems are not
 copied wholesale into final images. Their copied agent/package outputs are
@@ -49,12 +49,41 @@ adding the Injector license. Scanner declarations alone cannot approve the revie
 The pinned Alpine runtime includes 16 packages. Its package metadata identifies
 GPL terms for alpine-baselayout, apk-tools/libapk, BusyBox, musl-utils, and scanelf,
 along with MIT, Apache, MPL, BSD, and Zlib terms for other packages. Preserving the
-package database does not supply all associated license/notice texts or verify
-corresponding-source availability. Those base-image materials and .NET's managed
-dependency notices and native runtime inventory are concrete outstanding gaps.
+package database alone does not supply source material. The bundled inputs now
+cover all 10 origins: 139 packaging files and 126 checksum-listed inputs, stored
+as 148 unique files. Git blob identities and the recipes' SHA-512 sums were
+independently checked when producing the lock. Builds validate the actual package
+inventory and recipe versions, then verify SHA-256, applicable Git blob identities,
+and APorts SHA-512 checksums before creating the bundle. Recipes are never executed.
+The upstream archives retain their license/notice texts. This is a source-input
+inventory, not a claim of bit-for-bit binary reproducibility or a completed legal
+review. .NET's managed dependency notices and native runtime inventory remain
+concrete outstanding gaps.
 The Java agent already embeds upstream notices;
 Node.js, Python, and Ruby package material is retained and still needs reconciliation
 against the full per-architecture inventory.
+
+## Refresh Alpine source inputs
+
+Changing the pinned runtime image requires a matching source lock. Read its APK
+database, then run the updater with GitHub CLI access to the public APorts repo:
+
+```bash
+mkdir -p .artifacts/alpine-sources
+SOURCE_BASE_IMAGE=$(python3 -c 'from pathlib import Path; print(next(line.split("=",1)[1] for line in Path("payload/Dockerfile").read_text().splitlines() if line.startswith("ARG RUNTIME_IMAGE=")))')
+docker run --rm "$SOURCE_BASE_IMAGE" cat /lib/apk/db/installed > .artifacts/alpine-sources/installed
+python3 payload/scripts/lock_alpine_sources.py .artifacts/alpine-sources/installed \
+  "$SOURCE_BASE_IMAGE" payload/alpine-sources.lock.json --cache .artifacts/alpine-sources/cache
+```
+
+The updater retrieves the complete origin directories at their package-recorded
+commits and verifies archive inputs against the recipes. It updates the lock only
+after every input passes, without executing third-party scripts. Review the lock
+diff, rebuild both architectures, and reconcile their final-image inventories
+before renewing the release review. Unsupported packaging layouts fail closed.
+The bundle is about 57 MiB for the current base; including it makes the sources
+available directly with each image and in the source distribution, without
+depending on a future external mirror remaining online.
 
 ## Outstanding release gate
 

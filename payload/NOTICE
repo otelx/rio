@@ -17,5 +17,8 @@ Supplemental native .NET dependency license texts are under
 sources and hashes. These materials do not complete the redistribution review.
 Java's embedded META-INF/licenses material, .NET's LICENSE files, and the
 Node.js, Python, and Ruby packages' license/notice files remain in /dist.
+Alpine package source archives, patches, recipes, and packaging scripts are
+preserved in /licenses/sources/alpine-source-inputs.tar.gz. Its SOURCE_INPUTS.json
+records the installed package versions, source-origin commits, and file hashes.
 See THIRD_PARTY.md in the source distribution for the inventory, generated
 notice snapshots, and outstanding review of embedded and base-image components.
