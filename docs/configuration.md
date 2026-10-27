@@ -6,6 +6,8 @@ The payload comes from [the image component](../payload/README.md). Application 
 
 Start with the [quickstart](quickstart.md) for a complete local installation.
 
+The [support contract](compatibility.md) defines the validated runtime/signal scope, matching operator/instrumentation versions, cross-release migration limits, and the compatibility policy for this API and persisted annotations. The API remains `v1alpha1` for the first normal `v0.1.0` release.
+
 ## Configuration
 
 Install [the CRD](../config/crd.yaml) and use [the example policy](../config/example.yaml). The API group is `rio.otelx.github.io/v1alpha1`, deliberately separate from the upstream OpenTelemetry Operator APIs.
@@ -116,6 +118,8 @@ Inspect the certificate dates with the command above, compare the Secret certifi
 For a policy stuck deleting, keep the operator, webhook, namespace, and CRD installed. Inspect the policy's per-workload phase/message, the workload's `rio.otelx.github.io/state`, rollout status, Pods, events, and controller logs. Restore working admission first. Fix unsupported rollout strategies, paused Deployments, resource shortages, image pull failures, or application readiness. `RollingBack` waits for recovery or its saved deadline; `RecoveryFailed` stops automatic retries. Correct the effective policy or retry token when the policy is still editable; deletion resolves toward an uninstrumented configuration. Do not remove revision/configuration/state annotations to retry a live instrumented workload: admission uses them to keep recovery consistent.
 
 If removal remains stuck, restore each affected workload from its original uninstrumented template while preserving application changes, and replace its Pods. Check that no live Pod has the `rio-payload` volume, copy init container, injected environment, or preload settings, including standalone Pods. Only after all affected Pods are verified uninstrumented may an administrator remove the `rio.otelx.github.io/remove-instrumentation` finalizer from the deleting policy, preserving any unrelated finalizers, and rerun `./scripts/uninstall.sh`. Removing the finalizer earlier can strand instrumented Pods and saved references. Never delete the CRD first as a cleanup shortcut.
+
+The steps above describe the image rename, not a validated in-place cross-release upgrade. For the supported migration approach and treatment of saved state, follow [operator/instrumentation versions and upgrades](compatibility.md#operatorinstrumentation-versions-and-upgrades). Cached retired images do not provide a durable recovery guarantee.
 
 ## Automatic payload delivery
 
