@@ -138,6 +138,25 @@ PY
   kubectl logs deployment/rio -n rio-system > "$artifacts/operator.log"
   return 1
 }
+wait_admission() {
+  local expected_image=$1
+  for ((admission_attempt=0; admission_attempt<60; admission_attempt++)); do
+    if kubectl run rio-admission-probe -n injector-component-test --image="$payload_image" --restart=Never --dry-run=server -o json --command -- sleep infinity > "$artifacts/admission-probe.json" 2> "$artifacts/admission-probe.err"; then
+      if python3 - "$artifacts/admission-probe.json" "$expected_image" <<'CHECK'
+import json,sys
+p=json.load(open(sys.argv[1])); a=p['metadata'].get('annotations',{})
+images=[v['image']['reference'] for v in p['spec'].get('volumes',[]) if v.get('image')]
+images += [c['image'] for c in p['spec'].get('initContainers',[]) if c['name']=='rio-payload']
+sys.exit(0 if a.get('rio.otelx.github.io/applied-revision') and sys.argv[2] in images else 1)
+CHECK
+      then return 0; fi
+    fi
+    sleep 1
+  done
+  cat "$artifacts/admission-probe.err" >&2
+  printf 'API-server admission did not inject the expected payload\n' >&2
+  return 1
+}
 kubectl apply -f "$artifacts/policy.json"
 wait_phase Ready
 kubectl get pods -n injector-component-test -o json > "$artifacts/injected-pods.json"
@@ -165,6 +184,7 @@ if [[ -n "${PREVIOUS_SOURCE:-}" ]]; then
   kubectl get deployments,statefulsets,daemonsets -n injector-component-test -o json > "$artifacts/before-upgrade.json"
   "$component/scripts/install.sh" "$operator_image"
   wait_phase RolledBack
+  wait_admission "$PREVIOUS_PAYLOAD_IMAGE"
   kubectl get deployments,statefulsets,daemonsets -n injector-component-test -o json > "$artifacts/after-upgrade.json"
   python3 - "$artifacts" <<'CHECK'
 import json,pathlib,sys
@@ -223,11 +243,15 @@ CHECK
   kubectl set image deployment/rio -n rio-system "operator=$PREVIOUS_OPERATOR_IMAGE"
   kubectl rollout status deployment/rio -n rio-system --timeout=180s
   wait_phase Ready
+  # Endpoint propagation can lag Deployment readiness with failurePolicy:
+  # Ignore. Observe actual admission before asking for new workload Pods.
+  wait_admission "$payload_image"
   kubectl rollout restart deployment/deployment -n injector-component-test
   kubectl rollout status deployment/deployment -n injector-component-test --timeout=180s
   wait_phase Ready
   "$component/scripts/install.sh" "$operator_image"
   wait_phase Ready
+  wait_admission "$payload_image"
   # shellcheck source=scripts/e2e-certificates.sh
   source "$component/scripts/e2e-certificates.sh"
 fi
