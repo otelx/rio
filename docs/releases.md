@@ -90,6 +90,19 @@ assets remain mutable. GitHub requires republishing to make those releases
 immutable. That migration needs separate authorization; do not delete/recreate,
 unpublish, or republish existing releases as part of normal publication.
 
+## Audit signing without publication
+
+For a signing integration check without publication, manually dispatch `ci.yml`
+on the reviewed branch. In addition to the ordinary CI matrix, its
+`Audit source attestations without publishing` job signs an audit source archive
+and its SBOM, verifies the workflow/source identity, and requires verification of
+a deliberately wrong source commit to fail. It retains the archive, SPDX file,
+signed bundles, and checksums as `issue-5-attestation-audit`. That job has no release
+or package-write permissions. Its audit archive contains the checked-out repository source
+only, without the final-image notice snapshots added to a release distribution;
+passing this check does not replace the release's image-index, SBOM, license, or
+anonymous quickstart gates.
+
 ## Retry after failure
 
 If preparation fails after reserving a draft or pushing any tag, the version is

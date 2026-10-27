@@ -451,3 +451,71 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_SETTINGS_TOKEN: ${{ secrets.RELEASE_SETTINGS_TOKEN }}
         run: scripts/finalize-release.sh
+
+  attestation-audit:
+    name: Audit source attestations without publishing
+    if: github.event_name == 'workflow_dispatch'
+    needs: quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Prepare an audit archive from the exact checked-out source
+        run: |
+          mkdir -p .artifacts/attestation-audit/source
+          git archive HEAD | tar -x -C .artifacts/attestation-audit/source
+          git archive --format=tar.gz --prefix=rio-audit/ HEAD > .artifacts/attestation-audit/rio-issue-5-attestation-audit.tar.gz
+      - name: Generate the audit archive's SBOM
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0
+        with:
+          path: .artifacts/attestation-audit/source
+          syft-version: v1.55.0
+          output-file: .artifacts/attestation-audit/source.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
+      - name: Sign audit source provenance
+        id: provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-path: .artifacts/attestation-audit/rio-issue-5-attestation-audit.tar.gz
+          create-storage-record: false
+      - name: Sign the audit source SBOM
+        id: sbom
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-path: .artifacts/attestation-audit/rio-issue-5-attestation-audit.tar.gz
+          sbom-path: .artifacts/attestation-audit/source.spdx.json
+          create-storage-record: false
+      - name: Verify signatures, source identity, and rejection of a wrong commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PROVENANCE_BUNDLE: ${{ steps.provenance.outputs.bundle-path }}
+          SBOM_BUNDLE: ${{ steps.sbom.outputs.bundle-path }}
+        run: |
+          archive=.artifacts/attestation-audit/rio-issue-5-attestation-audit.tar.gz
+          signer=otelx/rio/.github/workflows/ci.yml
+          gh attestation verify "$archive" --repo otelx/rio --signer-workflow "$signer" --source-digest "$GITHUB_SHA"
+          gh attestation verify "$archive" --repo otelx/rio --signer-workflow "$signer" --source-digest "$GITHUB_SHA" --predicate-type https://spdx.dev/Document/v2.3
+          if gh attestation verify "$archive" --repo otelx/rio --signer-workflow "$signer" --source-digest 0000000000000000000000000000000000000000; then
+            echo 'Incorrect source identity was accepted' >&2
+            exit 1
+          fi
+          cp "$PROVENANCE_BUNDLE" .artifacts/attestation-audit/provenance.sigstore.json
+          cp "$SBOM_BUNDLE" .artifacts/attestation-audit/sbom.sigstore.json
+          (cd .artifacts/attestation-audit && sha256sum -- *.tar.gz *.spdx.json *.sigstore.json > SHA256SUMS)
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: issue-5-attestation-audit
+          path: |
+            .artifacts/attestation-audit/*.tar.gz
+            .artifacts/attestation-audit/*.spdx.json
+            .artifacts/attestation-audit/*.sigstore.json
+            .artifacts/attestation-audit/SHA256SUMS
+          include-hidden-files: true
+          if-no-files-found: error
