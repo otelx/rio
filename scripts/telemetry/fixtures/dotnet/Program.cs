@@ -14,6 +14,7 @@ app.MapGet("/health", () => Results.Json(new { status = "ok", language = "dotnet
 app.MapGet("/work/{marker}", async (string marker, HttpContext context, IHttpClientFactory clients) =>
 {
     // These are normal application logs. RIO's shipped agent supplies the bridge.
+    await Task.Delay(Math.Clamp(int.Parse(Environment.GetEnvironmentVariable("RIO_FIXTURE_DELAY_MS") ?? "0"), 0, 1000));
     logger.LogInformation("rio-fixture {Marker}", marker);
     var headers = context.Request.Headers.ToDictionary(
         header => header.Key.ToLowerInvariant(),

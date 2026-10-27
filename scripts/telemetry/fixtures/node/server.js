@@ -13,6 +13,7 @@ http.createServer(async (req, res) => {
     if (url.pathname === '/health') { res.end('ok'); return; }
     if (!url.pathname.startsWith('/work/')) { res.writeHead(404); res.end(); return; }
     const marker = decodeURIComponent(url.pathname.slice(6));
+    await new Promise(resolve => setTimeout(resolve, Math.max(0, Math.min(1000, Number(process.env.RIO_FIXTURE_DELAY_MS || 0)))));
     const headers = {};
     for (let i = 0; i < req.rawHeaders.length; i += 2) {
       const key = req.rawHeaders[i].toLowerCase();

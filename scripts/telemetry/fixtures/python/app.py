@@ -1,6 +1,8 @@
 """Ordinary aiohttp application: all telemetry comes from RIO's injected agent."""
 
 import logging
+import asyncio
+import os
 
 from aiohttp import ClientSession, ClientTimeout, web
 
@@ -17,6 +19,7 @@ async def health(request):
 
 async def work(request):
     marker = request.match_info["marker"]
+    await asyncio.sleep(max(0, min(1000, int(os.environ.get("RIO_FIXTURE_DELAY_MS", "0")))) / 1000)
     logger.info("rio-fixture %s", marker)
     headers = {}
     for name, value in request.raw_headers:

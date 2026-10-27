@@ -32,6 +32,9 @@ def check_headers(body, trace, client, state, baggage):
     assert baggage_values(headers) == baggage, headers
     if baggage:
         assert len(headers['baggage']) == 1, headers
+        assert len([part for part in headers['baggage'][0].split(',') if part.strip()]) == len(baggage), headers
+    else:
+        assert 'baggage' not in headers, headers
 
 
 def run(h):
@@ -40,6 +43,8 @@ def run(h):
     # A subset run exercises its corresponding ring, never implies missing pairs.
     pairs = list(zip(languages, languages[1:] + languages[:1]))
     summary = []
+    for lang in languages:
+        h.config[lang].setdefault('env', {})['RIO_FIXTURE_DELAY_MS'] = '750'
     for libc in h.args.libcs:
         for enabled in (True, False):
             h.current = h.out / f'propagation-{libc}-baggage-{enabled}'
@@ -62,14 +67,17 @@ def run(h):
                     return case, state, baggage, body
                 with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
                     responses = list(pool.map(request, cases))
+                caller_spans = []
                 for case, state, baggage, body in responses:
                     trace, remote, first, second = case
                     parent, client, child = h.poll(lambda: relationship(h.records('traces'), names[caller], names[callee], first, second, (trace, remote)))
+                    caller_spans.append(parent)
                     assert body['headers']['traceparent'] == [f'00-{trace}-{remote}-01'], body
                     check_headers(body, trace, client, state, {baggage} if enabled else set())
                     assert parent.get('traceState') == state and child.get('traceState') == state, (parent, child)
                     for span in (parent, client, child):
                         assert int(span.get('flags', 0)) & 1, span
+                assert max(int(s['startTimeUnixNano']) for s in caller_spans) < min(int(s['endTimeUnixNano']) for s in caller_spans), 'Requests did not overlap'
                 if enabled:
                     for context in ({}, {'traceparent': '00-invalid-invalid-zz', 'tracestate': 'malformed'}):
                         first, second = uuid.uuid4().hex, uuid.uuid4().hex
@@ -98,3 +106,5 @@ def run(h):
             h.save_apps()
             h.kube('delete', 'deployment', '--all', '-n', h.namespace, '--wait=true')
     (h.out / 'propagation-coverage.json').write_text(json.dumps(summary, indent=2))
+    for lang in languages:
+        h.config[lang]['env'].pop('RIO_FIXTURE_DELAY_MS', None)

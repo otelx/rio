@@ -14,6 +14,8 @@ BLOCKED = {
         'reason': 'Bundled Rack 0.30.0 has no automatic HTTP metric instruments; '
                   'the Ruby bundle contains no automatic runtime metric source.',
         'sources': [
+            'https://github.com/open-telemetry/opentelemetry-ruby-contrib/pull/1129',
+            'https://github.com/open-telemetry/opentelemetry-ruby-contrib/pull/1213',
             'https://github.com/open-telemetry/opentelemetry-ruby-contrib/tree/'
             'opentelemetry-instrumentation-rack/v0.30.0/instrumentation/rack/lib',
             'https://github.com/open-telemetry/opentelemetry-ruby-instrumentation/'

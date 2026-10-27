@@ -39,6 +39,7 @@ class Harness:
         self.counter = 0
         self.current = self.out
         self.config = {}
+        self.expected_config = None
 
     def command(self, *argv, timeout=180, check=True, input=None):
         result = subprocess.run(argv, env=self.env, text=True, input=input,
@@ -87,6 +88,10 @@ class Harness:
                              '-t', image, str(ROOT / 'scripts/telemetry/fixtures' / lang), timeout=600)
                 self.command('kind', 'load', 'docker-image', '--name', self.cluster, image, timeout=300)
                 (self.out / f'image-{lang}-{libc}.json').write_text(self.command('docker', 'image', 'inspect', image))
+                runtime = {'node': 'node --version', 'java': 'java -version', 'dotnet': 'dotnet --info',
+                           'python': 'python --version', 'ruby': 'ruby --version'}[lang]
+                (self.out / f'runtime-{lang}-{libc}.log').write_text(self.command('docker', 'run', '--rm',
+                    '--entrypoint', '/bin/sh', image, '-c', runtime + '; cat /etc/os-release; ldd --version 2>&1 || test "$?" -eq 1'))
         (self.out / 'versions.json').write_text(json.dumps({'fixtures': self.config, 'collector': COLLECTOR,
             'agents': json.loads((ROOT / 'payload/versions.json').read_text()), 'delivery': self.args.delivery}, indent=2))
         for kind, image in [('operator', self.operator), ('instrumentation', self.payload)]:
@@ -125,6 +130,7 @@ class Harness:
         rule = {'name': 'fixtures', 'action': 'Inject', 'selector': {'namespaces': [self.namespace]}}
         if rule_signals is not None:
             rule['signals'] = rule_signals
+        self.expected_config = {'signals': dict(signals, **(rule_signals or {})), 'env': agent_env}
         self.apply({'apiVersion': 'rio.otelx.github.io/v1alpha1', 'kind': 'Instrumentation', 'metadata': {'name': 'cluster'},
             'spec': {'image': self.payload, 'endpoint': 'http://collector.rio-telemetry.svc:4318',
                      'signals': signals, 'timeoutSeconds': 120,
@@ -149,9 +155,22 @@ class Harness:
             active = [p for p in pods['items'] if not p['metadata'].get('deletionTimestamp')]
             assert len(active) == 1, active
             annotations = active[0]['metadata'].get('annotations', {})
+            assert all(c.get('restartCount', 0) == 0 for c in active[0].get('status', {}).get('containerStatuses', [])), active[0]['status']
             if injected:
                 assert annotations.get('rio.otelx.github.io/delivery') == self.args.delivery, annotations
                 assert annotations['rio.otelx.github.io/applied-revision'] == annotations['rio.otelx.github.io/revision']
+                config = json.loads(annotations['rio.otelx.github.io/configuration'])
+                assert config['signals'] == self.expected_config['signals'], config
+                assert config['image'] == self.payload, config
+                assert config['endpoint'] == 'http://collector.rio-telemetry.svc:4318', config
+                assert {e['name']: e['value'] for e in config['env']} == self.expected_config['env'], config
+                volume = next(v for v in active[0]['spec']['volumes'] if v['name'] == 'rio-payload')
+                if self.args.delivery == 'imageVolume':
+                    assert volume['image']['reference'] == self.payload, volume
+                else:
+                    assert 'emptyDir' in volume and 'image' not in volume, volume
+                    assert any(c['image'] == self.payload and any(m['name'] == 'rio-payload' for m in c.get('volumeMounts', []))
+                               for c in active[0]['spec']['initContainers']), active[0]['spec']
             else:
                 assert not any(e['name'] == 'LD_PRELOAD' for c in active[0]['spec']['containers'] for e in c.get('env', []))
             assert any(c['type'] == 'Ready' and c['status'] == 'True' for c in active[0].get('status', {}).get('conditions', []))
@@ -246,7 +265,13 @@ class Harness:
         pods = json.loads(self.kube('get', 'pods', '-n', self.namespace, '-o', 'json'))
         for pod in pods['items']:
             name = pod['metadata']['name']
-            (self.current / (name + '.log')).write_text(self.kube('logs', '-n', self.namespace, name, '-c', 'app', check=False))
+            logs = self.kube('logs', '-n', self.namespace, name, '-c', 'app', check=False)
+            (self.current / (name + '.log')).write_text(logs)
+            assert all(c.get('restartCount', 0) == 0 for c in pod.get('status', {}).get('containerStatuses', [])), pod['status']
+            assert not re.search(r'(?i)(Error loading shared library|cannot open shared object|Gem::LoadError|'
+                                 r'Failed to load.*[Oo]pen[Tt]elemetry|Error in sitecustomize|'
+                                 r'Attempted duplicate registration|has already been initialized|'
+                                 r'ConfigurationException|OpenTelemetry.*[Cc]onfiguration.*[Ee]rror)', logs), logs
 
     def assert_silent(self, name, signals, duration=8):
         deadline = time.monotonic() + duration
@@ -260,7 +285,11 @@ class Harness:
             (self.out / (ns + '-pods.json')).write_text(self.kube('get', 'pods', '-n', ns, '-o', 'json', check=False))
             (self.out / (ns + '-describe.log')).write_text(self.kube('describe', 'pods', '-n', ns, check=False))
             (self.out / (ns + '-events.log')).write_text(self.kube('get', 'events', '-n', ns, '--sort-by=.lastTimestamp', check=False))
-            pods = json.loads(self.kube('get', 'pods', '-n', ns, '-o', 'json', check=False) or '{}')
+            raw = self.kube('get', 'pods', '-n', ns, '-o', 'json', check=False)
+            try:
+                pods = json.loads(raw)
+            except json.JSONDecodeError:
+                continue
             for pod in pods.get('items', []):
                 name = pod['metadata']['name']
                 for c in pod['spec'].get('containers', []) + pod['spec'].get('initContainers', []):
@@ -273,11 +302,14 @@ class Harness:
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--languages', nargs='+', default=['node', 'java', 'dotnet', 'python', 'ruby'])
+    parser.add_argument('--languages', nargs='+', choices=['node', 'java', 'dotnet', 'python', 'ruby'],
+                        default=['node', 'java', 'dotnet', 'python', 'ruby'])
     parser.add_argument('--libcs', nargs='+', choices=['glibc', 'musl'], default=['glibc', 'musl'])
     parser.add_argument('--arch', choices=['amd64', 'arm64'], required=True)
     parser.add_argument('--delivery', choices=['imageVolume', 'initContainer'], required=True)
     parser.add_argument('--keep-cluster', action='store_true')
+    parser.add_argument('--allow-known-blockers', action='store_true',
+                        help='Run implemented coverage while reporting unresolved upstream gaps (CI does not establish issue completion)')
     parser.add_argument('--scenarios', nargs='+', choices=['traces', 'propagation', 'metrics', 'logs'],
                         default=['traces', 'propagation', 'metrics', 'logs'])
     args = parser.parse_args()
@@ -293,14 +325,21 @@ def main():
             run(harness)
         if 'metrics' in args.scenarios:
             from telemetry.metrics import run
-            run(harness)
+            blockers = run(harness)
+            if blockers:
+                print('INCOMPLETE automatic metrics coverage: ' + json.dumps(blockers), flush=True)
+                if not args.allow_known_blockers:
+                    raise RuntimeError('Automatic metrics coverage incomplete; see metrics-coverage.json and issue #22')
         if 'logs' in args.scenarios:
             from telemetry.logs import run
             run(harness)
         success = True
     finally:
         if harness.created:
-            harness.diagnostics()
+            try:
+                harness.diagnostics()
+            except Exception as exc:
+                print(f'Diagnostic collection failed: {exc}', file=sys.stderr)
             if success and not args.keep_cluster:
                 harness.command('kind', 'delete', 'cluster', '--name', harness.cluster)
             else:

@@ -50,6 +50,7 @@
   },
   "ruby": {
     "commit": "68af0a92d6d9c2cd0ee38a9327e98797673227d1",
-    "version": "0.1.0"
+    "version": "0.1.0",
+    "loggerInstrumentation": "0.4.0"
   }
 }

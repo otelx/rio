@@ -50,6 +50,7 @@ public final class Main {
         return;
       }
       String marker = path.substring(6);
+      Thread.sleep(Math.max(0, Math.min(1000, Integer.parseInt(System.getenv().getOrDefault("RIO_FIXTURE_DELAY_MS", "0")))));
       LOG.info("rio-fixture {}", marker);
       Map<String, Object> response = new LinkedHashMap<>();
       response.put("marker", marker);
