@@ -30,8 +30,8 @@ Use immutable payload tags or digests. Replacing bytes behind an existing image 
 
 ## Operational boundaries
 
-- One operator replica, with Recreate during its own upgrades; no leader election.
-- Self-signed webhook certificates created by the installer expire after one year; no automatic rotation. Reinstallation reuses the current Secret. Plan certificate replacement before expiration.
+- One operator replica, with Recreate during its own upgrades; no leader election. The [upgrade and rollback procedure](configuration.md#upgrading-from-alpha1-or-alpha2) covers alpha.2-to-candidate migration and controller-only rollback with an unchanged CRD/state format.
+- Self-signed webhook certificates created by the installer expire after one year; no automatic rotation. Reinstallation reuses the current Secret. Use the [tested renewal and recovery procedure](configuration.md#webhook-certificate-renewal) before expiration or to recover expired certificates.
 - The webhook uses `failurePolicy: Ignore`. A webhook outage can admit healthy uninstrumented Pods; status reports `InjectionMissing` for managed workloads.
 - Cluster-wide RBAC can patch supported workload templates and delete failed recovery Pods. Only trusted administrators should install RIO or change policy.
 - Policy `env` can resolve values from Secrets in selected application namespaces. Limit permission to edit the cluster policy accordingly.

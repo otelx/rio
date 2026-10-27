@@ -83,7 +83,12 @@ if sys.argv[2]: assert actual==set(sys.argv[2].split(',')), actual
 assert all(n['status']['nodeInfo']['operatingSystem']=='linux' for n in nodes)
 print('Cluster architectures:', sorted(actual))
 PY
-"$component/scripts/install.sh" "$operator_image"
+if [[ -n "${PREVIOUS_SOURCE:-}" ]]; then
+  kind load docker-image --name "$cluster" "$PREVIOUS_OPERATOR_IMAGE" "$PREVIOUS_PAYLOAD_IMAGE"
+  "$PREVIOUS_SOURCE/scripts/install.sh" "$PREVIOUS_OPERATOR_IMAGE"
+else
+  "$component/scripts/install.sh" "$operator_image"
+fi
 if [ "$create_cluster" = false ]; then
   kubectl rollout restart deployment/rio -n rio-system
   kubectl rollout status deployment/rio -n rio-system --timeout=120s
@@ -111,11 +116,11 @@ kubectl apply -f "$artifacts/workloads.json"
 for kind in deployment statefulset daemonset; do
   kubectl rollout status "$kind/$kind" -n injector-component-test --timeout=180s
 done
-python3 - "$payload_image" > "$artifacts/policy.json" <<'PY'
+python3 - "${PREVIOUS_PAYLOAD_IMAGE:-$payload_image}" > "$artifacts/policy.json" <<'PY'
 import json,sys
 print(json.dumps({'apiVersion':'rio.otelx.github.io/v1alpha1','kind':'Instrumentation','metadata':{'name':'cluster'},'spec':{
     'image':sys.argv[1],'endpoint':'http://collector.invalid:4318','signals':{'traces':True,'metrics':True,'logs':True},
-    'timeoutSeconds':60,'rules':[{'name':'fixture','selector':{'namespaces':['injector-component-test']},'action':'Inject'}]}}))
+    'timeoutSeconds':60,'rules':[{'name':'override','selector':{'namespaces':['injector-component-test'],'workloads':[{'kind':'Deployment','name':'deployment'}]},'action':'Inject','image':sys.argv[1]},{'name':'fixture','selector':{'namespaces':['injector-component-test']},'action':'Inject'}]}}))
 PY
 wait_phase() {
   local wanted=$1
@@ -155,8 +160,77 @@ kubectl get pods -n injector-component-test -o json > "$artifacts/rolled-back-po
 kubectl rollout restart deployment/rio -n rio-system
 kubectl rollout status deployment/rio -n rio-system --timeout=120s
 wait_phase RolledBack
+if [[ -n "${PREVIOUS_SOURCE:-}" ]]; then
+  # Both stable and blocked revisions must survive upgrading the controller.
+  kubectl get deployments,statefulsets,daemonsets -n injector-component-test -o json > "$artifacts/before-upgrade.json"
+  "$component/scripts/install.sh" "$operator_image"
+  wait_phase RolledBack
+  kubectl get deployments,statefulsets,daemonsets -n injector-component-test -o json > "$artifacts/after-upgrade.json"
+  python3 - "$artifacts" <<'CHECK'
+import json,pathlib,sys
+p=pathlib.Path(sys.argv[1])
+def states(name):
+    return {x['kind']:json.loads(x['metadata']['annotations']['rio.otelx.github.io/state']) for x in json.loads((p/name).read_text())['items']}
+a,b=states('before-upgrade.json'),states('after-upgrade.json')
+for kind in a:
+    for key in ('current','stable','failedRevision','phase'): assert a[kind][key]==b[kind][key], (kind,key)
+CHECK
+  # Supported migration off retired repositories: establish an uninstrumented
+  # stable baseline before trying the new payload. No deleted image is needed
+  # by recovery if the first migration attempt fails.
+  kubectl patch instrumentations.rio.otelx.github.io cluster --type=merge -p '{"spec":{"timeoutSeconds":120,"rules":[{"name":"migration-baseline","selector":{"namespaces":["*"]},"action":"Skip"}]}}'
+  wait_phase Disabled
+  kubectl get deployments,statefulsets,daemonsets -n injector-component-test -o json > "$artifacts/migration-baseline.json"
+  python3 - "$artifacts/migration-baseline.json" <<'CHECK'
+import json,sys
+for x in json.load(open(sys.argv[1]))['items']:
+    state=json.loads(x['metadata']['annotations']['rio.otelx.github.io/state'])
+    assert not state['current']['enabled'] and not state['stable']['enabled'], state
+    assert not json.loads(x['spec']['template']['metadata']['annotations']['rio.otelx.github.io/configuration'])['enabled']
+CHECK
+  # Remove the retired fixture reference from each node after cleanup. A
+  # subsequent failed migration must recover without pulling that reference.
+  if [[ "$PREVIOUS_PAYLOAD_IMAGE" == ghcr.io/otelx/rio-payload:* ]]; then
+    mapfile -t test_nodes < <(kind get nodes --name "$cluster")
+    for test_node in "${test_nodes[@]}"; do docker exec "$test_node" crictl rmi "$PREVIOUS_PAYLOAD_IMAGE"; done
+  fi
+  python3 - "$artifacts/policy.json" "$payload_image" > "$artifacts/migrated-policy.json" <<'CHECK'
+import json,sys
+p=json.load(open(sys.argv[1])); p['spec']['image']=sys.argv[2]
+for r in p['spec']['rules']:
+    if 'image' in r: r['image']=sys.argv[2]
+p['spec']['timeoutSeconds']=15
+p['spec']['env']=[{'name':'OTEL_RIO_TEST_BREAK','value':'true'}]
+p['spec']['retryToken']='migration-failure'
+print(json.dumps(p))
+CHECK
+  kubectl apply -f "$artifacts/migrated-policy.json"
+  wait_phase RolledBack
+fi
 kubectl patch instrumentations.rio.otelx.github.io cluster --type=merge -p '{"spec":{"timeoutSeconds":60,"retryToken":"corrected","env":[]}}'
 wait_phase Ready
+if [[ -n "${PREVIOUS_SOURCE:-}" ]]; then
+  kubectl get deployments,statefulsets,daemonsets -n injector-component-test -o json > "$artifacts/migrated-workloads.json"
+  python3 - "$artifacts/migrated-workloads.json" "$payload_image" <<'CHECK'
+import json,sys
+for x in json.load(open(sys.argv[1]))['items']:
+    state=json.loads(x['metadata']['annotations']['rio.otelx.github.io/state'])
+    for key in ('current','stable'):
+        assert state[key]['enabled'] and state[key]['image']==sys.argv[2], (x['kind'],key,state)
+CHECK
+  # Alpha.2 and alpha.3 share the v1alpha1 CRD, Config hash, and State schema.
+  cmp "$PREVIOUS_SOURCE/config/crd.yaml" "$component/config/crd.yaml"
+  kubectl set image deployment/rio -n rio-system "operator=$PREVIOUS_OPERATOR_IMAGE"
+  kubectl rollout status deployment/rio -n rio-system --timeout=180s
+  wait_phase Ready
+  kubectl rollout restart deployment/deployment -n injector-component-test
+  kubectl rollout status deployment/deployment -n injector-component-test --timeout=180s
+  wait_phase Ready
+  "$component/scripts/install.sh" "$operator_image"
+  wait_phase Ready
+  # shellcheck source=scripts/e2e-certificates.sh
+  source "$component/scripts/e2e-certificates.sh"
+fi
 kubectl delete instrumentations.rio.otelx.github.io cluster --wait=true --timeout=180s
 kubectl get pods -n injector-component-test -o json > "$artifacts/removed-pods.json"
 python3 - "$artifacts/removed-pods.json" "$artifacts/nodes.json" <<'PY'
@@ -232,7 +306,8 @@ CHECK
 done
 # Exercise the documented removal path, including webhook and RBAC cleanup.
 "$component/scripts/uninstall.sh"
-if kubectl get crd instrumentations.rio.otelx.github.io >/dev/null 2>&1; then
-  printf 'CRD was not removed\n' >&2; exit 1
-fi
+for removed in crd/instrumentations.rio.otelx.github.io mutatingwebhookconfiguration/rio namespace/rio-system clusterrolebinding/rio clusterrole/rio; do
+  remaining=$(kubectl get "$removed" --ignore-not-found -o name)
+  [[ -z "$remaining" ]] || { printf 'Resource was not removed: %s\n' "$remaining" >&2; exit 1; }
+done
 printf 'RIO lifecycle and telemetry integration checks passed.\n'

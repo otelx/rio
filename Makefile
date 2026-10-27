@@ -10,7 +10,7 @@ PAYLOAD_IMAGE ?= ghcr.io/otelx/rio/instrumentation:dev
 PLATFORMS ?= linux/amd64,linux/arm64
 export OPERATOR_IMAGE PAYLOAD_IMAGE
 
-.PHONY: prepare test build vet image archive payload images smoke e2e install uninstall
+.PHONY: prepare test build vet image archive payload images smoke e2e e2e-upgrade renew-certificates install uninstall
 prepare:
 	mkdir -p "$(GOCACHE)" "$(GOMODCACHE)" "$(GOTMPDIR)" "$(ARTIFACTS)/bin"
 test: prepare
@@ -32,6 +32,12 @@ smoke:
 	./payload/scripts/smoke.sh
 e2e:
 	./scripts/e2e.sh
+e2e-upgrade: OPERATOR_IMAGE = ghcr.io/otelx/rio/operator:issue-6-candidate
+e2e-upgrade: PAYLOAD_IMAGE = ghcr.io/otelx/rio/instrumentation:issue-6-candidate
+e2e-upgrade:
+	./scripts/e2e-upgrade.sh
+renew-certificates:
+	./scripts/renew-certificates.sh
 install:
 	./scripts/install.sh "$(OPERATOR_IMAGE)"
 uninstall:
