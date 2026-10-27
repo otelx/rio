@@ -42,8 +42,16 @@ class Harness:
         self.expected_config = None
 
     def command(self, *argv, timeout=180, check=True, input=None):
-        result = subprocess.run(argv, env=self.env, text=True, input=input,
-                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=timeout)
+        try:
+            result = subprocess.run(argv, env=self.env, text=True, input=input,
+                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=timeout)
+        except subprocess.TimeoutExpired as exc:
+            output = exc.stdout or ''
+            if isinstance(output, bytes):
+                output = output.decode(errors='replace')
+            with (self.out / 'commands.log').open('a') as log:
+                log.write(json.dumps(list(argv)) + '\nTIMEOUT\n' + output + '\n')
+            raise
         with (self.out / 'commands.log').open('a') as log:
             log.write(json.dumps(list(argv)) + '\n' + result.stdout + '\n')
         if check and result.returncode:
@@ -68,9 +76,9 @@ class Harness:
         config = 'kind: Cluster\napiVersion: kind.x-k8s.io/v1alpha4\nfeatureGates:\n  ImageVolume: ' + str(self.args.delivery == 'imageVolume').lower() + '\nnodes:\n  - role: control-plane\n'
         path = self.out / 'kind.yaml'
         path.write_text(config)
-        self.command('kind', 'create', 'cluster', '--name', self.cluster, '--image', 'kindest/node:v1.35.0',
-                     '--config', str(path), '--kubeconfig', self.env['KUBECONFIG'], '--wait', '180s', timeout=300)
         self.created = True
+        self.command('kind', 'create', 'cluster', '--retain', '--name', self.cluster, '--image', 'kindest/node:v1.35.0',
+                     '--config', str(path), '--kubeconfig', self.env['KUBECONFIG'], '--wait', '180s', timeout=300)
         self.command('kind', 'load', 'docker-image', '--name', self.cluster, self.operator, self.payload, timeout=300)
         self.command(str(ROOT / 'scripts/install.sh'), self.operator, timeout=300)
         nodes = json.loads(self.kube('get', 'nodes', '-o', 'json'))
