@@ -158,7 +158,55 @@ func (s Selector) Matches(namespace, kind, name string) bool {
 }
 
 func excluded(namespace, operatorNamespace string) bool {
-	return namespace == operatorNamespace
+	return namespace == operatorNamespace || namespace == "kube-system" || namespace == "kube-public" || namespace == "kube-node-lease"
+}
+
+func criticalPriority(name string) bool {
+	return name == "system-node-critical" || name == "system-cluster-critical"
+}
+
+// mayInjectPod checks every possible owner identity without API calls. Only
+// ReplicaSet -> Deployment and Job -> CronJob names require a lookup. For those,
+// test all names mentioned in the policy and an unnamed wildcard candidate.
+func (p *Policy) mayInjectPod(pod *core.Pod) bool {
+	if p == nil || p.DeletionTimestamp != nil {
+		return false
+	}
+	kind, name := "Pod", pod.Name
+	parentKind := ""
+	for _, ref := range pod.OwnerReferences {
+		if ref.Controller == nil || !*ref.Controller {
+			continue
+		}
+		kind, name = ref.Kind, ref.Name
+		switch kind {
+		case "ReplicaSet":
+			parentKind = "Deployment"
+		case "Job":
+			parentKind = "CronJob"
+		}
+		break
+	}
+	if kind == "Pod" && name == "" {
+		name = strings.TrimSuffix(pod.GenerateName, "-")
+	}
+	if p.Resolve(pod.Namespace, kind, name).Enabled {
+		return true
+	}
+	if parentKind == "" {
+		return false
+	}
+	if p.Resolve(pod.Namespace, parentKind, "").Enabled {
+		return true
+	}
+	for _, rule := range p.Spec.Rules {
+		for _, w := range rule.Selector.Workloads {
+			if w.Kind == parentKind && p.Resolve(pod.Namespace, parentKind, w.Name).Enabled {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func (p *Policy) Validate() error {
