@@ -8,8 +8,8 @@ RIO is experimental. The initial release supports evaluation; it does not claim 
 - Native image-volume delivery is selected only after runtime checks and a probe on every registered Linux node succeed. Known minimum runtimes are containerd 2.1 and CRI-O 1.31. Kubernetes feature gates must also permit image volumes.
 - Otherwise RIO copies the same payload into an `emptyDir` with an init container. This copy runs as UID 0 with all capabilities dropped. Restricted namespaces requiring every container to run nonroot need a volume-permissions adaptation.
 - Windows containers are unsupported. RIO does not change application scheduling.
-- The controller and payload release tags contain amd64 and arm64 images. Mixed Linux clusters use the same tags on both architectures; the container runtime selects the matching image, and capability probes must succeed on every Linux node before native delivery is selected. Application images must also provide the architectures on which they can be scheduled.
-- The existing `v0.1.0-alpha.1` images are amd64 only. Build from source or use a subsequent release for arm64; existing release tags are not replaced.
+- Starting with `v0.1.0-alpha.2`, the controller and payload release tags contain amd64 and arm64 images. Mixed Linux clusters use the same tags on both architectures; the container runtime selects the matching image, and capability probes must succeed on every Linux node before native delivery is selected. Application images must also provide the architectures on which they can be scheduled.
+- The existing `v0.1.0-alpha.1` images are amd64 only. Use `v0.1.0-alpha.2` or later for arm64; existing release tags are not replaced.
 
 ## Runtimes and signals
 

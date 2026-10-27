@@ -4,14 +4,14 @@ Run this example in a new, disposable kind cluster. It uses a Node.js HTTP servi
 
 ## Prerequisites
 
-Install Docker, [kind](https://kind.sigs.k8s.io/), kubectl, Git, Bash, Python 3, and OpenSSL. Docker must be running. The example uses Linux containers and Kubernetes 1.35. The release currently targets Linux amd64; see [compatibility](compatibility.md) for architecture limits.
+Install Docker, [kind](https://kind.sigs.k8s.io/), kubectl, Git, Bash, Python 3, and OpenSSL. Docker must be running. The example uses Linux containers and Kubernetes 1.35. The release targets Linux amd64 and arm64; the controller and payload image tags select the matching architecture. See [compatibility](compatibility.md) for runtime and operational limits.
 
 Cluster creation, installation, and application rollout require cluster-admin access. Network access is needed to download container images.
 
 ## 1. Create the cluster
 
 ```bash
-git clone --branch v0.1.0-alpha.1 https://github.com/otelx/rio.git
+git clone --branch v0.1.0-alpha.2 https://github.com/otelx/rio.git
 cd rio
 mkdir -p .artifacts/tmp
 export TMPDIR="$PWD/.artifacts/tmp"

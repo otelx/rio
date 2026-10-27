@@ -198,7 +198,7 @@ CHECK
     python3 - "$root/examples/quickstart/policy.yaml" "$payload_image" > "$artifacts/quickstart-policy.yaml" <<'RENDER'
 from pathlib import Path
 import sys
-print(Path(sys.argv[1]).read_text().replace('ghcr.io/otelx/rio-payload:v0.1.0-alpha.1', sys.argv[2]))
+print(Path(sys.argv[1]).read_text().replace('ghcr.io/otelx/rio-payload:v0.1.0-alpha.2', sys.argv[2]))
 RENDER
     kubectl apply -f "$artifacts/quickstart-policy.yaml"
     kubectl wait --for=jsonpath='{.status.phase}'=Ready instrumentations.rio.otelx.github.io/cluster --timeout=300s

@@ -16,7 +16,7 @@ kind: Instrumentation
 metadata:
   name: cluster
 spec:
-  image: ghcr.io/otelx/rio-payload:v0.1.0-alpha.1
+  image: ghcr.io/otelx/rio-payload:v0.1.0-alpha.2
   endpoint: http://collector.observability.svc.cluster.local:4318
   signals:
     traces: true

@@ -86,7 +86,7 @@ spec:
         seccompProfile: {type: RuntimeDefault}
       containers:
         - name: operator
-          image: ghcr.io/otelx/rio:v0.1.0-alpha.1
+          image: ghcr.io/otelx/rio:v0.1.0-alpha.2
           imagePullPolicy: IfNotPresent
           ports:
             - {name: webhook, containerPort: 9443}

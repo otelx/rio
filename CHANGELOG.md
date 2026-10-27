@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.1.0-alpha.2
 
 - Linux arm64 controller and payload images, with native architecture CI and multi-platform release tags for amd64 and arm64.
 - Loader coverage for all five language agents with glibc and Alpine/musl, plus HTTP trace export checks with both libc variants.

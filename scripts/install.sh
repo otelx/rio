@@ -16,7 +16,7 @@ for required in kubectl python3 openssl; do
   command -v "$required" >/dev/null || { printf 'Missing command: %s\n' "$required" >&2; exit 1; }
 done
 trap 'printf "RIO: command failed at line %s\n" "$LINENO" >&2' ERR
-image=${1:-ghcr.io/otelx/rio:v0.1.0-alpha.1}
+image=${1:-ghcr.io/otelx/rio:v0.1.0-alpha.2}
 if [[ ! "$image" =~ ^[a-zA-Z0-9][a-zA-Z0-9._/:@-]*$ ]]; then
   printf 'Invalid image reference: %q\n' "$image" >&2
   exit 2
@@ -52,7 +52,7 @@ component,artifacts=map(pathlib.Path,sys.argv[1:3]); image=sys.argv[3]
 if not image: raise SystemExit('Missing image reference')
 text=(component/'config/install.yaml').read_text()
 text=text.replace('REPLACE_CA_BUNDLE',base64.b64encode((artifacts/'tls.crt').read_bytes()).decode())
-text=text.replace('ghcr.io/otelx/rio:v0.1.0-alpha.1',image)
+text=text.replace('ghcr.io/otelx/rio:v0.1.0-alpha.2',image)
 (artifacts/'install.yaml').write_text(text)
 PY
 kubectl apply -f "$artifacts/install.yaml"
