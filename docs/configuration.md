@@ -6,7 +6,7 @@ The payload comes from [the image component](../payload/README.md). Application 
 
 Start with the [quickstart](quickstart.md) for a complete local installation.
 
-The [support contract](compatibility.md) defines the validated runtime/signal scope, matching operator/instrumentation versions, cross-release migration limits, and the compatibility policy for this API and persisted annotations. The API remains `v1alpha1` for the first normal `v0.1.0` release.
+See [compatibility](compatibility.md) for supported environments, signals, API compatibility, and migration limits.
 
 ## Configuration
 
@@ -68,22 +68,16 @@ Malformed persisted rollout state, unreadable templates, failed workload updates
 
 The operator reports `InjectionMissing` for a healthy managed Pod that missed injection instead of claiming that instrumentation succeeded or rolling back a healthy application. Correct the webhook or policy synchronization and request a new revision to retry. Standalone Pods and Jobs are not automatically restarted; recreate them when instrumentation is needed.
 
-## Upgrading from alpha.1 or alpha.2
+## Retired image references
 
-The `v0.1.0-alpha.3` release changes both image paths:
+If an existing manifest references a deleted image repository, replace it with the current path and a matching release tag:
 
-| Component | Previous image | New image |
+| Component | Deleted repository | Current repository |
 | --- | --- | --- |
 | Operator | `ghcr.io/otelx/rio` | `ghcr.io/otelx/rio/operator` |
 | Instrumentation | `ghcr.io/otelx/rio-payload` | `ghcr.io/otelx/rio/instrumentation` |
 
-Use the `v0.1.0-alpha.3` installation files and run `./scripts/install.sh` to update the operator Deployment. Update your `Instrumentation` manifest's `spec.image` and any `rules[].image` overrides to the new instrumentation path and release tag, then apply the policy. The policy change triggers instrumentation rollouts for supported managed workloads. Recreate other selected Pods to apply the new image to them. Update image references in deployment automation and registry mirrors as well.
-
-The retired `ghcr.io/otelx/rio` and `ghcr.io/otelx/rio-payload` packages have been deleted. Images for alpha.1 and alpha.2 can no longer be pulled from GHCR. Use alpha.3 or later under the new paths; source tags and release archives remain available. For local development, follow the [source build instructions](development.md).
-
-Update old policy image references, including rule overrides, before recreating or rescheduling instrumented Pods. Saved recovery revisions may also reference retired images; a recovery that needs to pull a deleted image cannot succeed unless that image is already cached or supplied through a maintained registry mirror. Cross-release upgrade and recovery validation is tracked in [issue #6](https://github.com/otelx/rio/issues/6).
-
-The steps above describe the image rename, not a validated in-place cross-release upgrade. For the supported migration approach and treatment of saved state, follow [operator/instrumentation versions and upgrades](compatibility.md#operatorinstrumentation-versions-and-upgrades). Cached retired images do not provide a durable recovery guarantee.
+Check the operator Deployment, policy `spec.image`, rule overrides, automation, and registry mirrors. Saved recovery configurations can also reference deleted images. A cached image may disappear on rescheduling; retain a verified mirror if recovery needs it. Follow the [migration procedure](compatibility.md#operatorinstrumentation-versions-and-upgrades) before moving releases.
 
 ## Automatic payload delivery
 

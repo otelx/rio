@@ -64,16 +64,11 @@ See [release verification](https://github.com/otelx/rio/blob/{version}/docs/rele
 for digest-based installation, source checksums, SBOMs, authenticated provenance,
 license inventories, and anonymous quickstart evidence. Both image indexes select Linux amd64 and arm64.
 
-Application telemetry validation covers Node.js 24 built-in HTTP server trace export on the tested glibc/musl images.
-Java, .NET, Python, and Ruby have loader checks only and remain experimental. Metrics/log capture and export,
-and context propagation, are unvalidated. Exporter configuration does not guarantee automatic capture.
-The Kubernetes API remains `v1alpha1`.
-
-Use operator and instrumentation images from this same full release. In-place cross-release upgrade/downgrade
-and mixed-version recovery are unvalidated; follow the
-[migration policy](https://github.com/otelx/rio/blob/{version}/docs/compatibility.md#operatorinstrumentation-versions-and-upgrades).
-See the [maintenance and private security-report policy](https://github.com/otelx/rio/blob/{version}/SECURITY.md)
-for the maintained release range, best-effort response targets, and recovery limits.
+Node.js HTTP server trace export is tested on glibc and musl. Java, .NET, Python, Ruby,
+and metrics/log capture remain experimental; propagation is untested. The API remains `v1alpha1`.
+Use matching operator and instrumentation versions; see
+[compatibility and migration limits](https://github.com/otelx/rio/blob/{version}/docs/compatibility.md)
+and [security reporting](https://github.com/otelx/rio/blob/{version}/SECURITY.md).
 ''')
 PY
 release_args=(--repo otelx/rio --verify-tag --draft --title "RIO $version" --notes-file "$out/notes.md")

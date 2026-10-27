@@ -56,17 +56,19 @@ Update [versions.json](../payload/versions.json) and the language lockfiles toge
 
 The [release process](releases.md) supports stable and prerelease SemVer tags,
 publishes the exact tested images, and reserves each version before image pushes.
-It stages an immutable GitHub release behind SBOM/provenance verification and
-anonymous quickstart checks on both architectures. It also describes required
-repository settings, failed-release recovery, and digest-based consumption.
+SBOM/provenance verification and anonymous quickstart checks on both architectures
+must pass before an immutable GitHub release is published.
 
 Before tagging, complete the [redistribution review](../THIRD_PARTY.md), configure
-the scoped settings-read credential, update release references, and add the
-release-specific changelog section. Existing alpha release assets require a
-separate immutability migration; see the release process for current limitations.
+the scoped settings-read credential, update release references, and add the exact
+release's changelog section. Merge through a PR and wait for that merged commit's
+CI push run on protected `main` to succeed. The source guard requires that exact
+commit and runs before registry authentication and publication. See
+[maintainer access and release authority](maintainers.md) for tag permissions and
+[release verification](releases.md) for package visibility, retries, source asset
+protection, and digest-based consumption.
 
-Starting with `v0.1.0-alpha.3`, release images use `ghcr.io/otelx/rio/operator:VERSION` and `ghcr.io/otelx/rio/instrumentation:VERSION`. The publication script appends `rio/operator` and `rio/instrumentation` to its registry namespace argument, including in the disposable CI registry. The original `rio` and `rio-payload` packages have been deleted, including their alpha.1 and alpha.2 image versions. Source tags and release archives remain available. See [upgrade instructions](configuration.md#upgrading-from-alpha1-or-alpha2).
-
-Before tagging, update the release references in the quickstart, install template, installer default, policy, and changelog. Merge through a PR and wait for the exact merged commit's CI push run on protected `main` to succeed before tagging it. Release tags are immutable and can only be created by authorized administrators. The release source guard rejects commits outside `main` or without successful CI on `main` before registry authentication or publication. Follow [maintainer access and release authority](maintainers.md) for the required protections and access review. Both image packages must be linked to `otelx/rio` and publicly readable before announcing a release; each Dockerfile supplies the source label used for repository linking. Verify an anonymous pull and repeat the quickstart using the released image references.
-
-Before publishing a normal release, apply the [support contract](compatibility.md): keep the `v1alpha1` API label, rerun the full candidate CI matrix, record runtime fixture digests/libc versions in release evidence, publish the supported matching image pair and migration limits, and check [maintenance/security expectations](../SECURITY.md). Any claim of in-place upgrade or downgrade support also requires cross-release tests including saved rollout state; current tests establish same-version recovery only. Release notes must retain the experimental classification of Java, .NET, Python, and Ruby and the absence of metrics/log/propagation validation unless new application checks establish that coverage.
+Before a normal release, update the [support matrix](compatibility.md) using the
+candidate's image IDs and runtime/libc logs. Keep the CRD at `v1alpha1`. Expand
+language or signal support only after end-to-end validation. Cross-release upgrade
+or downgrade support requires tests with persisted rollout state.
