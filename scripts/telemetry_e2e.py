@@ -58,6 +58,10 @@ class Harness:
         self.kube('apply', '-f', '-', input=json.dumps(obj))
 
     def setup(self):
+        # A nonroot workload must be able to read the shipped configuration,
+        # regardless of the checkout umask used to build the payload.
+        self.command('docker', 'run', '--rm', '--user', '65532:65532', self.payload,
+                     '/bin/sh', '-ec', '/verify-layout.sh; cat /dist/injector/otelinject.conf >/dev/null')
         existing = self.command('kind', 'get', 'clusters').splitlines()
         assert self.cluster not in existing
         config = 'kind: Cluster\napiVersion: kind.x-k8s.io/v1alpha4\nfeatureGates:\n  ImageVolume: ' + str(self.args.delivery == 'imageVolume').lower() + '\nnodes:\n  - role: control-plane\n'
@@ -139,20 +143,25 @@ class Harness:
         self.apply({'apiVersion': 'v1', 'kind': 'Service', 'metadata': {'name': name, 'namespace': self.namespace},
             'spec': {'selector': {'app': name}, 'ports': [{'port': 8080}]}})
         self.kube('rollout', 'status', 'deployment/' + name, '-n', self.namespace, '--timeout=180s', timeout=210)
-        pods = json.loads(self.kube('get', 'pods', '-n', self.namespace, '-l', 'app=' + name, '-o', 'json'))
-        (self.current / (name + '-pods.json')).write_text(json.dumps(pods, indent=2))
-        active = [p for p in pods['items'] if not p['metadata'].get('deletionTimestamp')]
-        assert len(active) == 1, active
-        annotations = active[0]['metadata'].get('annotations', {})
-        if injected:
-            assert annotations.get('rio.otelx.github.io/delivery') == self.args.delivery, annotations
-            assert annotations['rio.otelx.github.io/applied-revision'] == annotations['rio.otelx.github.io/revision']
-        else:
-            assert not any(e['name'] == 'LD_PRELOAD' for c in active[0]['spec']['containers'] for e in c.get('env', []))
+        def admitted():
+            pods = json.loads(self.kube('get', 'pods', '-n', self.namespace, '-l', 'app=' + name, '-o', 'json'))
+            (self.current / (name + '-pods.json')).write_text(json.dumps(pods, indent=2))
+            active = [p for p in pods['items'] if not p['metadata'].get('deletionTimestamp')]
+            assert len(active) == 1, active
+            annotations = active[0]['metadata'].get('annotations', {})
+            if injected:
+                assert annotations.get('rio.otelx.github.io/delivery') == self.args.delivery, annotations
+                assert annotations['rio.otelx.github.io/applied-revision'] == annotations['rio.otelx.github.io/revision']
+            else:
+                assert not any(e['name'] == 'LD_PRELOAD' for c in active[0]['spec']['containers'] for e in c.get('env', []))
+            assert any(c['type'] == 'Ready' and c['status'] == 'True' for c in active[0].get('status', {}).get('conditions', []))
+        # Capabilities may still be probing when an initial uninstrumented Pod
+        # starts; wait for the controller's admitted replacement to be Ready.
+        self.poll(admitted, timeout=180)
         return name
 
     def request(self, name, marker, headers=None, next_url=None):
-        log_path = self.current / (name + '-forward.log')
+        log_path = self.current / (name + '-' + marker + '-forward.log')
         with log_path.open('w') as log:
             forward = subprocess.Popen(['kubectl', 'port-forward', '-n', self.namespace, 'service/' + name, ':8080'],
                                        env=self.env, stdout=log, stderr=subprocess.STDOUT, text=True)
@@ -211,6 +220,12 @@ class Harness:
                 marker = uuid.uuid4().hex
                 self.request(name, marker)
                 self.assert_silent(name, ('traces', 'metrics', 'logs'))
+                try:
+                    server_span(self.records('traces'), name, marker)
+                except AssertionError:
+                    pass
+                else:
+                    raise AssertionError('Trace assertion accepted deliberately uninstrumented app')
                 # Existing baseline must stay uninstrumented for this negative control.
                 self.kube('delete', 'deployment', name, '-n', self.namespace, '--wait=true')
                 self.policy({'traces': True, 'metrics': False, 'logs': False})
@@ -223,8 +238,15 @@ class Harness:
                 name = self.deploy(lang, libc, base + '-disabled', True)
                 self.request(name, uuid.uuid4().hex)
                 self.assert_silent(name, ('traces', 'metrics', 'logs'))
+                self.save_apps()
                 print(f'PASS trace export and negative controls: {lang}/{libc}/{self.args.arch}/{self.args.delivery}', flush=True)
                 self.kube('delete', 'deployment', '--all', '-n', self.namespace, '--wait=true')
+
+    def save_apps(self):
+        pods = json.loads(self.kube('get', 'pods', '-n', self.namespace, '-o', 'json'))
+        for pod in pods['items']:
+            name = pod['metadata']['name']
+            (self.current / (name + '.log')).write_text(self.kube('logs', '-n', self.namespace, name, '-c', 'app', check=False))
 
     def assert_silent(self, name, signals, duration=8):
         deadline = time.monotonic() + duration
@@ -256,13 +278,25 @@ def main():
     parser.add_argument('--arch', choices=['amd64', 'arm64'], required=True)
     parser.add_argument('--delivery', choices=['imageVolume', 'initContainer'], required=True)
     parser.add_argument('--keep-cluster', action='store_true')
+    parser.add_argument('--scenarios', nargs='+', choices=['traces', 'propagation', 'metrics', 'logs'],
+                        default=['traces', 'propagation', 'metrics', 'logs'])
     args = parser.parse_args()
     harness = Harness(args)
     success = False
     print(f'Evidence: {harness.out}', flush=True)
     try:
         harness.setup()
-        harness.trace_cases()
+        if 'traces' in args.scenarios:
+            harness.trace_cases()
+        if 'propagation' in args.scenarios:
+            from telemetry.propagation import run
+            run(harness)
+        if 'metrics' in args.scenarios:
+            from telemetry.metrics import run
+            run(harness)
+        if 'logs' in args.scenarios:
+            from telemetry.logs import run
+            run(harness)
         success = True
     finally:
         if harness.created:
