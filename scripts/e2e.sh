@@ -126,6 +126,7 @@ print(json.dumps({'apiVersion':'rio.otelx.github.io/v1alpha1','kind':'Instrument
 PY
 wait_phase() {
   local wanted=$1
+  local admission_retries=0 running_operator expected_image
   for attempt in $(seq 1 100); do
     kubectl get instrumentations.rio.otelx.github.io cluster -o json > "$artifacts/status.json"
     if python3 - "$artifacts/status.json" "$wanted" <<'PY'
@@ -136,6 +137,33 @@ observed=status.get('observedGeneration')==p['metadata']['generation']
 sys.exit(0 if observed and len(w)==3 and all(x['phase']==sys.argv[2] for x in w) else 1)
 PY
     then cp "$artifacts/status.json" "$artifacts/$wanted.json"; return 0; fi
+    # Ignore can legitimately create an uninstrumented but healthy Pod. Exercise
+    # the supported repair flow explicitly; never count that as rollback success.
+    if [[ ( "$wanted" == Ready || "$wanted" == RolledBack ) && "$admission_retries" -lt 2 ]] && python3 - "$artifacts/status.json" <<'PY'
+import json,sys
+rows=json.load(open(sys.argv[1])).get('status',{}).get('workloads',[])
+sys.exit(0 if any(row['namespace']=='injector-component-test' and row['phase']=='InjectionMissing' for row in rows) else 1)
+PY
+    then
+      running_operator=$(kubectl get deployment rio -n rio-system -o jsonpath='{.spec.template.spec.containers[0].image}')
+      if [[ "$running_operator" == "$operator_image" ]]; then
+        expected_image=$(python3 - "$artifacts/status.json" <<'PY'
+import json,sys
+print(json.load(open(sys.argv[1]))['spec']['image'])
+PY
+)
+        wait_admission "$expected_image"
+        admission_retries=$((admission_retries + 1))
+        python3 - "$artifacts/status.json" "$admission_retries" > "$artifacts/admission-retry.json" <<'PY'
+import json,sys
+policy=json.load(open(sys.argv[1]))
+token=policy['spec'].get('retryToken','')+'-admission-'+sys.argv[2]
+print(json.dumps({'spec':{'retryToken':token}}))
+PY
+        printf 'Verified admission; requesting instrumentation retry %s\n' "$admission_retries"
+        kubectl patch instrumentations.rio.otelx.github.io cluster --type=merge --patch-file="$artifacts/admission-retry.json"
+      fi
+    fi
     sleep 2
   done
   cat "$artifacts/status.json"

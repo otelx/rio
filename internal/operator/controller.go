@@ -212,15 +212,12 @@ func (c *Controller) Reconcile(ctx context.Context) (reconcileErr error) {
 		if next.FailedRevision != "" {
 			report["failedRevision"] = next.FailedRevision
 		}
-		if next.Phase == "Ready" && next.Current.Enabled {
-			for _, pod := range pods.Items {
-				if pod.Annotations[OwnerAnnotation] == string(obj.GetUID()) && pod.Annotations[RevisionAnnotation] == next.Current.Revision() && pod.DeletionTimestamp == nil && pod.Annotations[AppliedAnnotation] != next.Current.Revision() {
-					report["phase"] = "InjectionMissing"
-					report["message"] = "healthy pod did not receive the requested injection; inspect webhook events"
-					phase = "Degraded"
-				}
-			}
+		if next.Phase == "InjectionMissing" || next.Phase == "RollbackInjectionMissing" || (state != nil && next.Current.Revision() == state.Current.Revision() && next.Current.Enabled && health.Ready && health.InjectionMissing) {
+			report["phase"] = "InjectionMissing"
+			report["message"] = "healthy pods did not receive the requested instrumentation; inspect webhook events; the last successful configuration is preserved"
+			phase = "Degraded"
 		}
+
 		reports = append(reports, report)
 		if next.Phase == "RollingOut" || next.Phase == "RollingBack" {
 			if phase == "Ready" {
