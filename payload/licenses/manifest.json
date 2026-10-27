@@ -48,5 +48,10 @@
       "basis": "License text only: this does not certify eligible compilation or pin the actual bundled GNU runtime version."
     }
   ],
-  "review_status": "partial; see THIRD_PARTY.md"
+  "review_status": "partial; see THIRD_PARTY.md",
+  "managed_dotnet_inventory": {
+    "path": "dotnet/managed/inventory.json",
+    "scope": "All managed DLLs, both architectures and libcs. Native dependencies remain separate.",
+    "sources": "Each text source and hash, original NuGet package checksum, and matching DLL member are recorded in the inventory."
+  }
 }

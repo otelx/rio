@@ -8,7 +8,7 @@ other packages with their own terms. An image label is not a license inventory.
 | Operator Go dependencies | `go.mod`, `go.sum`, and compiled-image SBOM | `go-licenses/v2@v2.0.1 save` follows the compiled dependency graph and copies redistribution material into `/licenses/go`; the Go runtime license is included there too. |
 | Injector shared library | `payload/versions.json`, Injector v0.11.0 asset SHA-256 per architecture | Upstream Apache-2.0 license and Zig 0.15.2 standard-library MIT notice in `/licenses/upstream/injector/`. Its source build disables libc and declares no external Zig packages. |
 | Java agent | `payload/versions.json`, Java instrumentation v2.30.0 asset SHA-256 | Embedded `META-INF/licenses/` and other license/notice entries remain in the agent JAR. The notice inventory extracts these entries as well. |
-| .NET agents, glibc and musl | `payload/versions.json`, .NET instrumentation v1.17.0 asset SHA-256 | Upstream distribution `LICENSE` files remain under `/dist/agents/dotnet/{glibc,musl}`. Supplemental fmt, spdlog 1.15.3, .NET Foundation MIT, and GNU runtime license texts are in `/licenses/upstream/dotnet/`. Managed assembly notices and exact native runtime inputs require further review. |
+| .NET agents, glibc and musl | `payload/versions.json`, .NET instrumentation v1.17.0 asset SHA-256; `payload/licenses/dotnet/managed/inventory.json` | Upstream distribution `LICENSE` files remain under `/dist/agents/dotnet/{glibc,musl}`. Supplemental fmt, spdlog 1.15.3, .NET Foundation MIT, and GNU runtime license texts are in `/licenses/upstream/dotnet/`. The `managed/` inventory maps every managed DLL to original NuGet package bytes or the instrumentation source project, with preserved package metadata, licenses, and third-party notices. Exact native runtime inputs require further review. |
 | Node.js agent and dependencies | `payload/node/package-lock.json` | npm package license and notice files remain under `/dist/agents/node/node_modules`. |
 | Python agents and dependencies, glibc and musl | `payload/python/requirements.lock` | Wheel license/notice and dist-info material remains under `/dist/agents/python/{glibc,musl}`. |
 | Ruby agents and dependencies, glibc and musl | `payload/ruby/Gemfile.lock`, source revision in `payload/versions.json` | Gem license and notice files remain under `/dist/agents/ruby/{glibc,musl}`. |
@@ -35,6 +35,11 @@ verbatim from immutable upstream commits; [the material manifest](payload/licens
 records its source and SHA-256. GNU runtime texts do not identify or certify the
 actual compiler/runtime build used upstream, and the .NET Foundation MIT text is
 not a claim about the version of the copied CoreCLR headers.
+The native [ELF inventory](payload/licenses/dotnet/native-inventory.json) records
+all four profiler hashes, dynamic dependencies, and compiler comments. Those
+comments identify GCC 9.4.0/Clang 5.0.2 for glibc amd64, GCC 12.3.0/Clang 14 for
+glibc arm64, and Alpine GCC 15.2.0/Clang 21.1.2 for both musl targets. They do not
+identify every statically linked runtime object or establish all of its terms.
 
 ## Audit findings, 2026-10-27
 
@@ -57,11 +62,39 @@ inventory and recipe versions, then verify SHA-256, applicable Git blob identiti
 and APorts SHA-512 checksums before creating the bundle. Recipes are never executed.
 The upstream archives retain their license/notice texts. This is a source-input
 inventory, not a claim of bit-for-bit binary reproducibility or a completed legal
-review. .NET's managed dependency notices and native runtime inventory remain
-concrete outstanding gaps.
+review. .NET's native runtime inventory remains an outstanding gap.
 The Java agent already embeds upstream notices;
 Node.js, Python, and Ruby package material is retained and still needs reconciliation
 against the full per-architecture inventory.
+
+The managed .NET comparison covers all 228 DLL paths (114 unique binaries) in
+each architecture's final image. The bytes are identical between architectures.
+There are 71 distinct NuGet package/version pairs, matched by DLL SHA-256 to
+members of packages downloaded from NuGet's official flat-container endpoint.
+Five instrumentation project assemblies occur once per libc and are covered by
+the pinned instrumentation source license. Package product versions are not
+reliable package identifiers: the Binder DLL reporting `8.0.7`, for example,
+matches package `Microsoft.Extensions.Configuration.Binder/8.0.2` byte for byte.
+
+`payload/licenses/dotnet/managed/` preserves 84 unique text files, including
+original package metadata and every packaged license/third-party notice. When
+a package supplies only a license expression or URL, its license text is copied
+from the package's recorded source commit (the OpenTracing release tag supplies
+its source commit). The inventory records each text's SHA-256 and original URL
+or package URL, package checksum, and archive member. The image build verifies
+all preserved texts and the exact complete DLL set against that inventory after
+extracting the four pinned upstream distributions. New, removed, or changed DLLs
+fail the build until their coverage is reconciled. These checks bind evidence to
+the shipped bytes; they do not approve native dependencies or the overall review.
+
+To refresh this inventory, extract all four pinned .NET assets, match each
+dependency DLL's SHA-256 against its original NuGet package member, and record
+the package checksum/member and license material sources. Use source project
+coverage only for the instrumentation's own assemblies. Retain package metadata
+and all packaged notices, supplying source license texts where necessary. Compare
+both architectures, then run `payload/scripts/check_managed_notices.py` with the
+extracted distribution, material directory, and `payload/versions.json`. Rebuild
+and inspect both final images before renewing the review.
 
 ## Refresh Alpine source inputs
 
