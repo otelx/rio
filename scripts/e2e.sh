@@ -128,8 +128,10 @@ wait_phase() {
     kubectl get instrumentations.rio.otelx.github.io cluster -o json > "$artifacts/status.json"
     if python3 - "$artifacts/status.json" "$wanted" <<'PY'
 import json,sys
-w=[x for x in json.load(open(sys.argv[1])).get('status',{}).get('workloads',[]) if x['namespace']=='injector-component-test']
-sys.exit(0 if len(w)==3 and all(x['phase']==sys.argv[2] for x in w) else 1)
+p=json.load(open(sys.argv[1])); status=p.get('status',{})
+w=[x for x in status.get('workloads',[]) if x['namespace']=='injector-component-test']
+observed=status.get('observedGeneration')==p['metadata']['generation']
+sys.exit(0 if observed and len(w)==3 and all(x['phase']==sys.argv[2] for x in w) else 1)
 PY
     then cp "$artifacts/status.json" "$artifacts/$wanted.json"; return 0; fi
     sleep 2
@@ -238,6 +240,34 @@ for x in json.load(open(sys.argv[1]))['items']:
     for key in ('current','stable'):
         assert state[key]['enabled'] and state[key]['image']==sys.argv[2], (x['kind'],key,state)
 CHECK
+  if [[ "$PREVIOUS_PAYLOAD_IMAGE" == ghcr.io/otelx/rio/instrumentation:* ]]; then
+    # A retained alpha.3 payload is a supported rollback target. Exercise an
+    # explicit policy downgrade and restore under the candidate controller,
+    # checking overrides and saved successful snapshots in both directions.
+    for payload_target in previous candidate; do
+      if [[ "$payload_target" == previous ]]; then payload_ref=$PREVIOUS_PAYLOAD_IMAGE; else payload_ref=$payload_image; fi
+      python3 - "$artifacts/policy.json" "$payload_ref" "$payload_target" > "$artifacts/payload-$payload_target-policy.json" <<'CHECK'
+import json,sys
+p=json.load(open(sys.argv[1])); p['spec']['image']=sys.argv[2]
+for r in p['spec']['rules']:
+    if 'image' in r: r['image']=sys.argv[2]
+p['spec']['timeoutSeconds']=120
+p['spec']['retryToken']='payload-'+sys.argv[3]
+print(json.dumps(p))
+CHECK
+      kubectl apply -f "$artifacts/payload-$payload_target-policy.json"
+      wait_phase Ready
+      wait_admission "$payload_ref"
+      kubectl get deployments,statefulsets,daemonsets -n injector-component-test -o json > "$artifacts/payload-$payload_target-workloads.json"
+      python3 - "$artifacts/payload-$payload_target-workloads.json" "$payload_ref" <<'CHECK'
+import json,sys
+for x in json.load(open(sys.argv[1]))['items']:
+    state=json.loads(x['metadata']['annotations']['rio.otelx.github.io/state'])
+    for key in ('current','stable'):
+        assert state[key]['enabled'] and state[key]['image']==sys.argv[2], (x['kind'],key,state)
+CHECK
+    done
+  fi
   # Alpha.2 and alpha.3 share the v1alpha1 CRD, Config hash, and State schema.
   cmp "$PREVIOUS_SOURCE/config/crd.yaml" "$component/config/crd.yaml"
   kubectl set image deployment/rio -n rio-system "operator=$PREVIOUS_OPERATOR_IMAGE"
