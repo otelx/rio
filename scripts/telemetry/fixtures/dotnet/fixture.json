@@ -16,7 +16,7 @@
     "name": "http.server.request.duration",
     "type": "histogram",
     "unit": "s",
-    "temporality": "cumulative",
+    "temporality": 2,
     "activity": "GET /work/MARKER increases count and produces a nonnegative duration sample"
   },
   "logs": {
