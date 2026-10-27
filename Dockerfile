@@ -1,6 +1,7 @@
-FROM --platform=$BUILDPLATFORM golang:1.26.1-bookworm AS build
+FROM --platform=$BUILDPLATFORM golang:1.27.3-bookworm@sha256:972b4110ba0f47539a975c31e52c64765e1ff19f2d74469ae4a595c6676e80a5 AS build
 WORKDIR /source
 COPY go.mod go.sum ./
+RUN test "$(go env GOVERSION)" = "go$(awk '$1 == "go" {print $2}' go.mod)"
 RUN go mod download
 COPY cmd ./cmd
 COPY internal ./internal

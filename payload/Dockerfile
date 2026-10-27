@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM python:3.14.6-slim-trixie AS downloads
+FROM python:3.14.6-slim-trixie@sha256:7bec7ddcddeff7975d6ba9b4be7dd6f6b2f55e7491539145e2978f7f97ce9144 AS downloads
 ARG TARGETARCH
 WORKDIR /build
 COPY versions.json scripts/download.py ./
@@ -38,7 +38,7 @@ ENV BUNDLE_PATH=/build/bundle BUNDLE_FROZEN=true BUNDLE_APP_CONFIG=/build/.bundl
 RUN mkdir -p "$TMPDIR" && bundle install && cp -R /build/bundle/ruby/3.3.0 /payload
 COPY ruby/opentelemetry-auto-instrumentation.rb /payload/
 
-FROM alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
+FROM alpine:3.24.3@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a
 LABEL org.opencontainers.image.source="https://github.com/otelx/rio" \
       org.opencontainers.image.title="RIO instrumentation" \
       org.opencontainers.image.description="OpenTelemetry Injector and language agents for automatic runtime instrumentation" \

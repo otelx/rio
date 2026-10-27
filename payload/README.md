@@ -24,13 +24,13 @@ The operator mounts the image root at `/__otel_sdk_auto_instrumentation__`. For 
 | Component | Pinned input |
 | --- | --- |
 | Injector | 0.11.0, separate amd64 and arm64 libraries |
-| Java | Upstream OpenTelemetry Java agent 2.30.0 |
-| Node.js | Zero-Code package 0.78.0, npm lockfile |
-| Python | Distro 0.66b0 / SDK 1.45.0, hashed dependency lock |
+| Java | Upstream OpenTelemetry Java agent 2.33.1 |
+| Node.js | Zero-Code package 0.82.0, npm lockfile |
+| Python | Distro 0.66b1 / SDK 1.45.1, hashed dependency lock |
 | .NET | Zero-Code package 1.17.0, both libc variants per architecture |
 | Ruby | Upstream commit `68af0a92d6d9c2cd0ee38a9327e98797673227d1`, Bundler lockfile |
 
-Downloads fail on a checksum mismatch. Python requirements derive from the upstream Operator v0.160.0 and include the HTTP/protobuf exporter, rather than a Python-version-dependent gRPC exporter. Node uses `npm ci`. Ruby uses a frozen Bundler dependency graph and a pinned upstream checkout. Its tiny local loader only locates the upstream entry point; it does not implement an SDK or change signal behavior. Python's `sitecustomize.py` calls the upstream Zero-Code loader.
+Downloads fail on a checksum mismatch. Python requirements derive from the upstream Operator v0.160.0, with dependency security updates, and include the HTTP/protobuf exporter, rather than a Python-version-dependent gRPC exporter. Node uses `npm ci`. Ruby uses a frozen Bundler dependency graph and a pinned upstream checkout. Its tiny local loader only locates the upstream entry point; it does not implement an SDK or change signal behavior. Python's `sitecustomize.py` calls the upstream Zero-Code loader. See [dependency security](../docs/dependency-security.md) for final-image scans and supplemental Java/.NET inventories.
 
 Python payloads are built on Python 3.14 and Ruby payloads on Ruby 3.3. Runtime, framework, libc, and native-extension compatibility still requires application testing; bundling five agents does not promise every runtime version or framework. Traces, metrics, and logs use the standard agent exporter configuration. Exporter availability and automatic capture of a particular signal are distinct: an application must use libraries that the corresponding agent instruments.
 

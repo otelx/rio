@@ -5,7 +5,7 @@ test -s "$root/versions.json"
 test -s "$root/injector/libotelinject.so"
 test -s "$root/injector/otelinject.conf"
 test -s "$root/agents/java/opentelemetry-javaagent.jar"
-test -s "$root/agents/node/node_modules/@opentelemetry/auto-instrumentations-node/build/src/register.js"
+test -s "$root/agents/node/node_modules/@opentelemetry/auto-instrumentations-node/dist/register.cjs"
 for libc in glibc musl; do
   test -s "$root/agents/python/$libc/sitecustomize.py"
   test -d "$root/agents/python/$libc/opentelemetry/sdk"
