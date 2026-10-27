@@ -35,6 +35,10 @@ Select namespaces, detect supported runtimes through the upstream Injector, and 
 
 Start with the [quickstart](https://github.com/otelx/rio/blob/$version/docs/quickstart.md) and read the [compatibility limits](https://github.com/otelx/rio/blob/$version/docs/compatibility.md).
 
+Application telemetry validation covers Node.js 24 built-in HTTP server trace export on the tested glibc/musl images. Java, .NET, Python, and Ruby have loader checks only and remain experimental. Metrics/log capture and export, and context propagation, are unvalidated. Exporter configuration does not guarantee automatic capture. The Kubernetes API remains \`v1alpha1\`.
+
+Use operator and instrumentation images from this same full release. In-place cross-release upgrade/downgrade and mixed-version recovery are unvalidated; follow the [migration policy](https://github.com/otelx/rio/blob/$version/docs/compatibility.md#operatorinstrumentation-versions-and-upgrades). See the [maintenance and private security-report policy](https://github.com/otelx/rio/blob/$version/SECURITY.md); only the latest alpha is currently maintained, with best-effort acknowledgement within 7 calendar days and initial triage within 14 calendar days, without an SLA or appointed backup responder.
+
 Images validated by this release workflow:
 
 - Operator: \`ghcr.io/otelx/rio/operator:$version\`

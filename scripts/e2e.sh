@@ -187,6 +187,10 @@ for arch in "${architectures[@]}"; do
     kubectl patch deployment/hello -n rio-example --type=merge -p "{\"spec\":{\"template\":{\"spec\":{\"nodeSelector\":{\"kubernetes.io/arch\":\"$arch\"}}}}}"
     kubectl set image deployment/hello -n rio-example "hello=$app_image"
     kubectl rollout status deployment/hello -n rio-example --timeout=180s
+    # Record exact runtime/libc versions behind the floating fixture tags.
+    # musl's ldd prints its version and exits 1 when no file is supplied.
+    kubectl exec -n rio-example deployment/hello -- sh -c \
+      'node --version && cat /etc/os-release && (ldd --version 2>&1 || test "$?" -eq 1)' > "$logs/runtime.log"
     # Baseline is uninstrumented before the namespace is selected.
     kubectl get pods -n rio-example -o json > "$logs/hello-before.json"
     python3 - "$logs/hello-before.json" <<'CHECK'
