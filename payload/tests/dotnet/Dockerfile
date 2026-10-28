@@ -1,5 +1,5 @@
 ARG RUNTIME_IMAGE=mcr.microsoft.com/dotnet/aspnet:8.0
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /source
 COPY . .
 RUN dotnet publish --configuration Release --output /out -p:UseAppHost=false

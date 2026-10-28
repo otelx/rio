@@ -107,8 +107,8 @@ class SecurityGateTest(unittest.TestCase):
                 path = root / name
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_bytes(b"reviewed source")
-            versions = {"dotnet": {"version": "fixture"}, "dotnetRioPropagation": {"sdkImage": "pinned-sdk"}}
-            (root / "Dockerfile").write_text("FROM --platform=$BUILDPLATFORM pinned-sdk AS dotnet-propagation\n")
+            versions = {"dotnet": {"version": "fixture"}, "dotnetRioPropagation": {"sdkImage": "pinned-sdk", "net8SdkImage": "pinned-net8-sdk"}}
+            (root / "Dockerfile").write_text("FROM --platform=$BUILDPLATFORM pinned-net8-sdk AS dotnet-net8\nFROM --platform=$BUILDPLATFORM pinned-sdk AS dotnet-propagation\n")
             for name in ("dotnet/Rio.Propagation.csproj", "dotnet/bootstrap/Rio.Bootstrap.csproj"):
                 (root / name).write_text("<Project />")
             upstream = {"upstream": versions["dotnet"], "assemblies": {}}
@@ -130,10 +130,13 @@ class SecurityGateTest(unittest.TestCase):
             legal.write_text(json.dumps(upstream))
             manifest = OWNED.generate(root, compiled, versions)
             self.assertEqual(set(OWNED.OUTPUTS), OWNED.verify(manifest, distribution, root, versions)[0])
-            mismatched = json.loads(json.dumps(versions))
-            mismatched["dotnetRioPropagation"]["sdkImage"] = "different-sdk"
-            with self.assertRaisesRegex(ValueError, "SDK image"):
-                OWNED.generate(root, compiled, mismatched)
+            for field in ("sdkImage", "net8SdkImage"):
+                mismatched = json.loads(json.dumps(versions))
+                mismatched["dotnetRioPropagation"][field] = "different-sdk"
+                with self.subTest(field=field), self.assertRaisesRegex(ValueError, "SDK image"):
+                    OWNED.generate(root, compiled, mismatched)
+                with self.subTest(field=field), self.assertRaisesRegex(ValueError, "build inputs"):
+                    OWNED.verify(manifest, distribution, root, mismatched)
             project = root / "dotnet/Rio.Propagation.csproj"
             project.write_text('<Project><ItemGroup><PackageReference Include="unreviewed" /></ItemGroup></Project>')
             with self.assertRaisesRegex(ValueError, "package dependency"):

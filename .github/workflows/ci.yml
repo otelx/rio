@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
@@ -58,7 +58,7 @@ jobs:
       matrix:
         arch: [amd64, arm64]
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
@@ -67,7 +67,7 @@ jobs:
           go-version-file: go.mod
           cache: false
       - name: Build operator image
-        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
           load: true
@@ -77,7 +77,7 @@ jobs:
           cache-from: type=gha,scope=operator-${{ matrix.arch }}
           cache-to: type=gha,mode=max,scope=operator-${{ matrix.arch }}
       - name: Build instrumentation image
-        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: payload
           load: true
@@ -93,7 +93,7 @@ jobs:
           scripts/scan-image.sh operator "$OPERATOR_IMAGE" .artifacts/security/operator || status=1
           scripts/scan-image.sh instrumentation "$PAYLOAD_IMAGE" .artifacts/security/instrumentation || status=1
           exit "$status"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: security-current-${{ matrix.arch }}
@@ -131,7 +131,7 @@ jobs:
         run: |
           docker save "$OPERATOR_IMAGE" "$PAYLOAD_IMAGE" | gzip > .artifacts/release-images.tar.gz
           (cd .artifacts && sha256sum release-images.tar.gz > archive.sha256)
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: tested-release-images-${{ matrix.arch }}
           path: |
@@ -142,7 +142,7 @@ jobs:
             .artifacts/notices/
           include-hidden-files: true
           retention-days: 3
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: loaders-${{ matrix.arch }}
@@ -165,7 +165,7 @@ jobs:
         arch: [amd64, arm64]
         delivery: [imageVolume, initContainer]
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
@@ -186,7 +186,7 @@ jobs:
         run: |
           export CLUSTER_NAME="${CLUSTER_NAME,,}"
           make admission-e2e
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: tested-release-images-${{ matrix.arch }}
           path: .artifacts/release
@@ -203,7 +203,7 @@ jobs:
           make e2e
       - name: Verify five-language telemetry and cross-language propagation
         run: python3 scripts/telemetry_e2e.py --arch '${{ matrix.arch }}' --delivery '${{ matrix.delivery }}'
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: diagnostics-${{ matrix.arch }}-${{ matrix.delivery }}
@@ -229,7 +229,7 @@ jobs:
         arch: [amd64, arm64]
         delivery: [imageVolume, initContainer]
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -245,7 +245,7 @@ jobs:
           export TMPDIR="$PWD/.artifacts/tmp"
           go install sigs.k8s.io/kind@v0.33.0
           echo "$GOBIN" >> "$GITHUB_PATH"
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: tested-release-images-${{ matrix.arch }}
           path: .artifacts/release
@@ -265,7 +265,7 @@ jobs:
         run: |
           export CLUSTER_NAME="${CLUSTER_NAME,,}"
           make e2e-upgrade
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: upgrade-diagnostics-${{ matrix.baseline }}-${{ matrix.arch }}-${{ matrix.delivery }}
@@ -285,14 +285,14 @@ jobs:
         image: registry:2@sha256:a3d8aaa63ed8681a604f1dea0aa03f100d5895b6a58ace528858a7b332415373
         ports: ['5000:5000']
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: tested-release-images-*
           path: .artifacts/release
-      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
         with:
           platforms: arm64
       - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
@@ -323,7 +323,7 @@ jobs:
       matrix:
         arch: [amd64, arm64]
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
@@ -344,7 +344,7 @@ jobs:
             scripts/scan-image.sh "$role" "$image" ".artifacts/security/$role" || status=1
           done
           exit "$status"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: security-published-${{ matrix.arch }}
@@ -371,7 +371,7 @@ jobs:
       attestations: write
       pull-requests: read
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           fetch-depth: 0
@@ -379,7 +379,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: scripts/check-release-source.sh
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: tested-release-images-*
           path: .artifacts/release
@@ -493,7 +493,7 @@ jobs:
           cp "$INSTRUMENTATION_PROVENANCE" .artifacts/release/prepared/instrumentation-provenance.sigstore.json
           cp "$INSTRUMENTATION_AMD64_SBOM" .artifacts/release/prepared/instrumentation-amd64-sbom.sigstore.json
           cp "$INSTRUMENTATION_ARM64_SBOM" .artifacts/release/prepared/instrumentation-arm64-sbom.sigstore.json
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: prepared-release
           path: .artifacts/release/prepared/
@@ -510,7 +510,7 @@ jobs:
       matrix:
         arch: [amd64, arm64]
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
@@ -525,7 +525,7 @@ jobs:
           export TMPDIR="$PWD/.artifacts/tmp"
           go install sigs.k8s.io/kind@v0.33.0
           echo "$GOBIN" >> "$GITHUB_PATH"
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: prepared-release
           path: .artifacts/release/prepared
@@ -533,13 +533,13 @@ jobs:
         env:
           RELEASE_ARCH: ${{ matrix.arch }}
         run: scripts/verify-release.sh .artifacts/release/prepared/release.json
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: anonymous-release-check-${{ matrix.arch }}
           path: .artifacts/release-check/**/verified-*.json
           include-hidden-files: true
           if-no-files-found: error
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: anonymous-release-diagnostics-${{ matrix.arch }}
@@ -559,14 +559,14 @@ jobs:
       packages: read
       attestations: read
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: prepared-release
           path: .artifacts/release/prepared
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: anonymous-release-check-*
           path: .artifacts/release/checks
@@ -596,7 +596,7 @@ jobs:
       id-token: write
       attestations: write
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Prepare an audit archive from the exact checked-out source
@@ -642,7 +642,7 @@ jobs:
           cp "$PROVENANCE_BUNDLE" .artifacts/attestation-audit/provenance.sigstore.json
           cp "$SBOM_BUNDLE" .artifacts/attestation-audit/sbom.sigstore.json
           (cd .artifacts/attestation-audit && sha256sum -- *.tar.gz *.spdx.json *.sigstore.json > SHA256SUMS)
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: issue-5-attestation-audit
           path: |

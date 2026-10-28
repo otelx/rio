@@ -1,7 +1,7 @@
 ARG RUNTIME_IMAGE=alpine:3.24.3@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a
 FROM ${RUNTIME_IMAGE} AS runtime-base
 
-FROM python:3.14.6-slim-trixie@sha256:7bec7ddcddeff7975d6ba9b4be7dd6f6b2f55e7491539145e2978f7f97ce9144 AS downloads
+FROM python:3.15.0-slim-trixie@sha256:f5b92f2a669a4c347044f29367f31983280b648250ca94dea66f98c53bc87e58 AS downloads
 ARG TARGETARCH
 WORKDIR /build
 COPY versions.json scripts/download.py ./
@@ -16,7 +16,12 @@ COPY --from=runtime-base /lib/apk/db/installed /installed-packages
 COPY alpine-sources.lock.json scripts/alpine_sources.py ./
 RUN python alpine_sources.py /installed-packages alpine-sources.lock.json /alpine-source-inputs.tar.gz --base-image "$RUNTIME_IMAGE"
 
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0.427-bookworm-slim@sha256:ff39a765f04619c8d146796fc09b38499ae5984f4a2a4c3a0a57d0022855daee AS dotnet-propagation
+# Supply the net8.0 reference packs and test runtime without NuGet downloads.
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0.427-bookworm-slim@sha256:ff39a765f04619c8d146796fc09b38499ae5984f4a2a4c3a0a57d0022855daee AS dotnet-net8
+
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0.320-bookworm-slim@sha256:7e3a4bd66701a451823db2028154ae16ff191bc452596ba618ef4d0c58f9cd01 AS dotnet-propagation
+COPY --from=dotnet-net8 /usr/share/dotnet/packs/ /usr/share/dotnet/packs/
+COPY --from=dotnet-net8 /usr/share/dotnet/shared/ /usr/share/dotnet/shared/
 WORKDIR /source
 COPY --from=downloads /payload/dotnet/glibc/net /agent/net
 COPY dotnet/Rio.Propagation.csproj dotnet/PropagationPlugin.cs dotnet/NuGet.Config ./
@@ -34,12 +39,12 @@ COPY Dockerfile /sources/Dockerfile
 COPY scripts/dotnet_inventory.py /sources/scripts/dotnet_inventory.py
 RUN python /sources/scripts/dotnet_inventory.py /sources /generated /build/versions.json /rio-dotnet-inventory.json
 
-FROM node:24@sha256:934240a162082fd8b8a2f90cd5114446443f1eba1c5378f6687167ca405e6584 AS node
+FROM node:25@sha256:78839ac448c23517f8eab2e8f7943d9b4f73979eb7f8bed2c73dbf72ff869e7b AS node
 WORKDIR /build
 COPY node/package.json node/package-lock.json ./
 RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 
-FROM python:3.14.6-trixie@sha256:55dd7c1ea6c2b2c45a26d797187706eb9e5e0046f8e54fd759e38647b505c36b AS python-glibc
+FROM python:3.15.0-trixie@sha256:d5ae371dc36dd95f3bb453fb64ca03377ba455d3351339f16be6c47aa10177b9 AS python-glibc
 WORKDIR /build
 COPY python/requirements.lock ./
 RUN mkdir -p /build/tmp && TMPDIR=/build/tmp pip install --no-cache-dir --require-hashes --no-compile --target /payload -r requirements.lock
@@ -49,7 +54,7 @@ COPY python/patch_aiohttp_context.py ./
 RUN python patch_aiohttp_context.py /payload
 COPY python/sitecustomize.py /payload/
 
-FROM python:3.14.6-alpine3.23@sha256:b165067c5afc37fa5608a3c05609cc3d51aafd808a30fbfd822ee594fef55ad4 AS python-musl
+FROM python:3.15.0-alpine3.23@sha256:d64bc17e0dff27c5c4a31f616450d032aa73d6325855127ce3a305bf1384c8d5 AS python-musl
 WORKDIR /build
 COPY python/requirements.lock ./
 RUN mkdir -p /build/tmp && TMPDIR=/build/tmp pip install --no-cache-dir --require-hashes --no-compile --target /payload -r requirements.lock
