@@ -1,0 +1,12 @@
+# Dependency and security maintenance owner; review policy is documented in docs/dependency-security.md.
+/go.mod @MrAlias
+/go.sum @MrAlias
+/Dockerfile @MrAlias
+/payload/ @MrAlias
+/.github/workflows/ @MrAlias
+/.github/dependabot.yml @MrAlias
+/security/ @MrAlias
+/scripts/*security* @MrAlias
+/scripts/scan-image.sh @MrAlias
+/scripts/*sbom.py @MrAlias
+/docs/dependency-security.md @MrAlias

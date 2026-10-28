@@ -15,7 +15,7 @@ The five-language telemetry validation below applies to matching `ghcr.io/otelx/
 | Delivery | Native image volume or init-container copy to `emptyDir` | Both paths tested with each architecture and libc |
 | Workloads | Deployments, StatefulSets, DaemonSets with supported rolling-update strategies | Injection, failure recovery, operator restart, and removal |
 
-Other Kubernetes versions, runtimes, and application images need separate validation. Application base images are pinned by version and immutable multi-architecture index digest in each fixture's `fixture.json`; dependency locks pin framework and logging-library inputs. [Supported-branch CI](https://github.com/otelx/rio/actions/runs/40615729597) at commit `da444787d2be3544324b1bae157b2eb5c6b52176` records actual image IDs, runtime/OS/libc output, agent versions, and Collector output per cell. See the [payload validation](../payload/README.md#validation-and-updating).
+Other Kubernetes versions, runtimes, and application images need separate validation. Application base images are pinned by version and immutable multi-architecture index digest in each fixture's `fixture.json`; dependency locks pin framework and logging-library inputs. The initial matrix evidence is [supported-branch CI](https://github.com/otelx/rio/actions/runs/40615729597) at commit `da444787d2be3544324b1bae157b2eb5c6b52176`. The refreshed agent inputs below are verified by the required native CI attached to [the dependency update](https://github.com/otelx/rio/pull/13); its retained image IDs, runtime/OS/libc output, agent versions, and Collector data are the evidence for those inputs. See the [payload validation](../payload/README.md#validation-and-updating).
 
 ## Delivery and security constraints
 
@@ -31,10 +31,10 @@ The matrix below is validated through Kubernetes admission, the shipped Injector
 
 | Language | Pinned runtime and HTTP framework/client | Agent/bundle inputs | glibc fixture | musl fixture |
 | --- | --- | --- | --- | --- |
-| [Node.js](../scripts/telemetry/fixtures/node/fixture.json) | Node.js 24.22.1; built-in `node:http` server/client | Auto-instrumentations 0.78.0; Winston transport 0.30.0 | Debian 12; glibc 2.36 (`2.36-9+deb12u14`) | Alpine 3.24.3; musl 1.2.6 |
-| [Java](../scripts/telemetry/fixtures/java/fixture.json) | Temurin OpenJDK 21.0.12.1+1; JDK `HttpServer`/`HttpClient`; Gson 2.13.1 | Java agent 2.30.0 | Ubuntu 26.04.1; glibc 2.43 (`2.43-2ubuntu2.4`) | Alpine 3.24.3; musl 1.2.6 |
+| [Node.js](../scripts/telemetry/fixtures/node/fixture.json) | Node.js 24.22.1; built-in `node:http` server/client | Auto-instrumentations 0.82.0; Winston transport 0.35.0 | Debian 12; glibc 2.36 (`2.36-9+deb12u14`) | Alpine 3.24.3; musl 1.2.6 |
+| [Java](../scripts/telemetry/fixtures/java/fixture.json) | Temurin OpenJDK 21.0.12.1+1; JDK `HttpServer`/`HttpClient`; Gson 2.13.1 | Java agent 2.33.1 | Ubuntu 26.04.1; glibc 2.43 (`2.43-2ubuntu2.4`) | Alpine 3.24.3; musl 1.2.6 |
 | [.NET](../scripts/telemetry/fixtures/dotnet/fixture.json) | .NET/ASP.NET Core 8.0.33; Kestrel and `System.Net.Http.HttpClient` | Automatic instrumentation 1.17.0; RIO propagation/bootstrap extension 1 | Debian 12; glibc 2.36 (`2.36-9+deb12u14`) | Alpine 3.24.3; musl 1.2.6 |
-| [Python](../scripts/telemetry/fixtures/python/fixture.json) | Python 3.14.6; aiohttp 3.13.3 server/`ClientSession` | Distro/instrumentations 0.66b0; SDK 1.45.0; RIO source-checked OTLP flags and aiohttp context repairs | Debian 13.6; glibc 2.41 (`2.41-12+deb13u3`) | Alpine 3.23.5; musl 1.2.5 |
+| [Python](../scripts/telemetry/fixtures/python/fixture.json) | Python 3.14.6; aiohttp 3.13.3 server/`ClientSession` | Distro/instrumentations 0.66b1; SDK 1.45.1; RIO source-checked OTLP flags and aiohttp context repairs | Debian 13.6; glibc 2.41 (`2.41-12+deb13u3`) | Alpine 3.23.5; musl 1.2.5 |
 | [Ruby](../scripts/telemetry/fixtures/ruby/fixture.json) | Ruby 3.3.12; Sinatra 4.2.1, Rack 3.2.7, Rackup 2.3.1, WEBrick 1.9.2; Net::HTTP 0.10.0 | Auto-instrumentation 0.1.0 at pinned commit `68af0a92d6d9c2cd0ee38a9327e98797673227d1`; Rack 0.30.0, Sinatra 0.29.0, Logger 0.4.0; RIO Rack metrics 1.0.0; metrics API 0.5.0 / SDK 0.13.1 / OTLP exporter 0.8.0 | Debian 12; glibc 2.36 (`2.36-9+deb12u14`) | Alpine 3.23.5; musl 1.2.5 |
 
 All assertions use fresh request UUIDs and unique service identities. Application images contain ordinary framework/client/logging dependencies, with no application OpenTelemetry provider, exporter, custom span, meter, or log-record setup. Bounded export polling inspects Collector data; workload readiness and loader messages cannot pass a telemetry assertion. Uninstrumented applications must still serve requests and log normally while exporting no telemetry. Application/operator/Collector logs, Pod diagnostics, policy manifests, and raw signal files are retained. Known SDK/bootstrap startup errors and application restarts fail the checks.
@@ -65,7 +65,7 @@ Ruby measures monotonic request duration through response-body completion or fai
 
 | Language | Pinned logging API/library | Validated capture |
 | --- | --- | --- |
-| Node.js | Winston 3.19.0; agent-side Winston transport 0.30.0 | One correlated INFO record for the normal application message |
+| Node.js | Winston 3.19.0; agent-side Winston transport 0.35.0 | One correlated INFO record for the normal application message |
 | Java | Logback 1.5.18 through SLF4J 2.0.17 | Same body/severity/time/resource/correlation checks |
 | .NET | Framework-provided `Microsoft.Extensions.Logging.ILogger` in ASP.NET Core 8.0.33, formatted messages enabled | Same checks; ordinary console logging remains enabled |
 | Python | Standard-library `logging` from Python 3.14.6 | Same checks |

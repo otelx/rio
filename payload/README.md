@@ -26,9 +26,9 @@ The operator mounts the image root at `/__otel_sdk_auto_instrumentation__`. For 
 | Component | Pinned input |
 | --- | --- |
 | Injector | 0.11.0, separate amd64 and arm64 libraries |
-| Java | Upstream OpenTelemetry Java agent 2.30.0 |
-| Node.js | Zero-Code package 0.78.0; agent-side Winston transport 0.30.0, npm integrity lockfile |
-| Python | Distro 0.66b0 / SDK 1.45.0, hashed dependency lock and source-checked RIO repairs |
+| Java | Upstream OpenTelemetry Java agent 2.33.1 |
+| Node.js | Zero-Code package 0.82.0; agent-side Winston transport 0.35.0, npm integrity lockfile |
+| Python | Distro 0.66b1 / SDK 1.45.1, hashed dependency lock and source-checked RIO repairs |
 | .NET | Automatic instrumentation 1.17.0, both libc variants per architecture; RIO bootstrap and propagation plugin |
 | Ruby | Upstream commit `68af0a92d6d9c2cd0ee38a9327e98797673227d1`; Logger bridge 0.4.0; RIO Rack metrics extension 1.0.0; frozen Bundler lockfile |
 

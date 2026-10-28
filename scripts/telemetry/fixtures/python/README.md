@@ -11,7 +11,7 @@ The fixture implements the [shared interface](../../README.md). aiohttp's
 `ClientSession.get` receives no application-supplied propagation headers. Each
 work request logs once through standard-library `logging`, preserving the
 agent's root handler and normal console output. Both client and server use
-instrumentation already included in RIO's Python distro 0.66b0 / SDK 1.45.0.
+instrumentation already included in RIO's Python distro 0.66b1 / SDK 1.45.1.
 
 With `OTEL_SEMCONV_STABILITY_OPT_IN=http`, the automatic server duration source
 is `http.server.request.duration`, an OTLP histogram in seconds. The SDK's

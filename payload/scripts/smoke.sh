@@ -48,11 +48,11 @@ for libc in glibc musl; do
   fi
   printf 'Checking all five language loaders on %s (%s)\n' "$platform" "$libc"
   docker run "${common[@]}" "$java" java -version > "$logs/java.log" 2>&1
-  grep -q 'opentelemetry-javaagent.*version: 2.30.0' "$logs/java.log"
-  docker run "${common[@]}" "$node" node -e 'if (!Object.keys(require.cache).some(p => p.endsWith("auto-instrumentations-node/build/src/register.js"))) throw new Error("Node agent not loaded"); console.log("Node.js Injector activated")' > "$logs/node.log" 2>&1
+  grep -q 'opentelemetry-javaagent.*version: 2.33.1' "$logs/java.log"
+  docker run "${common[@]}" "$node" node -e 'if (!Object.keys(require.cache).some(p => p.endsWith("auto-instrumentations-node/dist/register.cjs"))) throw new Error("Node agent not loaded"); console.log("Node.js Injector activated")' > "$logs/node.log" 2>&1
   docker run "${common[@]}" "$python" python -c 'import sys; assert "opentelemetry.instrumentation.auto_instrumentation" in sys.modules; from opentelemetry import trace; assert type(trace.get_tracer_provider()).__name__ == "TracerProvider"; print("Python Injector activated")' > "$logs/python.log" 2>&1
   docker run "${common[@]}" "$ruby" ruby -e 'raise "Ruby agent not loaded" unless defined?(OpenTelemetry::SDK); puts "Ruby Injector activated"' > "$logs/ruby.log" 2>&1
-  fixture="rio-dotnet-smoke:$arch-$libc"
+  fixture="${DOTNET_SMOKE_IMAGE:-rio-dotnet-smoke}:$arch-$libc"
   docker build --platform "$platform" --build-arg "RUNTIME_IMAGE=$dotnet" -t "$fixture" "$component/tests/dotnet" > "$logs/dotnet-build.log" 2>&1
   docker run "${common[@]}" "$fixture" > "$logs/dotnet.log" 2>&1
 done

@@ -1,4 +1,4 @@
-"""Backport OTLP trace flag encoding for the pinned Python exporter 1.45.0.
+"""Backport OTLP trace flag encoding for the pinned Python exporter 1.45.1.
 
 Upstream issue: https://github.com/open-telemetry/opentelemetry-python/issues/4666
 Upstream fix: https://github.com/open-telemetry/opentelemetry-python/pull/5667
@@ -22,7 +22,7 @@ def apply(root):
     original = path.read_bytes()
     if hashlib.sha256(original).hexdigest() != ORIGINAL_SHA256:
         raise RuntimeError('Unexpected Python OTLP encoder source; review/remove trace flags backport')
-    record_path = root / 'opentelemetry_exporter_otlp_proto_common-1.45.0.dist-info/RECORD'
+    record_path = root / 'opentelemetry_exporter_otlp_proto_common-1.45.1.dist-info/RECORD'
     with record_path.open(newline='') as stream:
         records = list(csv.reader(stream))
     source = original.decode()

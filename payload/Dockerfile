@@ -1,8 +1,7 @@
-# syntax=docker/dockerfile:1
-ARG RUNTIME_IMAGE=alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
+ARG RUNTIME_IMAGE=alpine:3.24.3@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a
 FROM ${RUNTIME_IMAGE} AS runtime-base
 
-FROM python:3.14.6-slim-trixie AS downloads
+FROM python:3.14.6-slim-trixie@sha256:7bec7ddcddeff7975d6ba9b4be7dd6f6b2f55e7491539145e2978f7f97ce9144 AS downloads
 ARG TARGETARCH
 WORKDIR /build
 COPY versions.json scripts/download.py ./
@@ -27,6 +26,13 @@ RUN dotnet publish Rio.Propagation.csproj --configuration Release --output /out/
     && dotnet publish bootstrap/Rio.Bootstrap.csproj --configuration Release --output /out/bootstrap \
     && dotnet publish tests/throwing-hook/ThrowingHook.csproj --configuration Release --output /out/test-hook \
     && dotnet run --project tests/Rio.Bootstrap.Tests.csproj --configuration Release -- /out/bootstrap/Rio.Bootstrap.dll /out/test-hook/Rio.Bootstrap.ThrowingHook.dll
+
+FROM downloads AS dotnet-inventory
+COPY --from=dotnet-propagation /out/ /generated/
+COPY dotnet/ /sources/dotnet/
+COPY Dockerfile /sources/Dockerfile
+COPY scripts/dotnet_inventory.py /sources/scripts/dotnet_inventory.py
+RUN python /sources/scripts/dotnet_inventory.py /sources /generated /build/versions.json /rio-dotnet-inventory.json
 
 FROM node:24@sha256:934240a162082fd8b8a2f90cd5114446443f1eba1c5378f6687167ca405e6584 AS node
 WORKDIR /build
@@ -88,6 +94,7 @@ COPY --from=dotnet-propagation /out/plugin/Rio.Propagation.dll /dist/agents/dotn
 COPY --from=dotnet-propagation /out/plugin/Rio.Propagation.dll /dist/agents/dotnet/musl/net/Rio.Propagation.dll
 COPY --from=dotnet-propagation /out/bootstrap/Rio.Bootstrap.dll /dist/agents/dotnet/glibc/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll
 COPY --from=dotnet-propagation /out/bootstrap/Rio.Bootstrap.dll /dist/agents/dotnet/musl/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll
+COPY --from=dotnet-inventory /rio-dotnet-inventory.json /dist/agents/dotnet/rio-inventory.json
 COPY --from=node /build/node_modules /dist/agents/node/node_modules
 COPY --from=python-glibc /payload /dist/agents/python/glibc
 COPY --from=python-musl /payload /dist/agents/python/musl

@@ -1,4 +1,4 @@
-"""Repair full request-context activation in aiohttp-server 0.66b0.
+"""Repair full request-context activation in aiohttp-server 0.66b1.
 
 The upstream proposal documents the same lost-baggage defect:
 https://github.com/open-telemetry/opentelemetry-python-contrib/pull/2510
@@ -33,7 +33,7 @@ def apply(root):
     original = path.read_bytes()
     if hashlib.sha256(original).hexdigest() != ORIGINAL_SHA256:
         raise RuntimeError('Unexpected aiohttp-server source; review/remove full-context repair')
-    record_path = root / 'opentelemetry_instrumentation_aiohttp_server-0.66b0.dist-info/RECORD'
+    record_path = root / 'opentelemetry_instrumentation_aiohttp_server-0.66b1.dist-info/RECORD'
     with record_path.open(newline='') as stream:
         records = list(csv.reader(stream))
     replacements = (

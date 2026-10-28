@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "base_image": "alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b",
+  "base_image": "alpine:3.24.3@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a",
   "packages": [
     {
       "P": "alpine-baselayout",
@@ -25,17 +25,17 @@
     },
     {
       "P": "alpine-release",
-      "V": "3.24.1-r0",
+      "V": "3.24.3-r0",
       "L": "MIT",
       "o": "alpine-base",
-      "c": "0934530484bbcde7498e2c694c710a49616a450e"
+      "c": "ee92350c8a4509152dc91c693814215a884c07c3"
     },
     {
       "P": "apk-tools",
-      "V": "3.0.6-r0",
+      "V": "3.0.8-r0",
       "L": "GPL-2.0-only",
       "o": "apk-tools",
-      "c": "1403ea7a8ae3fb8e5a11207ddb1ff536eb8de912"
+      "c": "4588b452722bd4800efdc6cce4f6e980e02a997f"
     },
     {
       "P": "busybox",
@@ -53,45 +53,45 @@
     },
     {
       "P": "ca-certificates-bundle",
-      "V": "20260611-r0",
+      "V": "20261020-r0",
       "L": "MPL-2.0 AND MIT",
       "o": "ca-certificates",
-      "c": "e41cbd2ae991adfe8df298ba8e8e777e90bd0e03"
+      "c": "e78f5987166c6ffbe23f6472e2e8f040298fe2da"
     },
     {
       "P": "libapk",
-      "V": "3.0.6-r0",
+      "V": "3.0.8-r0",
       "L": "GPL-2.0-only",
       "o": "apk-tools",
-      "c": "1403ea7a8ae3fb8e5a11207ddb1ff536eb8de912"
+      "c": "4588b452722bd4800efdc6cce4f6e980e02a997f"
     },
     {
       "P": "libcrypto3",
-      "V": "3.5.7-r0",
+      "V": "3.5.9-r0",
       "L": "Apache-2.0",
       "o": "openssl",
-      "c": "4a4352d83ab03720965454a8c7b30b1b6a996c84"
+      "c": "29b9ec24b1b5b39aeef51fa2a044210e2ec5258e"
     },
     {
       "P": "libssl3",
-      "V": "3.5.7-r0",
+      "V": "3.5.9-r0",
       "L": "Apache-2.0",
       "o": "openssl",
-      "c": "4a4352d83ab03720965454a8c7b30b1b6a996c84"
+      "c": "29b9ec24b1b5b39aeef51fa2a044210e2ec5258e"
     },
     {
       "P": "musl",
-      "V": "1.2.6-r2",
+      "V": "1.2.6-r3",
       "L": "MIT",
       "o": "musl",
-      "c": "f5640d3a10f664c9119720c60515265d3d6f6d01"
+      "c": "8f79d39391b46d6dbf1800fb68b8212a21d5ee2e"
     },
     {
       "P": "musl-utils",
-      "V": "1.2.6-r2",
+      "V": "1.2.6-r3",
       "L": "MIT AND BSD-2-Clause AND GPL-2.0-or-later",
       "o": "musl",
-      "c": "f5640d3a10f664c9119720c60515265d3d6f6d01"
+      "c": "8f79d39391b46d6dbf1800fb68b8212a21d5ee2e"
     },
     {
       "P": "scanelf",
@@ -109,22 +109,22 @@
     },
     {
       "P": "zlib",
-      "V": "1.3.2-r0",
+      "V": "1.3.2-r1",
       "L": "Zlib",
       "o": "zlib",
-      "c": "f248b33b5943c7dc69bf691031d7612ab2e8ed93"
+      "c": "0afa2da0e8c8051c6f8f64a7a388e5a259904245"
     }
   ],
   "origins": [
     {
       "origin": "alpine-base",
-      "commit": "0934530484bbcde7498e2c694c710a49616a450e",
+      "commit": "ee92350c8a4509152dc91c693814215a884c07c3",
       "files": [
         {
           "name": "APKBUILD",
-          "url": "https://raw.githubusercontent.com/alpinelinux/aports/0934530484bbcde7498e2c694c710a49616a450e/main/alpine-base/APKBUILD",
-          "sha256": "815b70b84ada04848694df0f5661b5f096cf14d8b88cd9fc877de2afe672078c",
-          "git_blob": "0012df5f9e5c3aaae82ac17c58592473be8fc3a6"
+          "url": "https://raw.githubusercontent.com/alpinelinux/aports/ee92350c8a4509152dc91c693814215a884c07c3/main/alpine-base/APKBUILD",
+          "sha256": "51cb91f683941e1d9d89fe9e600d5c11bbae4b7baa45a870dba4a969516c7f3f",
+          "git_blob": "ca42eed745fb54d84a2f14113abfa649a1d2e3bf"
         }
       ]
     },
@@ -400,30 +400,23 @@
     },
     {
       "origin": "apk-tools",
-      "commit": "1403ea7a8ae3fb8e5a11207ddb1ff536eb8de912",
+      "commit": "4588b452722bd4800efdc6cce4f6e980e02a997f",
       "files": [
         {
           "name": "APKBUILD",
-          "url": "https://raw.githubusercontent.com/alpinelinux/aports/1403ea7a8ae3fb8e5a11207ddb1ff536eb8de912/main/apk-tools/APKBUILD",
-          "sha256": "5fa1b3168b587ae9a95c3106accfaaa2f738934d66f4bb0b52ddb51f3962af63",
-          "git_blob": "ed5dd99b45ca417b562d8087c0cd7099dae1c90b"
+          "url": "https://raw.githubusercontent.com/alpinelinux/aports/4588b452722bd4800efdc6cce4f6e980e02a997f/main/apk-tools/APKBUILD",
+          "sha256": "492db5ec3ca2ca6cfd3cc4e5b52a0262ca7bd9c77299344efb4d786c596b7005",
+          "git_blob": "384798fd6db41f33430d07ae7f6959aad6304323"
         },
         {
-          "name": "_apk",
-          "url": "https://raw.githubusercontent.com/alpinelinux/aports/1403ea7a8ae3fb8e5a11207ddb1ff536eb8de912/main/apk-tools/_apk",
-          "sha256": "87824378d2caa2f6bc5e3d103ddec4a9e7cb7a95d03ce0fb7c0e311cdbc9efc6",
-          "git_blob": "03f641724fc2e5587bf44817f374545a068881d4",
-          "aports_sha512": "993518cafcc5a932c9a418f7aac48012fc48f03c55964ad99d04b034bfa185d550c38dab46f1046adfaa1d65b422b4095b5a54d9a2504dee9278f25e76f9e3ed"
-        },
-        {
-          "name": "apk-tools-v3.0.6.tar.gz",
-          "url": "https://distfiles.alpinelinux.org/distfiles/v3.24/apk-tools-v3.0.6.tar.gz",
-          "sha256": "e9b62742ef7e9e8c1c051efdaed3a2f49d06d8ce20c707697aa23d29bbc7c86a",
-          "aports_sha512": "86c6ba9aad517d7a39d204373b37a28c143afe1438fa5090df90845f205c7f01e8aaee00ed0b6f7b27206ff745e0f1db160e3b919d17b37639fb19ae78bd13e6"
+          "name": "apk-tools-v3.0.8.tar.gz",
+          "url": "https://distfiles.alpinelinux.org/distfiles/v3.24/apk-tools-v3.0.8.tar.gz",
+          "sha256": "e81c64a6e7c3806d45d4622c253e757aee970be84048554fa0eed79310e9453e",
+          "aports_sha512": "3616435508dead5240f8d9fe74e87e2aa93262f9e466f50af8f60100e166403393b1e491c115395864d4179b219699831ecb61dc60960b5dfb1f10816d75f95f"
         },
         {
           "name": "repo-hash-sha1.patch",
-          "url": "https://raw.githubusercontent.com/alpinelinux/aports/1403ea7a8ae3fb8e5a11207ddb1ff536eb8de912/main/apk-tools/repo-hash-sha1.patch",
+          "url": "https://raw.githubusercontent.com/alpinelinux/aports/4588b452722bd4800efdc6cce4f6e980e02a997f/main/apk-tools/repo-hash-sha1.patch",
           "sha256": "0ef3ecc88a5c627ee9486632bbc26e66dd0073e6a9be0c143b25c6e366162df0",
           "git_blob": "33ad944259835f90e0f7dd6b28f78f0f2daa1c89",
           "aports_sha512": "6f6442d73d994964d78f06433a611902cbb066a457f3532544278b1422aa0aa276ccec1f2438ea7e93a8a048d3fdbf72ccd9a79d210f44870fda467bc43cb9fd"
@@ -998,29 +991,29 @@
     },
     {
       "origin": "ca-certificates",
-      "commit": "e41cbd2ae991adfe8df298ba8e8e777e90bd0e03",
+      "commit": "e78f5987166c6ffbe23f6472e2e8f040298fe2da",
       "files": [
         {
           "name": "APKBUILD",
-          "url": "https://raw.githubusercontent.com/alpinelinux/aports/e41cbd2ae991adfe8df298ba8e8e777e90bd0e03/main/ca-certificates/APKBUILD",
-          "sha256": "a1429622d05b27e016c1266312be8a9a7e4610da01d7d40826b1681677c53843",
-          "git_blob": "3d7cba6056b58a3fbce01f7c81e20fa6c085684c"
+          "url": "https://raw.githubusercontent.com/alpinelinux/aports/e78f5987166c6ffbe23f6472e2e8f040298fe2da/main/ca-certificates/APKBUILD",
+          "sha256": "7b35fb8e11790105578f47d57a3b22831227b0d8ad7d064e575bad146023f3da",
+          "git_blob": "c76805bafbc2a5867c1fe67aa0437573022a36fd"
         },
         {
-          "name": "ca-certificates-20260611.tar.bz2",
-          "url": "https://distfiles.alpinelinux.org/distfiles/v3.24/ca-certificates-20260611.tar.bz2",
-          "sha256": "32ca73f2e81e2b88dc614f12e1ee04a82b1ec5a8e29d9f359ddf8905a0afcbb0",
-          "aports_sha512": "f473a1111eb508ef5d1096489479dba07db6b0d76ef2b900b3473933d57419429061d83e9c1e881ab61c4b0f17c64859ec74d670da6fc1d83d9b0fa73e1b7d8d"
+          "name": "ca-certificates-20261020.tar.bz2",
+          "url": "https://distfiles.alpinelinux.org/distfiles/v3.24/ca-certificates-20261020.tar.bz2",
+          "sha256": "1048bc7f50fa42a6621bc2f8816173f89a0c0098f26dff072bc8fe40af714400",
+          "aports_sha512": "d28eb01751b1a914ffb5d8cb99e662f0a35a95148c21dcf98de1ab3108b54db9714a99472d07715023867f4f76a21f2a79a2bc1c7e9876ce5167fdd865ad2dd7"
         },
         {
           "name": "ca-certificates.post-deinstall",
-          "url": "https://raw.githubusercontent.com/alpinelinux/aports/e41cbd2ae991adfe8df298ba8e8e777e90bd0e03/main/ca-certificates/ca-certificates.post-deinstall",
+          "url": "https://raw.githubusercontent.com/alpinelinux/aports/e78f5987166c6ffbe23f6472e2e8f040298fe2da/main/ca-certificates/ca-certificates.post-deinstall",
           "sha256": "9523860edc396093bd41270c6e33a569a30657e2ffd729829514ee6b6d54d652",
           "git_blob": "10d219f03f526641af8a366db975b010b3c260e1"
         },
         {
           "name": "ca-certificates.trigger",
-          "url": "https://raw.githubusercontent.com/alpinelinux/aports/e41cbd2ae991adfe8df298ba8e8e777e90bd0e03/main/ca-certificates/ca-certificates.trigger",
+          "url": "https://raw.githubusercontent.com/alpinelinux/aports/e78f5987166c6ffbe23f6472e2e8f040298fe2da/main/ca-certificates/ca-certificates.trigger",
           "sha256": "1bf77c8eae3220b1bd7dd86561d0899315f51d72257c1aeb4066072ed4304fe5",
           "git_blob": "0ed2ac4980c97739fb6addfbf41a5700c6d286a1"
         }
@@ -1028,80 +1021,87 @@
     },
     {
       "origin": "musl",
-      "commit": "f5640d3a10f664c9119720c60515265d3d6f6d01",
+      "commit": "8f79d39391b46d6dbf1800fb68b8212a21d5ee2e",
       "files": [
         {
           "name": "0001-add-stub-for-pthread_mutexattr_setprioceiling.patch",
-          "url": "https://raw.githubusercontent.com/alpinelinux/aports/f5640d3a10f664c9119720c60515265d3d6f6d01/main/musl/0001-add-stub-for-pthread_mutexattr_setprioceiling.patch",
+          "url": "https://raw.githubusercontent.com/alpinelinux/aports/8f79d39391b46d6dbf1800fb68b8212a21d5ee2e/main/musl/0001-add-stub-for-pthread_mutexattr_setprioceiling.patch",
           "sha256": "b2067680c66af9eb9f4fdc1fa5d9337a9fd62bdab2c437b416aa97d79eb884ee",
           "git_blob": "0afb1fbc2e96c3f6a41d02635d64115184b8e614",
           "aports_sha512": "83ec0f774dbb5d4f4d4b917d149ea0ef609d028d18ae7624e90fedda6e3174c91ade93751bfd376adfa2848155110fc4dd02b6790363b98e5395c4787e8731e8"
         },
         {
           "name": "APKBUILD",
-          "url": "https://raw.githubusercontent.com/alpinelinux/aports/f5640d3a10f664c9119720c60515265d3d6f6d01/main/musl/APKBUILD",
-          "sha256": "db4e568cdf2b256815fdfdb55704cd2efdffdc0e8ecd0cb935fdc3e89e2140f4",
-          "git_blob": "dd843d37816a760badde8280e4d338c132159db6"
+          "url": "https://raw.githubusercontent.com/alpinelinux/aports/8f79d39391b46d6dbf1800fb68b8212a21d5ee2e/main/musl/APKBUILD",
+          "sha256": "22c5adb3f3b68ab84e5ff7d20df68447063d1ecb5c7b39afd5a04a1dfd444a35",
+          "git_blob": "b729315a72d9060cc69ba9bddec53c0691c05158"
+        },
+        {
+          "name": "CVE-2026-107891.patch",
+          "url": "https://raw.githubusercontent.com/alpinelinux/aports/8f79d39391b46d6dbf1800fb68b8212a21d5ee2e/main/musl/CVE-2026-107891.patch",
+          "sha256": "0cf0090ab433e8f9ed08ae03a0c93aff557c1d3e347260f62a61a10281f5333b",
+          "git_blob": "2abae19db458c2b3e9b45281a6f4867347c7c26f",
+          "aports_sha512": "df73a35b9da531021ad5b1a6aad12b9d8d69de2bed7fc91b1156d9727476ab25c0d3c2341d60488152ee8ccbddb83786e91fff950cdb177b9b04673da98fdc4e"
         },
         {
           "name": "CVE-2026-40200.patch",
-          "url": "https://raw.githubusercontent.com/alpinelinux/aports/f5640d3a10f664c9119720c60515265d3d6f6d01/main/musl/CVE-2026-40200.patch",
+          "url": "https://raw.githubusercontent.com/alpinelinux/aports/8f79d39391b46d6dbf1800fb68b8212a21d5ee2e/main/musl/CVE-2026-40200.patch",
           "sha256": "1ee29f64f9ca8e8ad7c349779d661ff6b52126a27575d3586981357a52c406fb",
           "git_blob": "88298ca471d38b2c8861f817caf394a591fcdc26",
           "aports_sha512": "a64ab7688d1a85e560b5687783df482d2467a79a74400da5a1601382847d6b4e6a79b7529a8dc80c46ddda8dc2a812f2261557fc8ee98dc3bdf7322761bd6d9c"
         },
         {
           "name": "CVE-2026-6042.patch",
-          "url": "https://raw.githubusercontent.com/alpinelinux/aports/f5640d3a10f664c9119720c60515265d3d6f6d01/main/musl/CVE-2026-6042.patch",
+          "url": "https://raw.githubusercontent.com/alpinelinux/aports/8f79d39391b46d6dbf1800fb68b8212a21d5ee2e/main/musl/CVE-2026-6042.patch",
           "sha256": "1d0be2e72b9d5bd16546b923aa8af861d271322f01644716a81823bec4065c99",
           "git_blob": "4c52c0a3211ec70c5010bc6bce0446c183914380",
           "aports_sha512": "f7849abeab0e4eab992a80464afa07b9c8aae5cee76040523b9dbc0931435f28ea8f5792b8a4a0cd6d608ac2f37e3225e89afcb3171a0a6df44450ed57cee83b"
         },
         {
           "name": "__stack_chk_fail_local.c",
-          "url": "https://raw.githubusercontent.com/alpinelinux/aports/f5640d3a10f664c9119720c60515265d3d6f6d01/main/musl/__stack_chk_fail_local.c",
+          "url": "https://raw.githubusercontent.com/alpinelinux/aports/8f79d39391b46d6dbf1800fb68b8212a21d5ee2e/main/musl/__stack_chk_fail_local.c",
           "sha256": "299a7d75a09de3e2e11e7fb4acc3182e4a14e868093d2f30938fce9bfcff13da",
           "git_blob": "2b403a6e046fb288af4b3d16eda76980a599aea4",
           "aports_sha512": "062bb49fa54839010acd4af113e20f7263dde1c8a2ca359b5fb2661ef9ed9d84a0f7c3bc10c25dcfa10bb3c5a4874588dff636ac43d5dbb3d748d75400756d0b"
         },
         {
           "name": "fix-loongarch64-zero-len-extcontext.patch",
-          "url": "https://raw.githubusercontent.com/alpinelinux/aports/f5640d3a10f664c9119720c60515265d3d6f6d01/main/musl/fix-loongarch64-zero-len-extcontext.patch",
+          "url": "https://raw.githubusercontent.com/alpinelinux/aports/8f79d39391b46d6dbf1800fb68b8212a21d5ee2e/main/musl/fix-loongarch64-zero-len-extcontext.patch",
           "sha256": "92c8e965798ed516c15cb2a4e7c4ac45ec1eb68b6abff16c73adff2a3bae1b14",
           "git_blob": "7955bddd4db379bdf668d80666a141cbf175c986",
           "aports_sha512": "6eae45aa82db69bc96386aedf3d1bfe83dfa0a7b4b824326c1c7e1bab31100d635ed0e8930c26a1694697fad59167a42e2b5f3a2ac51b07e36d85f047e268cff"
         },
         {
           "name": "getconf.c",
-          "url": "https://raw.githubusercontent.com/alpinelinux/aports/f5640d3a10f664c9119720c60515265d3d6f6d01/main/musl/getconf.c",
+          "url": "https://raw.githubusercontent.com/alpinelinux/aports/8f79d39391b46d6dbf1800fb68b8212a21d5ee2e/main/musl/getconf.c",
           "sha256": "d87d0cbb3690ae2c5d8cc218349fd8278b93855dd625deaf7ae50e320aad247c",
           "git_blob": "c4235242b0ef70bb7a99cb210a134d19c15dc0b9",
           "aports_sha512": "0d80f37b34a35e3d14b012257c50862dfeb9d2c81139ea2dfa101d981d093b009b9fa450ba27a708ac59377a48626971dfc58e20a3799084a65777a0c32cbc7d"
         },
         {
           "name": "getent.c",
-          "url": "https://raw.githubusercontent.com/alpinelinux/aports/f5640d3a10f664c9119720c60515265d3d6f6d01/main/musl/getent.c",
+          "url": "https://raw.githubusercontent.com/alpinelinux/aports/8f79d39391b46d6dbf1800fb68b8212a21d5ee2e/main/musl/getent.c",
           "sha256": "a6171c2db641cdd99c164169d3c5c6ca323617483cedec4cbbe3eb39c5834df0",
           "git_blob": "bcc8b81c10bef1de5af8db7053dac48547c8e14d",
           "aports_sha512": "246e029350d4295147fe311108dcfb991ef130271b856040c1fb6a9955414f263d2a51f978b8ae91f52ff49705e8e4572b8f0e6939801fa854e3f095a67d3d64"
         },
         {
           "name": "handle-aux-at_base.patch",
-          "url": "https://raw.githubusercontent.com/alpinelinux/aports/f5640d3a10f664c9119720c60515265d3d6f6d01/main/musl/handle-aux-at_base.patch",
+          "url": "https://raw.githubusercontent.com/alpinelinux/aports/8f79d39391b46d6dbf1800fb68b8212a21d5ee2e/main/musl/handle-aux-at_base.patch",
           "sha256": "2a65e03b94217063d72fe998e5fb2e25cd01716078a3ba1b0ab574ab205111e6",
           "git_blob": "7c9f2dc5fc05abaf82f2e7b59704862b325c0aab",
           "aports_sha512": "a76f79b801497ad994746cf82bb6eaf86f9e1ae646e6819fbae8532a7f4eee53a96ac1d4e789ec8f66aea2a68027b0597f7a579b3369e01258da8accfce41370"
         },
         {
           "name": "iconv.c",
-          "url": "https://raw.githubusercontent.com/alpinelinux/aports/f5640d3a10f664c9119720c60515265d3d6f6d01/main/musl/iconv.c",
+          "url": "https://raw.githubusercontent.com/alpinelinux/aports/8f79d39391b46d6dbf1800fb68b8212a21d5ee2e/main/musl/iconv.c",
           "sha256": "f79a2930a2e5bb0624321589edf8b889d1e9b603e01e6b7ae214616605b3fdd7",
           "git_blob": "f5d5ce2aa730461df126cdf8bc8b084b4ebb881c",
           "aports_sha512": "9d42d66fb1facce2b85dad919be5be819ee290bd26ca2db00982b2f8e055a0196290a008711cbe2b18ec9eee8d2270e3b3a4692c5a1b807013baa5c2b70a2bbf"
         },
         {
           "name": "ldconfig",
-          "url": "https://raw.githubusercontent.com/alpinelinux/aports/f5640d3a10f664c9119720c60515265d3d6f6d01/main/musl/ldconfig",
+          "url": "https://raw.githubusercontent.com/alpinelinux/aports/8f79d39391b46d6dbf1800fb68b8212a21d5ee2e/main/musl/ldconfig",
           "sha256": "7065021e04a5060957b5c6907af671a7028230d91927fb0c25892cadd9312b7c",
           "git_blob": "9a6c05978d1bfae6871fb96a862dfd3e7bb9c326",
           "aports_sha512": "29da5e89358103846a42987c2a5ff26ec131e29a6a7a714cd0e2941baf1f1e5cd9b1ee66f488c8e222135031bf2de507d7d05b037ab65c30482147dba63d2e52"
@@ -1116,30 +1116,30 @@
     },
     {
       "origin": "openssl",
-      "commit": "4a4352d83ab03720965454a8c7b30b1b6a996c84",
+      "commit": "29b9ec24b1b5b39aeef51fa2a044210e2ec5258e",
       "files": [
         {
           "name": "APKBUILD",
-          "url": "https://raw.githubusercontent.com/alpinelinux/aports/4a4352d83ab03720965454a8c7b30b1b6a996c84/main/openssl/APKBUILD",
-          "sha256": "63b8a9adf00a6076c830b79e4c1f56d9ac57f29a4b068e0d5bf7c62073758ea2",
-          "git_blob": "34ad1d1bde8d927776aeeba1c724b36439dca1d5"
+          "url": "https://raw.githubusercontent.com/alpinelinux/aports/29b9ec24b1b5b39aeef51fa2a044210e2ec5258e/main/openssl/APKBUILD",
+          "sha256": "ea459c051ee8d846c06f1d47d09d0f737778502c01de88c9696e96a208de5943",
+          "git_blob": "6c7ac59fec9063a925a6ecac2b61d45cbe659f5b"
         },
         {
           "name": "auxv.patch",
-          "url": "https://raw.githubusercontent.com/alpinelinux/aports/4a4352d83ab03720965454a8c7b30b1b6a996c84/main/openssl/auxv.patch",
+          "url": "https://raw.githubusercontent.com/alpinelinux/aports/29b9ec24b1b5b39aeef51fa2a044210e2ec5258e/main/openssl/auxv.patch",
           "sha256": "0b3a36c0f1b3d8e0adcf02c251374ce4d2578b0c9f4b88207bf85c5c1b58c7d8",
           "git_blob": "7803ef811cc802650a1a3b3808899fb8202c7b34",
           "aports_sha512": "b2541075148fd5af4552d34158deb1a325f5adced90626dc03fd126f47323cde949b15b2657523c34b26530b322312a43bd42ada7295b4f2dd1d3b5d11892c62"
         },
         {
-          "name": "openssl-3.5.7.tar.gz",
-          "url": "https://distfiles.alpinelinux.org/distfiles/v3.24/openssl-3.5.7.tar.gz",
-          "sha256": "a8c0d28a529ca480f9f36cf5792e2cd21984552a3c8e4aa11a24aa31aeac98e8",
-          "aports_sha512": "de5351d2d532e1a3908a738f7d8aae448d32bc60bdb24808c556a24bc37a3f53daedf12b5d432eeb8c235e16939d842f908332ede8a447ca103ad1c493c820d7"
+          "name": "openssl-3.5.9.tar.gz",
+          "url": "https://distfiles.alpinelinux.org/distfiles/v3.24/openssl-3.5.9.tar.gz",
+          "sha256": "603f5602e2eef00d77fbd429d34dcd5822bb301757a1bc9cdb24c670f1eb859a",
+          "aports_sha512": "c4c8136fd2c98d13bb85a57bfb0def25c906f47f1fe97675cd114594944eab957b5b81a3e0f48826e1a0f093afff5e83766b539d49768f6db68310fd678d7de6"
         },
         {
           "name": "openssl-fips.post-install",
-          "url": "https://raw.githubusercontent.com/alpinelinux/aports/4a4352d83ab03720965454a8c7b30b1b6a996c84/main/openssl/openssl-fips.post-install",
+          "url": "https://raw.githubusercontent.com/alpinelinux/aports/29b9ec24b1b5b39aeef51fa2a044210e2ec5258e/main/openssl/openssl-fips.post-install",
           "sha256": "441311401af66e9f1b4b38730827ade609669196f91c56b82351a7226b903755",
           "git_blob": "463f0efbb085bea4fe893e7826f1a0fbf1da90b3"
         }
@@ -1165,13 +1165,20 @@
     },
     {
       "origin": "zlib",
-      "commit": "f248b33b5943c7dc69bf691031d7612ab2e8ed93",
+      "commit": "0afa2da0e8c8051c6f8f64a7a388e5a259904245",
       "files": [
         {
           "name": "APKBUILD",
-          "url": "https://raw.githubusercontent.com/alpinelinux/aports/f248b33b5943c7dc69bf691031d7612ab2e8ed93/main/zlib/APKBUILD",
-          "sha256": "7b8d064be19f39b5e921e9e2dddb960964c6e159ca035848cc362375f0da9b9f",
-          "git_blob": "927a1b7a2e6516bbee255f092e6cb1ad5df27fe8"
+          "url": "https://raw.githubusercontent.com/alpinelinux/aports/0afa2da0e8c8051c6f8f64a7a388e5a259904245/main/zlib/APKBUILD",
+          "sha256": "c9348892bf3857602fe74fcc1d411e263b408b7d70344170396f5993a62bbe26",
+          "git_blob": "b920acf55a1aa727b97cec465152f1c42cf6bdad"
+        },
+        {
+          "name": "CVE-2026-85091.patch",
+          "url": "https://raw.githubusercontent.com/alpinelinux/aports/0afa2da0e8c8051c6f8f64a7a388e5a259904245/main/zlib/CVE-2026-85091.patch",
+          "sha256": "110ff14375733173d8aa54574473424fbd7dfe4b81f1ca34a759c6fe14b15b14",
+          "git_blob": "49f6b63108c2345f2a473705331cf901e367d585",
+          "aports_sha512": "878888308a51296470f05eca59a79212314d4c9a26c19bbf70c1cb1b8d25eb42e0cce5a001acbe287268aa215c854cb5a9990ff62b7aefa9de221803d172957e"
         },
         {
           "name": "zlib-1.3.2.tar.gz",

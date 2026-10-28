@@ -12,7 +12,7 @@ scripts/               Installation, removal, and lifecycle integration checks
 .artifacts/            Ignored binaries, caches, certificates, logs, and evidence
 ```
 
-Go 1.25+, Docker with Buildx, Bash, kubectl, kind, Python 3, OpenSSL, and ShellCheck are used by the development workflow. The CI Go version follows `go.mod`. Build caches and working files stay under `.artifacts/`.
+Go 1.27.3, Docker with Buildx, Bash, kubectl, kind, Python 3, OpenSSL, and ShellCheck are used by the development workflow. The exact CI Go patch version follows `go.mod` and must match the controller builder. Build caches and working files stay under `.artifacts/`.
 
 ## Build and test
 
@@ -53,6 +53,8 @@ The installer uses your current kubectl context. For a local quickstart, change 
 ## Update payload inputs
 
 Update [versions.json](../payload/versions.json) and the language lockfiles together. Downloaded release assets are checked against SHA-256 pins. Use `make -C payload lock` to regenerate Node.js and Python locks (npm and uv required), and Bundler to update Ruby's frozen graph when its upstream revision changes. Retest layout, startup, telemetry, and lifecycle behavior before publishing.
+
+Follow [dependency security](dependency-security.md) for final-image and shaded Java/.NET inventory scans, weekly maintenance ownership, blocking findings, and time-bounded exceptions. These checks gate the image archives used by release publication. Loader fixtures can use a task-specific repository with `DOTNET_SMOKE_IMAGE=rio-issue-3-dotnet-smoke make smoke`.
 
 ## Releases
 

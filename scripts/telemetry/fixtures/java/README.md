@@ -11,8 +11,8 @@ is independently pinned in `Dockerfile`. Library versions and SHA256 hashes are
 recorded in `dependencies.lock.json`; Docker verifies these hashes when fetching
 the exact Maven Central artifacts. Gson is used only for JSON serialization.
 
-The bundled Java agent 2.30.0 lists these instrumentations in its
-[versioned supported libraries](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/v2.30.0/docs/supported-libraries.md).
+The bundled Java agent 2.33.1 lists these instrumentations in its
+[versioned supported libraries](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/v2.33.1/docs/supported-libraries.md).
 Expected automatic telemetry is a server span for each real HTTP request,
 `http.server.request.duration` histogram data in seconds (cumulative temporality),
 and one INFO Logback event with body `rio-fixture MARKER` per `/work/MARKER`

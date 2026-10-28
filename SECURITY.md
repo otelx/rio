@@ -16,4 +16,6 @@ Security fixes, including dependency updates, ship in a new immutable alpha or n
 
 RIO is experimental and offers no production support. Installation grants cluster-wide permissions, and agents execute inside application containers. Restrict policy editing to trusted administrators and review the [operational limits](docs/compatibility.md).
 
+See [dependency security](docs/dependency-security.md) for scanning coverage, blocking policy, exception deadlines, and the maintainer responsible for alerts and payload updates.
+
 Maintainers follow the [repository protections and credential response policy](docs/maintainers.md). Revoke or rotate exposed credentials immediately, report them privately, and investigate their use before closing secret-scanning alerts. Removing a credential from source does not revoke it.

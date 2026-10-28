@@ -13,11 +13,11 @@
     }
   },
   "java": {
-    "version": "2.30.0",
+    "version": "2.33.1",
     "assets": {
       "opentelemetry-javaagent.jar": {
-        "url": "https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.30.0/opentelemetry-javaagent.jar",
-        "sha256": "9d6bc2ad8dd8fb7f730984988e57b8ac0a82d81c7b3b8ae795378718733a509d"
+        "url": "https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.33.1/opentelemetry-javaagent.jar",
+        "sha256": "e43a270df53c6f423e0ab157be9c27ccc01d5dc3232e162fe54777573db2f149"
       }
     }
   },
@@ -42,15 +42,15 @@
       }
     }
   },
-  "node": "0.78.0",
-  "nodeWinstonTransport": "0.30.0",
+  "node": "0.82.0",
+  "nodeWinstonTransport": "0.35.0",
   "python": {
-    "distro": "0.66b0",
-    "sdk": "1.45.0",
+    "distro": "0.66b1",
+    "sdk": "1.45.1",
     "operatorRequirements": "v0.160.0",
     "patches": [
       "OTLP span/link trace flags backport: opentelemetry-python#4666 / #5667",
-      "aiohttp-server 0.66b0 full request-context repair; related opentelemetry-python-contrib#2510 (closed unmerged)"
+      "aiohttp-server 0.66b1 full request-context repair; related opentelemetry-python-contrib#2510 (closed unmerged)"
     ]
   },
   "ruby": {

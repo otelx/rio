@@ -1,0 +1,6 @@
+{
+  "1.17.0": {
+    "url": "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.17.0/sbom.spdx.json",
+    "sha256": "698f7db934b759546319a0e7b7530f1984684e06c9847125fa354c073f3bd508"
+  }
+}
