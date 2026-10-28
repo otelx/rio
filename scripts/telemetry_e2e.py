@@ -21,6 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from telemetry.assertions import items, read_records, server_span
 
 ROOT = Path(__file__).resolve().parent.parent
+KIND_NODE = 'kindest/node:v1.35.0@sha256:4613778f3cfcd10e615029370f5786704559103cf27bef934597ba562b269661'
 COLLECTOR = 'otel/opentelemetry-collector-contrib:0.163.2@sha256:7f22d2a6748110ffb6a59bc0df448bccbf501cdb667d610ede4c61d3863d5849'
 
 
@@ -86,7 +87,7 @@ class Harness:
         path.write_text(config)
         self.created = True
         if not self.args.resume:
-            self.command('kind', 'create', 'cluster', '--retain', '--name', self.cluster, '--image', 'kindest/node:v1.35.0',
+            self.command('kind', 'create', 'cluster', '--retain', '--name', self.cluster, '--image', KIND_NODE,
                          '--config', str(path), '--kubeconfig', self.env['KUBECONFIG'], '--wait', '180s', timeout=300)
         self.command('kind', 'load', 'docker-image', '--name', self.cluster, self.operator, self.payload, timeout=300)
         if self.args.resume:
@@ -95,6 +96,14 @@ class Harness:
         self.command(str(ROOT / 'scripts/install.sh'), self.operator, timeout=300)
         nodes = json.loads(self.kube('get', 'nodes', '-o', 'json'))
         (self.out / 'nodes.json').write_text(json.dumps(nodes, indent=2))
+        node_image = self.command('docker', 'image', 'inspect', KIND_NODE)
+        (self.out / 'kind-node-image.json').write_text(node_image)
+        expected_node_image = json.loads(node_image)[0]['Id']
+        node_images = {node: self.command('docker', 'inspect', '--type', 'container',
+            '--format', '{{.Image}}', node).strip()
+            for node in self.command('kind', 'get', 'nodes', '--name', self.cluster).splitlines()}
+        assert node_images and set(node_images.values()) == {expected_node_image}, node_images
+        (self.out / 'kind-node-image-ids.json').write_text(json.dumps(node_images, indent=2))
         assert {n['status']['nodeInfo']['architecture'] for n in nodes['items']} == {self.args.arch}
         self.kube('create', 'namespace', self.namespace)
         self.kube('create', 'namespace', 'rio-telemetry')
@@ -115,7 +124,7 @@ class Harness:
         actual_agents = json.loads(self.command('docker', 'run', '--rm', self.payload, '/bin/cat', '/dist/versions.json'))
         assert actual_agents == json.loads((ROOT / 'payload/versions.json').read_text()), 'Bundle manifest differs from tested source'
         (self.out / 'versions.json').write_text(json.dumps({'fixtures': self.config, 'collector': COLLECTOR,
-            'agents': actual_agents, 'delivery': self.args.delivery,
+            'agents': actual_agents, 'kindNode': KIND_NODE, 'delivery': self.args.delivery,
             'sourceCommit': self.command('git', '-C', str(ROOT), 'rev-parse', 'HEAD').strip()}, indent=2))
         for kind, image in [('operator', self.operator), ('instrumentation', self.payload)]:
             (self.out / f'{kind}-image.json').write_text(self.command('docker', 'image', 'inspect', image))
