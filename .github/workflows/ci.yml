@@ -93,7 +93,7 @@ jobs:
           scripts/scan-image.sh operator "$OPERATOR_IMAGE" .artifacts/security/operator || status=1
           scripts/scan-image.sh instrumentation "$PAYLOAD_IMAGE" .artifacts/security/instrumentation || status=1
           exit "$status"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: security-current-${{ matrix.arch }}
@@ -131,7 +131,7 @@ jobs:
         run: |
           docker save "$OPERATOR_IMAGE" "$PAYLOAD_IMAGE" | gzip > .artifacts/release-images.tar.gz
           (cd .artifacts && sha256sum release-images.tar.gz > archive.sha256)
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: tested-release-images-${{ matrix.arch }}
           path: |
@@ -142,7 +142,7 @@ jobs:
             .artifacts/notices/
           include-hidden-files: true
           retention-days: 3
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: loaders-${{ matrix.arch }}
@@ -203,7 +203,7 @@ jobs:
           make e2e
       - name: Verify five-language telemetry and cross-language propagation
         run: python3 scripts/telemetry_e2e.py --arch '${{ matrix.arch }}' --delivery '${{ matrix.delivery }}'
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: diagnostics-${{ matrix.arch }}-${{ matrix.delivery }}
@@ -265,7 +265,7 @@ jobs:
         run: |
           export CLUSTER_NAME="${CLUSTER_NAME,,}"
           make e2e-upgrade
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: upgrade-diagnostics-${{ matrix.baseline }}-${{ matrix.arch }}-${{ matrix.delivery }}
@@ -344,7 +344,7 @@ jobs:
             scripts/scan-image.sh "$role" "$image" ".artifacts/security/$role" || status=1
           done
           exit "$status"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: security-published-${{ matrix.arch }}
@@ -493,7 +493,7 @@ jobs:
           cp "$INSTRUMENTATION_PROVENANCE" .artifacts/release/prepared/instrumentation-provenance.sigstore.json
           cp "$INSTRUMENTATION_AMD64_SBOM" .artifacts/release/prepared/instrumentation-amd64-sbom.sigstore.json
           cp "$INSTRUMENTATION_ARM64_SBOM" .artifacts/release/prepared/instrumentation-arm64-sbom.sigstore.json
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: prepared-release
           path: .artifacts/release/prepared/
@@ -533,13 +533,13 @@ jobs:
         env:
           RELEASE_ARCH: ${{ matrix.arch }}
         run: scripts/verify-release.sh .artifacts/release/prepared/release.json
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: anonymous-release-check-${{ matrix.arch }}
           path: .artifacts/release-check/**/verified-*.json
           include-hidden-files: true
           if-no-files-found: error
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: anonymous-release-diagnostics-${{ matrix.arch }}
@@ -642,7 +642,7 @@ jobs:
           cp "$PROVENANCE_BUNDLE" .artifacts/attestation-audit/provenance.sigstore.json
           cp "$SBOM_BUNDLE" .artifacts/attestation-audit/sbom.sigstore.json
           (cd .artifacts/attestation-audit && sha256sum -- *.tar.gz *.spdx.json *.sigstore.json > SHA256SUMS)
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: issue-5-attestation-audit
           path: |
