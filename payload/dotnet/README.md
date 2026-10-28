@@ -35,10 +35,4 @@ still override runtime propagation later in their lifecycle. An already listed
 RIO plugin is not added again. Explicit file-based plugin lists must include
 this plugin themselves; that configuration is outside the validated matrix.
 
-Both assemblies use the .NET 9 compiler and the .NET 8 reference packs and test runtime from the immutable SDK images recorded in `versions.json`. The plugin references the exact API and DiagnosticSource
-assemblies from the checksum-verified upstream agent, with no NuGet downloads.
-The image build runs bootstrap regression checks for identity, dependency
-isolation, plugin-list preservation, ordering, and idempotence. Shared admission
-tests own exported span ancestry, headers, baggage, signal independence, and
-the architecture/libc/delivery matrix. The application fixtures remain free of
-OpenTelemetry dependencies and setup.
+Both assemblies use the .NET 9 compiler and the .NET 8 reference packs and test runtime from the immutable SDK images recorded in `versions.json`. The plugin references the exact API and DiagnosticSource assemblies from the checksum-verified upstream agent, with no NuGet downloads. The image build runs bootstrap regression checks for identity, dependency isolation, plugin-list preservation, ordering, and idempotence. Shared admission tests own exported span ancestry, headers, baggage, signal independence, and the architecture/libc/delivery matrix. The application fixtures remain free of OpenTelemetry dependencies and setup. 
