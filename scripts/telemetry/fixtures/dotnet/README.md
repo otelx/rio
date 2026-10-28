@@ -1,11 +1,6 @@
 # ASP.NET Core fixture
 
-The fixture uses the ASP.NET Core shared framework for Kestrel, `HttpClient`, and
-`ILogger`. It has no NuGet package dependencies; the cleared package sources and
-locked restore make that property explicit. Both runtime images and the build
-SDK are pinned in `fixture.json` and the Dockerfile. The runtime images' manifest
-lists include Linux amd64 and arm64. Runtime and ASP.NET Core are 8.0.33; the
-SDK is 8.0.427. The runtime image supplies its matching framework libraries.
+The fixture uses the ASP.NET Core shared framework for Kestrel, `HttpClient`, and `ILogger`. It has no NuGet package dependencies; the cleared package sources and locked restore make that property explicit. Both runtime images and the build SDK are pinned in `fixture.json` and the Dockerfile. The runtime images' manifest lists include Linux amd64 and arm64. Runtime and ASP.NET Core are 8.0.33; the compiler SDK is 9.0.320. The pinned 8.0.427 SDK supplies the .NET 8 framework and host packs for the restore with cleared package sources. Both SDK images appear in `fixture.json`. The runtime image supplies its matching framework libraries.
 
 `GET /work/MARKER` logs one `ILogger` INFO message, returns the received headers
 as arrays, and optionally calls `next` through a normal `HttpClient`. A failed
