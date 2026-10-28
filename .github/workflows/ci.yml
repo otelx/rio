@@ -35,6 +35,7 @@ jobs:
           test -z "$(gofmt -l cmd internal)"
           shellcheck scripts/*.sh payload/scripts/*.sh payload/*.sh
           python3 -m py_compile payload/scripts/download.py payload/python/sitecustomize.py
+          python3 -m py_compile scripts/telemetry_e2e.py scripts/telemetry/*.py
           python3 -m json.tool payload/versions.json > /dev/null
 
   images:
@@ -126,7 +127,8 @@ jobs:
     name: Integration (${{ matrix.arch }}, ${{ matrix.delivery }})
     needs: images
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
-    timeout-minutes: 30
+    # Full native signal/propagator matrix; individual export waits remain bounded.
+    timeout-minutes: 90
     env:
       OPERATOR_IMAGE: ghcr.io/otelx/rio/operator:dev-${{ matrix.arch }}
       PAYLOAD_IMAGE: ghcr.io/otelx/rio/instrumentation:dev-${{ matrix.arch }}
@@ -172,6 +174,8 @@ jobs:
         run: |
           export CLUSTER_NAME="${CLUSTER_NAME,,}"
           make e2e
+      - name: Verify five-language telemetry and cross-language propagation
+        run: python3 scripts/telemetry_e2e.py --arch '${{ matrix.arch }}' --delivery '${{ matrix.delivery }}'
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
@@ -180,6 +184,9 @@ jobs:
             .artifacts/admission/**/*.log
             .artifacts/e2e/**/*.log
             .artifacts/e2e/**/*.json
+            .artifacts/telemetry/**/*.log
+            .artifacts/telemetry/**/*.json
+            .artifacts/telemetry/**/*.jsonl
           include-hidden-files: true
           if-no-files-found: ignore
 

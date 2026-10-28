@@ -1,2 +1,5 @@
 source "https://rubygems.org"
 gem "opentelemetry-auto-instrumentation", git: "https://github.com/open-telemetry/opentelemetry-ruby-instrumentation.git", ref: "68af0a92d6d9c2cd0ee38a9327e98797673227d1"
+# instrumentation-all 0.91.0 does not include the Logger log bridge. Version
+# 0.4.0 supports the distro's pinned logs-api 0.3; 0.5 requires logs-api ~> 0.6.
+gem "opentelemetry-instrumentation-logger", "0.4.0"

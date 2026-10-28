@@ -1,0 +1,6 @@
+bin/
+obj/
+out/
+bootstrap/bin/
+bootstrap/obj/
+bootstrap/out/

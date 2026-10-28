@@ -1,0 +1,24 @@
+{
+  "language": "java",
+  "runtime": "Eclipse Temurin OpenJDK 21.0.12.1+1",
+  "framework": "JDK jdk.httpserver HttpServer and java.net.http.HttpClient 21.0.12.1+1; Logback 1.5.18 / SLF4J 2.0.17; Gson 2.13.1",
+  "agent": "OpenTelemetry Java agent 2.30.0",
+  "images": {
+    "glibc": "eclipse-temurin:21.0.12.1_1-jre-resolute@sha256:6ef3295d2cef695fd288f928a15a92081a7ce61da9e785b6fd09b2ea0c1aa8e5",
+    "musl": "eclipse-temurin:21.0.12.1_1-jre-alpine-3.24@sha256:b48e02e0ea88d7bfb305335df94923bdef394905f4147dccd52e873cf17b1088"
+  },
+  "env": {},
+  "metrics": {
+    "source": "Agent automatic JDK HTTP server/client and JVM runtime instrumentation",
+    "name": "http.server.request.duration",
+    "type": "histogram",
+    "unit": "s",
+    "temporality": 2
+  },
+  "logs": {
+    "library": "Logback 1.5.18 via SLF4J 2.0.17",
+    "body": "rio-fixture MARKER",
+    "severity": "INFO",
+    "correlation": true
+  }
+}

@@ -1,0 +1,107 @@
+"""Propagation assertions must reject shared IDs with broken ancestry/headers."""
+import copy
+from pathlib import Path
+import sys
+import unittest
+from unittest.mock import Mock, patch
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from telemetry.propagation import (assert_unsampled_absent, check_headers, fresh_root,
+                                   generated_traceparent, observe_unsampled, relationship)
+
+
+class PropagationAssertions(unittest.TestCase):
+    def setUp(self):
+        self.trace = '1' * 32
+        def span(kind, marker, ident, parent):
+            return {'kind': kind, 'traceId': self.trace, 'spanId': ident * 16, 'parentSpanId': parent * 16,
+                    'startTimeUnixNano': '100', 'endTimeUnixNano': '200', 'attributes': [
+                        {'key': key, 'value': {'stringValue': value}} for key, value in {
+                            'url.path': '/work/' + marker, 'http.request.method': 'GET',
+                            'http.response.status_code': '200'}.items()]}
+        self.caller = span(2, 'first', '2', '3')
+        self.client = span(3, 'second', '4', '2')
+        self.callee = span(2, 'second', '5', '4')
+        self.records = [{'resourceSpans': [
+            {'resource': {'attributes': [{'key': 'service.name', 'value': {'stringValue': service}}]},
+             'scopeSpans': [{'spans': spans}]} for service, spans in [
+                ('caller', [self.caller, self.client]), ('callee', [self.callee])]]}]
+
+    def test_valid_remote_parent_and_client_server_ancestry(self):
+        self.assertEqual(relationship(self.records, 'caller', 'callee', 'first', 'second',
+                                     (self.trace, '3' * 16)), (self.caller, self.client, self.callee))
+
+    def test_delayed_export_after_initial_silence_fails_unsampled_observation(self):
+        harness = Mock()
+        harness.records.side_effect = [[], self.records]
+        with patch('telemetry.propagation.time.monotonic', side_effect=[0, 0, 1]), \
+                patch('telemetry.propagation.time.sleep'), self.assertRaises(AssertionError):
+            observe_unsampled(harness, ['caller', 'callee'], {self.trace})
+        self.assertEqual(harness.records.call_count, 2)
+
+    def test_final_sweep_checks_previous_unsampled_contexts_in_every_service(self):
+        # A delayed export from an earlier request cannot hide behind the newest
+        # request's unrelated trace or a span exported by another ring service.
+        with self.assertRaises(AssertionError):
+            assert_unsampled_absent(self.records, ['caller', 'callee'], {'9' * 32, self.trace})
+        assert_unsampled_absent(self.records, ['caller', 'callee'], {'9' * 32})
+
+    def test_shared_trace_cannot_hide_wrong_parentage(self):
+        self.callee['parentSpanId'] = '6' * 16
+        with self.assertRaises(AssertionError):
+            relationship(self.records, 'caller', 'callee', 'first', 'second')
+
+    def test_exported_client_tracestate_cannot_be_lost_or_changed(self):
+        for span in (self.caller, self.client, self.callee):
+            span['traceState'] = 'rio=state'
+        relationship(self.records, 'caller', 'callee', 'first', 'second', state='rio=state')
+        for value in (None, '', 'rio=other'):
+            if value is None:
+                self.client.pop('traceState', None)
+            else:
+                self.client['traceState'] = value
+            with self.subTest(value=value), self.assertRaises(AssertionError):
+                relationship(self.records, 'caller', 'callee', 'first', 'second', state='rio=state')
+
+    def test_absent_and_malformed_contexts_cannot_reuse_one_constant_root(self):
+        seen = {'9' * 32}  # Previously supplied valid incoming context.
+        first = {'traceId': self.trace}
+        fresh_root(first, seen)
+        with self.assertRaises(AssertionError):
+            fresh_root(dict(first), seen)
+        fresh_root({'traceId': '8' * 32}, seen)
+        self.assertEqual(seen, {'9' * 32, self.trace, '8' * 32})
+
+    def test_fresh_context_cannot_reuse_incoming_id_or_keep_remote_parent(self):
+        for parent in ({'traceId': self.trace},
+                       {'traceId': '8' * 32, 'parentSpanId': '3' * 16},
+                       {'traceId': '0' * 32}):
+            with self.subTest(parent=parent), self.assertRaises(AssertionError):
+                fresh_root(parent, {self.trace})
+
+    def test_baggage_and_traceparent_duplicates_fail(self):
+        headers = {'traceparent': [f'00-{self.trace}-{self.client["spanId"]}-01'],
+                   'tracestate': ['rio=state'], 'baggage': ['rio_marker=first']}
+        body = {'downstream': {'headers': headers}}
+        check_headers(body, self.trace, self.client, 'rio=state', {'rio_marker=first'})
+        for mutation in ({'traceparent': headers['traceparent'] * 2},
+                         {'baggage': ['rio_marker=first,rio_marker=first']}):
+            changed = copy.deepcopy(body)
+            changed['downstream']['headers'].update(mutation)
+            with self.assertRaises(AssertionError):
+                check_headers(changed, self.trace, self.client, 'rio=state', {'rio_marker=first'})
+
+    def test_disabled_baggage_requires_header_absence(self):
+        body = {'downstream': {'headers': {'traceparent': [f'00-{self.trace}-{self.client["spanId"]}-01'],
+                                         'tracestate': ['rio=state'], 'baggage': ['']}}}
+        with self.assertRaises(AssertionError):
+            check_headers(body, self.trace, self.client, 'rio=state', set())
+
+    def test_fresh_context_accepts_sampled_random_bit_without_allowing_reserved_flags(self):
+        for flags, suffix in [(257, '01'), (259, '03')]:
+            self.client['flags'] = flags
+            self.assertEqual(generated_traceparent(self.client), f'00-{self.trace}-{self.client["spanId"]}-{suffix}')
+        for flags in (0, 2, 5, 255):
+            self.client['flags'] = flags
+            with self.assertRaises(AssertionError):
+                generated_traceparent(self.client)

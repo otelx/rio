@@ -2,3 +2,6 @@
 node/node_modules
 **/__pycache__
 *.log
+dotnet/**/bin
+dotnet/**/obj
+dotnet/**/out

@@ -1,0 +1,27 @@
+{
+  "language": "ruby",
+  "runtime": "Ruby 3.3.12",
+  "framework": "Sinatra 4.2.1, Rack 3.2.7, Rackup 2.3.1, WEBrick 1.9.2, Net::HTTP 0.10.0",
+  "agent": "OpenTelemetry Ruby auto-instrumentation 0.1.0 at 68af0a92d6d9c2cd0ee38a9327e98797673227d1; Rack instrumentation 0.30.0, Sinatra instrumentation 0.29.0, Logger instrumentation 0.4.0; RIO Rack metrics extension 1.0.0",
+  "images": {
+    "glibc": "ruby:3.3.12-slim-bookworm@sha256:df209d82bb55aeb26b9b08922ee22c15f19b3458455690132dc07a5c52dc1c99",
+    "musl": "ruby:3.3.12-alpine3.23@sha256:11da101dfad607c6193a921abc815c989bc9f19b43f5f686bbcc7d424298d596"
+  },
+  "env": {
+    "OTEL_RUBY_REQUIRE_BUNDLER": "true"
+  },
+  "logs": {
+    "library": "Ruby Logger 1.7.0",
+    "body": "rio-fixture MARKER",
+    "bodySuffix": "\n",
+    "severity": "INFO",
+    "correlation": true
+  },
+  "metrics": {
+    "name": "http.server.request.duration",
+    "type": "histogram",
+    "unit": "s",
+    "temporality": 2,
+    "source": "RIO bundle Rack request-duration instrumentation 1.0.0 (automatic middleware; response body completion)"
+  }
+}

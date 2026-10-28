@@ -8,7 +8,7 @@ other packages with their own terms. An image label is not a license inventory.
 | Operator Go dependencies | `go.mod`, `go.sum`, and compiled-image SBOM | `go-licenses/v2@v2.0.1 save` follows the compiled dependency graph and copies redistribution material into `/licenses/go`; the Go runtime license is included there too. |
 | Injector shared library | `payload/versions.json`, Injector v0.11.0 asset SHA-256 per architecture | Upstream Apache-2.0 license and Zig 0.15.2 standard-library MIT notice in `/licenses/upstream/injector/`. Its source build disables libc and declares no external Zig packages. |
 | Java agent | `payload/versions.json`, Java instrumentation v2.30.0 asset SHA-256 | Embedded `META-INF/licenses/` and other license/notice entries remain in the agent JAR. The notice inventory extracts these entries as well. |
-| .NET agents, glibc and musl | `payload/versions.json`, .NET instrumentation v1.17.0 asset SHA-256; `payload/licenses/dotnet/managed/inventory.json` | Upstream distribution `LICENSE` files remain under `/dist/agents/dotnet/{glibc,musl}`. Supplemental fmt, spdlog 1.15.3, .NET Foundation MIT, and GNU runtime license texts are in `/licenses/upstream/dotnet/`. The `managed/` inventory maps every managed DLL to original NuGet package bytes or the instrumentation source project, with preserved package metadata, licenses, and third-party notices. Exact native runtime inputs require further review. |
+| .NET agents, glibc and musl | `payload/versions.json`, .NET instrumentation v1.17.0 asset SHA-256; `payload/licenses/dotnet/managed/inventory.json` | Upstream distribution `LICENSE` files remain under `/dist/agents/dotnet/{glibc,musl}`. Supplemental fmt, spdlog 1.15.3, .NET Foundation MIT, and GNU runtime license texts are in `/licenses/upstream/dotnet/`. The `managed/` inventory maps every upstream managed DLL to original NuGet package bytes or the instrumentation source project, with preserved package metadata, licenses, and third-party notices. Exact native runtime inputs require further review. |
 | Node.js agent and dependencies | `payload/node/package-lock.json` | npm package license and notice files remain under `/dist/agents/node/node_modules`. |
 | Python agents and dependencies, glibc and musl | `payload/python/requirements.lock` | Wheel license/notice and dist-info material remains under `/dist/agents/python/{glibc,musl}`. |
 | Ruby agents and dependencies, glibc and musl | `payload/ruby/Gemfile.lock`, source revision in `payload/versions.json` | Gem license and notice files remain under `/dist/agents/ruby/{glibc,musl}`. |
@@ -73,7 +73,12 @@ Node.js, Python, and Ruby package material is retained and still needs reconcili
 against the full per-architecture inventory.
 
 The managed .NET comparison covers all 228 DLL paths (114 unique binaries) in
-each architecture's final image. The bytes are identical between architectures.
+each architecture's extracted upstream distribution. Those upstream bytes are
+identical between architectures. RIO retains the original startup hook unchanged
+as `OpenTelemetry.AutoInstrumentation.StartupHook.original.dll` and adds its own
+bootstrap and propagation assemblies from [payload/dotnet](payload/dotnet/README.md).
+These two RIO assemblies use the project's Apache-2.0 license; their build inputs
+are recorded separately from the upstream agent pins in `payload/versions.json`.
 There are 71 distinct NuGet package/version pairs, matched by DLL SHA-256 to
 members of packages downloaded from NuGet's official flat-container endpoint.
 Five instrumentation project assemblies occur once per libc and are covered by
