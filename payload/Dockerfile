@@ -1,7 +1,7 @@
 ARG RUNTIME_IMAGE=alpine:3.24.3@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a
 FROM ${RUNTIME_IMAGE} AS runtime-base
 
-FROM python:3.14.6-slim-trixie@sha256:7bec7ddcddeff7975d6ba9b4be7dd6f6b2f55e7491539145e2978f7f97ce9144 AS downloads
+FROM python:3.15.0-slim-trixie@sha256:f5b92f2a669a4c347044f29367f31983280b648250ca94dea66f98c53bc87e58 AS downloads
 ARG TARGETARCH
 WORKDIR /build
 COPY versions.json scripts/download.py ./
@@ -39,7 +39,7 @@ WORKDIR /build
 COPY node/package.json node/package-lock.json ./
 RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 
-FROM python:3.14.6-trixie@sha256:55dd7c1ea6c2b2c45a26d797187706eb9e5e0046f8e54fd759e38647b505c36b AS python-glibc
+FROM python:3.15.0-trixie@sha256:d5ae371dc36dd95f3bb453fb64ca03377ba455d3351339f16be6c47aa10177b9 AS python-glibc
 WORKDIR /build
 COPY python/requirements.lock ./
 RUN mkdir -p /build/tmp && TMPDIR=/build/tmp pip install --no-cache-dir --require-hashes --no-compile --target /payload -r requirements.lock
@@ -49,7 +49,7 @@ COPY python/patch_aiohttp_context.py ./
 RUN python patch_aiohttp_context.py /payload
 COPY python/sitecustomize.py /payload/
 
-FROM python:3.14.6-alpine3.23@sha256:b165067c5afc37fa5608a3c05609cc3d51aafd808a30fbfd822ee594fef55ad4 AS python-musl
+FROM python:3.15.0-alpine3.23@sha256:d64bc17e0dff27c5c4a31f616450d032aa73d6325855127ce3a305bf1384c8d5 AS python-musl
 WORKDIR /build
 COPY python/requirements.lock ./
 RUN mkdir -p /build/tmp && TMPDIR=/build/tmp pip install --no-cache-dir --require-hashes --no-compile --target /payload -r requirements.lock
