@@ -6,11 +6,13 @@
 
 RIO lets a platform team select application namespaces using one central policy. Its Kubernetes controller delivers the [OpenTelemetry Injector](https://github.com/open-telemetry/opentelemetry-injector) and language agents to selected Pods, and manages rolling updates when the policy changes. The Injector detects supported runtimes when application processes start. Application images do not need to be rebuilt.
 
-> **Status: experimental, alpha.** Node.js HTTP trace export is tested. Java, .NET, Python, Ruby, and metrics/log capture remain experimental; propagation is untested. Read the [support scope and operational limits](docs/compatibility.md) before evaluating workloads.
+> **Status: experimental, alpha.** HTTP traces, automatic request metrics, application log capture, and defined cross-language W3C propagation paths are validated for the [pinned five-language matrix](docs/compatibility.md#runtimes-and-signals). Validated by [supported-branch CI](https://github.com/otelx/rio/actions/runs/40615729597) using matching operator and instrumentation images built from commit `da444787d2be3544324b1bae157b2eb5c6b52176`; the CI artifacts record their exact native image IDs. Read the [support scope and operational limits](docs/compatibility.md) before evaluating workloads.
 
 ## Try it
 
 Follow the **[quickstart](docs/quickstart.md)** to run a small Node.js service, select its namespace, and inspect real HTTP spans in an OpenTelemetry Collector. The example does not depend on a vendor backend or the presentation repository.
+
+The quickstart pins `v0.1.0-alpha.3` and demonstrates Node.js HTTP traces. To evaluate the five-language matrix, use matching operator and instrumentation images built from the commit cited above.
 
 The central selection looks like this; the full policy also supplies a payload image, OTLP endpoint, and signal settings:
 
