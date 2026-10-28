@@ -39,6 +39,9 @@ def generate(root, compiled, versions):
     sdk = versions["dotnetRioPropagation"]["sdkImage"]
     if f"FROM --platform=$BUILDPLATFORM {sdk} AS dotnet-propagation" not in (root / "Dockerfile").read_text().splitlines():
         raise ValueError("RIO .NET SDK image differs from its reviewed pin")
+    net8_sdk = versions["dotnetRioPropagation"]["net8SdkImage"]
+    if f"FROM --platform=$BUILDPLATFORM {net8_sdk} AS dotnet-net8" not in (root / "Dockerfile").read_text().splitlines():
+        raise ValueError("RIO .NET 8 SDK image differs from its reviewed pin")
     for project in ("dotnet/Rio.Propagation.csproj", "dotnet/bootstrap/Rio.Bootstrap.csproj"):
         if any(element.tag.rsplit("}", 1)[-1] == "PackageReference" for element in ET.parse(root / project).iter()):
             raise ValueError("New RIO .NET package dependency needs inventory review")
@@ -60,6 +63,9 @@ def verify(manifest, directory, root, versions):
     sdk = versions["dotnetRioPropagation"]["sdkImage"]
     if f"FROM --platform=$BUILDPLATFORM {sdk} AS dotnet-propagation" not in (root / "Dockerfile").read_text().splitlines():
         raise ValueError("RIO .NET SDK image differs from its reviewed pin")
+    net8_sdk = versions["dotnetRioPropagation"]["net8SdkImage"]
+    if f"FROM --platform=$BUILDPLATFORM {net8_sdk} AS dotnet-net8" not in (root / "Dockerfile").read_text().splitlines():
+        raise ValueError("RIO .NET 8 SDK image differs from its reviewed pin")
     if set(manifest.get("assemblies", {})) != set(OUTPUTS) or manifest.get("upstream_relocations") != RELOCATIONS:
         raise ValueError("Unexpected RIO .NET assembly or upstream relocation")
     for libc in ("glibc", "musl"):
