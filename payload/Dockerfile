@@ -64,7 +64,7 @@ COPY python/patch_aiohttp_context.py ./
 RUN python patch_aiohttp_context.py /payload
 COPY python/sitecustomize.py /payload/
 
-FROM ruby:3.3.12-slim-bookworm@sha256:df209d82bb55aeb26b9b08922ee22c15f19b3458455690132dc07a5c52dc1c99 AS ruby-glibc
+FROM ruby:4.0.0-slim-bookworm@sha256:d456e74d02e8a83109658bc598c570c5bd69690cdc629a1e0524aabee33b8e20 AS ruby-glibc
 WORKDIR /build
 RUN apt-get update && apt-get install -y --no-install-recommends git build-essential && rm -rf /var/lib/apt/lists/*
 COPY ruby/Gemfile ruby/Gemfile.lock ./
@@ -74,7 +74,7 @@ COPY ruby/opentelemetry-auto-instrumentation.rb ruby/rio-rack-metrics.rb /payloa
 COPY ruby/tests/ /build/tests/
 RUN RIO_METRICS_EXTENSION=/payload/rio-rack-metrics.rb bundle exec ruby /build/tests/rack_metrics_test.rb
 
-FROM ruby:3.3.12-alpine3.23@sha256:11da101dfad607c6193a921abc815c989bc9f19b43f5f686bbcc7d424298d596 AS ruby-musl
+FROM ruby:4.0.0-alpine3.23@sha256:409cde4da4e42d002f5fa2e267ada8ad47669c34bb66942b772ed912f9a17273 AS ruby-musl
 WORKDIR /build
 RUN apk add --no-cache git build-base
 COPY ruby/Gemfile ruby/Gemfile.lock ./
