@@ -85,9 +85,12 @@ class SecurityGateTest(unittest.TestCase):
             self.assertEqual(packages, DOTNET.select_packages(sbom, directory, "amd64"))
             with self.assertRaises(ValueError):
                 DOTNET.select_packages(sbom, directory, "arm64")
-            (directory / "musl" / "unindexed.dll").write_bytes(b"fixture")
-            with self.assertRaises(ValueError):
-                DOTNET.select_packages(sbom, directory, "amd64")
+            for name in ("unindexed.dll", "unindexed.DLL"):
+                extra = directory / "musl" / name
+                extra.write_bytes(b"fixture")
+                with self.subTest(name=name), self.assertRaises(ValueError):
+                    DOTNET.select_packages(sbom, directory, "amd64")
+                extra.unlink()
 
     def test_java_inventory_pin_matches_current_agent(self):
         import json

@@ -58,7 +58,8 @@ def select_packages(sbom, directory, arch, owned=(), relocations=None):
             paths.remove(upstream)
             paths.add(final)
         paths.update(owned)
-        dlls = {p.relative_to(directory / libc).as_posix() for p in (directory / libc).rglob("*.dll")}
+        dlls = {p.relative_to(directory / libc).as_posix() for p in (directory / libc).rglob("*")
+                if p.is_file() and p.suffix.lower() == ".dll"}
         if not dlls or dlls != paths:
             raise ValueError(f"Incomplete .NET {libc} inventory: missing={dlls - paths}, extra={paths - dlls}")
         if any(not any(ref.get("referenceLocator", "").startswith("pkg:nuget/")
