@@ -1,16 +1,13 @@
 package operator
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
-	"net/http/httptest"
 	"reflect"
 	"strings"
 	"testing"
 	"time"
 
-	admission "k8s.io/api/admission/v1"
 	core "k8s.io/api/core/v1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -163,37 +160,6 @@ func TestMutateBothModesAndDisabledSignals(t *testing.T) {
 	}
 }
 
-func TestAdmissionUsesPinnedRollbackRatherThanNewPolicy(t *testing.T) {
-	p := testPolicy()
-	stable := p.Resolve("app", "Pod", "web")
-	p.Spec.Image = "broken:v2"
-	p.Spec.Env = []core.EnvVar{{Name: "OTEL_RIO_TEST_BREAK", Value: "true"}}
-	p.Spec.RetryToken = "newer-policy"
-	encoded, _ := json.Marshal(stable)
-	pod := core.Pod{ObjectMeta: meta.ObjectMeta{Name: "web", Namespace: "app", Annotations: map[string]string{ConfigAnnotation: string(encoded), RevisionAnnotation: stable.Revision()}}, Spec: core.PodSpec{Containers: []core.Container{{Name: "app", Image: "app"}}}}
-	raw, _ := json.Marshal(pod)
-	review := admission.AdmissionReview{Request: &admission.AdmissionRequest{UID: "request", Namespace: "app", Operation: admission.Create, Resource: meta.GroupVersionResource{Resource: "pods"}, Object: runtime.RawExtension{Raw: raw}}}
-	request, _ := json.Marshal(review)
-	store := &Store{}
-	store.Set(Snapshot{Policy: p, Synced: true})
-	w := &Webhook{Store: store, Kube: fake.NewClientset(), Namespace: "operator"}
-	recorder := httptest.NewRecorder()
-	w.ServeHTTP(recorder, httptest.NewRequest("POST", "/mutate", bytes.NewReader(request)))
-	var response admission.AdmissionReview
-	if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
-		t.Fatal(err)
-	}
-	if response.Response == nil || !response.Response.Allowed {
-		t.Fatal(recorder.Body.String())
-	}
-	if !bytes.Contains(response.Response.Patch, []byte(`"image":"payload:v1"`)) || bytes.Contains(response.Response.Patch, []byte(`"image":"broken:v2"`)) {
-		t.Fatalf("did not honor rollback: %s", response.Response.Patch)
-	}
-	if bytes.Contains(response.Response.Patch, []byte("OTEL_RIO_TEST_BREAK")) {
-		t.Fatal("rollback inherited environment overrides from the failing policy")
-	}
-}
-
 func TestRuntimeCompatibility(t *testing.T) {
 	for _, tc := range []struct {
 		runtime, kubelet string
@@ -312,7 +278,7 @@ func TestReconcilePersistsTemplateAndFinalizerWithoutChangingApplication(t *test
 		lists[schema.GroupVersionResource{Group: "apps", Version: "v1", Resource: name}] = map[string]string{"deployments": "DeploymentList", "statefulsets": "StatefulSetList", "daemonsets": "DaemonSetList"}[name]
 	}
 	dyn := dynamicfake.NewSimpleDynamicClientWithCustomListKinds(runtime.NewScheme(), lists, &unstructured.Unstructured{Object: policy}, dep)
-	c := &Controller{Kube: fake.NewClientset(), Dynamic: dyn, Namespace: "operator", Store: &Store{}}
+	c := &Controller{Authority: testAuthority(), Kube: fake.NewClientset(), Dynamic: dyn, Namespace: "operator", Store: &Store{}}
 	if err := c.Reconcile(context.Background()); err != nil {
 		t.Fatal(err)
 	}
@@ -320,7 +286,7 @@ func TestReconcilePersistsTemplateAndFinalizerWithoutChangingApplication(t *test
 	if err != nil {
 		t.Fatal(err)
 	}
-	state, err := readState(got)
+	state, err := c.Authority.readState(got)
 	if err != nil || state == nil || state.Phase != "RollingOut" {
 		t.Fatalf("state: %+v %v", state, err)
 	}

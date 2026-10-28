@@ -11,6 +11,7 @@ import (
 
 	admission "k8s.io/api/admission/v1"
 	apps "k8s.io/api/apps/v1"
+	auth "k8s.io/api/authentication/v1"
 	batch "k8s.io/api/batch/v1"
 	core "k8s.io/api/core/v1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -28,7 +29,7 @@ func admissionResponse(t *testing.T, w *Webhook, pod core.Pod) *admission.Admiss
 	if err != nil {
 		t.Fatal(err)
 	}
-	request, err := json.Marshal(admission.AdmissionReview{Request: &admission.AdmissionRequest{UID: "request", Namespace: pod.Namespace, Operation: admission.Create, Resource: meta.GroupVersionResource{Resource: "pods"}, Object: runtime.RawExtension{Raw: raw}}})
+	request, err := json.Marshal(admission.AdmissionReview{Request: &admission.AdmissionRequest{UID: "request", UserInfo: auth.UserInfo{Username: "system:kube-controller-manager"}, Namespace: pod.Namespace, Operation: admission.Create, Resource: meta.GroupVersionResource{Resource: "pods"}, Object: runtime.RawExtension{Raw: raw}}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -45,7 +46,6 @@ func admissionResponse(t *testing.T, w *Webhook, pod core.Pod) *admission.Admiss
 }
 
 func TestAdmissionIsolation(t *testing.T) {
-	yes := true
 	for _, tc := range []struct {
 		name, namespace, ownerKind, priority string
 		synced, selected, wantLookup         bool
@@ -73,7 +73,7 @@ func TestAdmissionIsolation(t *testing.T) {
 			store.Set(Snapshot{Policy: p, Synced: tc.synced})
 			pod := core.Pod{ObjectMeta: meta.ObjectMeta{Name: "web", Namespace: tc.namespace}, Spec: core.PodSpec{PriorityClassName: tc.priority}}
 			if tc.ownerKind != "" {
-				pod.OwnerReferences = []meta.OwnerReference{{Kind: tc.ownerKind, Name: "missing", Controller: &yes}}
+				pod.OwnerReferences = []meta.OwnerReference{ownerRef(tc.ownerKind, "missing", "missing")}
 			}
 			// Unselected Pods must not parse this annotation or modify their spec.
 			if !tc.wantLookup {
@@ -91,22 +91,25 @@ func TestAdmissionIsolation(t *testing.T) {
 }
 
 func TestAdmissionResolvesSelectedParentsAndHonorsSkip(t *testing.T) {
-	yes := true
 	for _, kind := range []string{"Deployment", "CronJob"} {
 		t.Run(kind, func(t *testing.T) {
 			childKind := "ReplicaSet"
-			var child runtime.Object = &apps.ReplicaSet{ObjectMeta: meta.ObjectMeta{Name: "child", Namespace: "app", OwnerReferences: []meta.OwnerReference{{Kind: kind, Name: "web", Controller: &yes}}}}
+			var child runtime.Object = &apps.ReplicaSet{ObjectMeta: meta.ObjectMeta{Name: "child", Namespace: "app", UID: "child", OwnerReferences: []meta.OwnerReference{ownerRef(kind, "web", "parent")}}}
 			if kind == "CronJob" {
 				childKind = "Job"
-				child = &batch.Job{ObjectMeta: meta.ObjectMeta{Name: "child", Namespace: "app", OwnerReferences: []meta.OwnerReference{{Kind: kind, Name: "web", Controller: &yes}}}}
+				child = &batch.Job{ObjectMeta: meta.ObjectMeta{Name: "child", Namespace: "app", UID: "child", OwnerReferences: []meta.OwnerReference{ownerRef(kind, "web", "parent")}}}
 			}
 			p := testPolicy()
 			p.Spec.Rules[0].Selector.Workloads = []WorkloadSelector{{Kind: kind, Name: "web"}}
-			kube := fake.NewClientset(child)
+			var parent runtime.Object = &apps.Deployment{ObjectMeta: meta.ObjectMeta{Name: "web", Namespace: "app", UID: "parent"}}
+			if kind == "CronJob" {
+				parent = &batch.CronJob{ObjectMeta: meta.ObjectMeta{Name: "web", Namespace: "app", UID: "parent"}}
+			}
+			kube := fake.NewClientset(child, parent)
 			store := &Store{}
 			store.Set(Snapshot{Policy: p, Synced: true})
 			w := &Webhook{Store: store, Kube: kube, Namespace: "operator"}
-			pod := core.Pod{ObjectMeta: meta.ObjectMeta{Name: "pod", Namespace: "app", OwnerReferences: []meta.OwnerReference{{Kind: childKind, Name: "child", Controller: &yes}}}, Spec: core.PodSpec{Containers: []core.Container{{Name: "app", Image: "app"}}}}
+			pod := core.Pod{ObjectMeta: meta.ObjectMeta{Name: "pod", Namespace: "app", OwnerReferences: []meta.OwnerReference{ownerRef(childKind, "child", "child")}}, Spec: core.PodSpec{Containers: []core.Container{{Name: "app", Image: "app"}}}}
 			response := admissionResponse(t, w, pod)
 			if !response.Allowed || !bytes.Contains(response.Patch, []byte(VolumeName)) {
 				t.Fatalf("selected parent was missed: %+v", response)
@@ -146,7 +149,7 @@ func isolationController(t *testing.T, p *Policy, objects ...runtime.Object) (*C
 	}
 	objects = append(objects, &unstructured.Unstructured{Object: policy})
 	dyn := dynamicfake.NewSimpleDynamicClientWithCustomListKinds(runtime.NewScheme(), lists, objects...)
-	return &Controller{Dynamic: dyn, Kube: fake.NewClientset(), Store: &Store{}, Namespace: "operator"}, dyn
+	return &Controller{Authority: testAuthority(), Dynamic: dyn, Kube: fake.NewClientset(), Store: &Store{}, Namespace: "operator"}, dyn
 }
 
 func isolationDeployment(name, namespace string) *unstructured.Unstructured {

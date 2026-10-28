@@ -1,0 +1,3 @@
+# Preserve original package metadata and legal text bytes, including CRLF and
+# upstream trailing spaces; their original SHA-256 values bind the inventory.
+payload/licenses/dotnet/managed/*.txt -text -whitespace

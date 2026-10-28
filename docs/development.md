@@ -58,8 +58,23 @@ Follow [dependency security](dependency-security.md) for final-image and shaded 
 
 ## Releases
 
-Versions follow `vMAJOR.MINOR.PATCH`, with alpha suffixes while experimental. The release workflow validates the tag, builds and tests both images on native amd64 and arm64 workers, and runs the two delivery paths for each architecture. It loads the tested archives and publishes architecture tags (`VERSION-amd64` and `VERSION-arm64`), then combines them into the common `VERSION` tag without rebuilding. The common tag selects the matching image on mixed Linux clusters. It creates a GitHub prerelease with a source archive and SHA-256 checksum; no `latest` tag is published for alpha versions.
+The [release process](releases.md) supports stable and prerelease SemVer tags,
+publishes the exact tested images, and reserves each version before image pushes.
+SBOM/provenance verification and anonymous quickstart checks on both architectures
+must pass before an immutable GitHub release is published.
 
-Before tagging, update the release references in the quickstart, install template, installer default, policy, and changelog. Merge through a PR and wait for the exact merged commit's CI push run on protected `main` to succeed before tagging it. Release tags are immutable and can only be created by authorized administrators. The release source guard rejects commits outside `main` or without successful CI on `main` before registry authentication or publication. Follow [maintainer access and release authority](maintainers.md) for the required protections and access review. Both image packages must be linked to `otelx/rio` and publicly readable before announcing a release; each Dockerfile supplies the source label used for repository linking. Verify an anonymous pull and repeat the quickstart using the released image references.
+Before tagging, complete the [redistribution review](../THIRD_PARTY.md), configure
+the scoped settings-read credential, update release references, and add the exact
+release's changelog section. Merge through a PR and wait for that merged commit's
+CI push run on protected `main` to succeed. The source guard requires that exact
+commit and runs before registry authentication and publication. See
+[maintainer access and release authority](maintainers.md) for tag permissions and
+[release verification](releases.md) for package visibility, retries, source asset
+protection, and digest-based consumption.
 
-The publisher accepts alpha tags only. Before enabling normal releases, run candidate CI and update the [support matrix](compatibility.md) using its image IDs and runtime/libc logs. Keep the CRD at `v1alpha1`. Expand language or signal support only after end-to-end validation. Cross-release upgrade or downgrade support requires tests with persisted rollout state. The upgrade suite pins alpha.2 and alpha.3; update and rerun its baselines before claiming other transitions.
+Before a normal release, update the [support matrix](compatibility.md) using the
+candidate's image IDs and runtime/libc logs. Keep the CRD at `v1alpha1`. Expand
+language or signal support only after end-to-end validation. Cross-release upgrade
+or downgrade support requires tests with persisted rollout state.
+The upgrade suite pins alpha.2 and alpha.3; update and rerun its baselines before
+claiming other transitions.

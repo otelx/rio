@@ -49,7 +49,7 @@ RIO does not instrument Go. OBI is a separate installation; coexistence is unval
 
 Use `ghcr.io/otelx/rio/operator:VERSION` and `ghcr.io/otelx/rio/instrumentation:VERSION` from the same full release, with its manifests and CRD. This includes policy rule overrides. Keep image references immutable and retain images needed for recovery. Custom builds and substituted agents are experimental.
 
-The upgrade suite validates alpha.2 and alpha.3 to the candidate with persisted successful and blocked revisions. Follow the [tested upgrade procedure](configuration.md#upgrading-existing-releases), including an uninstrumented recovery baseline before changing payload images. Temporary controller rollback retains the unchanged candidate CRD/state format; available alpha.3 payload rollback is also tested. Historical controllers lack later safeguards, so follow the documented diagnostic restrictions. Other mixed versions and unvalidated transitions remain unsupported.
+The upgrade suite validates alpha.2 and alpha.3 to the candidate by preserving and refusing unsigned history, then cleaning up and explicitly resetting it before starting authenticated history. Follow the [tested upgrade procedure](configuration.md#upgrading-existing-releases), including an uninstrumented recovery baseline before changing payload images. Temporary diagnostic controller rollback must leave the candidate CRD, raw state, signature, and policy unchanged; available alpha.3 payload rollback is also tested. Historical controllers lack later safeguards, so follow the documented diagnostic restrictions. Other mixed versions and unvalidated transitions remain unsupported.
 
 For transitions outside those tested baselines, use a clean reset without reusing persisted state:
 
@@ -71,7 +71,7 @@ Annotations under `rio.otelx.github.io/` store recovery state:
 
 | Location | Suffixes | Contents |
 | --- | --- | --- |
-| Workload metadata | `state` | Current/stable configurations, rollout phase, timing, failed revision |
+| Workload metadata | `state`, `state-signature` | Current/stable configurations, rollout phase, timing, failed revision |
 | Pod template | `configuration`, `revision`, `workload-uid` | Configuration snapshot, hash, owning workload |
 | Admitted Pod | Template annotations plus `applied-revision`, `delivery` | Applied revision and delivery method |
 

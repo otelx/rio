@@ -7,6 +7,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/json"
 	"encoding/pem"
 	"fmt"
 	"io"
@@ -27,6 +28,7 @@ import (
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
@@ -67,7 +69,7 @@ func TestAdmissionKubernetesAPI(t *testing.T) {
 		}
 	}
 	store := &Store{}
-	webhook := &Webhook{Store: store, Kube: kube, Namespace: "rio-system"}
+	webhook := &Webhook{Authority: testAuthority(), Store: store, Kube: kube, Namespace: "rio-system"}
 	var calls atomic.Int64
 	server := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		calls.Add(1)
@@ -162,7 +164,7 @@ func TestAdmissionKubernetesAPI(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	controller := &Controller{Kube: kube, Dynamic: dyn, Namespace: "rio-system", Store: store}
+	controller := &Controller{Authority: webhook.Authority, Kube: kube, Dynamic: dyn, Namespace: "rio-system", Store: store}
 	// A broken workload in an unselected namespace and a healthy selected
 	// workload exercise state isolation using persisted API objects.
 	for _, ns := range []string{selected, other} {
@@ -209,6 +211,105 @@ func TestAdmissionKubernetesAPI(t *testing.T) {
 	if err != nil || got.Annotations[AppliedAnnotation] == "" {
 		t.Fatalf("webhook did not inject selected Pod: %v %v", got, err)
 	}
+	// Exercise saved snapshots through the actual API server, including the
+	// authenticated creator supplied to admission (not caller-owned metadata).
+	deployment, err := kube.AppsV1().Deployments(selected).Get(ctx, "fixture", meta.GetOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	zero := int32(0)
+	replicaSet, err := kube.AppsV1().ReplicaSets(selected).Create(ctx, &apps.ReplicaSet{
+		ObjectMeta: meta.ObjectMeta{Name: "snapshot", Labels: deployment.Spec.Template.Labels, OwnerReferences: []meta.OwnerReference{ownerRef("Deployment", deployment.Name, string(deployment.UID))}},
+		Spec:       apps.ReplicaSetSpec{Replicas: &zero, Selector: deployment.Spec.Selector.DeepCopy(), Template: *deployment.Spec.Template.DeepCopy()},
+	}, meta.CreateOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	owned := pod("authorized-snapshot")
+	owned.Annotations = replicaSet.Spec.Template.Annotations
+	owned.OwnerReferences = []meta.OwnerReference{ownerRef("ReplicaSet", replicaSet.Name, string(replicaSet.UID))}
+	controllerConfig := rest.CopyConfig(cfg)
+	controllerConfig.Impersonate.UserName = "system:serviceaccount:kube-system:replicaset-controller"
+	controllerKube, err := kubernetes.NewForConfig(controllerConfig)
+	if err != nil {
+		t.Fatal(err)
+	}
+	createOwned := func(p *core.Pod) (*core.Pod, error) {
+		return controllerKube.CoreV1().Pods(selected).Create(ctx, p, meta.CreateOptions{DryRun: []string{meta.DryRunAll}})
+	}
+	injected, err := createOwned(owned)
+	if err != nil || injected.Annotations[AppliedAnnotation] != owned.Annotations[RevisionAnnotation] {
+		t.Fatalf("authorized snapshot not injected: %v %v", injected, err)
+	}
+	denied := func(name string, p *core.Pod, controller bool) {
+		t.Helper()
+		var err error
+		if controller {
+			_, err = createOwned(p)
+		} else {
+			_, err = create(selected, p)
+		}
+		if err == nil || !strings.Contains(err.Error(), "denied the request") {
+			t.Fatalf("%s was not explicitly rejected: %v", name, err)
+		}
+	}
+	// An ordinary Pod creator cannot borrow the controller's snapshot, even
+	// with a real owner chain and matching revision hash.
+	denied("copied snapshot from ordinary creator", owned, false)
+	forged := owned.DeepCopy()
+	var forgedConfig Config
+	if err := json.Unmarshal([]byte(forged.Annotations[ConfigAnnotation]), &forgedConfig); err != nil {
+		t.Fatal(err)
+	}
+	forgedConfig.Image = "ghcr.io/otelx/rio/instrumentation:issue-2-forged"
+	encoded, err := json.Marshal(forgedConfig)
+	if err != nil {
+		t.Fatal(err)
+	}
+	forged.Annotations[ConfigAnnotation] = string(encoded)
+	forged.Annotations[RevisionAnnotation] = forgedConfig.Revision()
+	denied("forged configuration with matching hash", forged, true)
+	stale := owned.DeepCopy()
+	stale.Annotations[RevisionAnnotation] = "stale"
+	denied("stale saved revision", stale, true)
+	malformed := owned.DeepCopy()
+	malformed.Annotations[ConfigAnnotation] = "{"
+	denied("malformed snapshot", malformed, true)
+	marker := pod("forged-applied")
+	marker.Annotations = map[string]string{AppliedAnnotation: owned.Annotations[RevisionAnnotation]}
+	denied("applied marker without injected structure", marker, false)
+	copied := owned.DeepCopy()
+	copied.Name = "copied-unselected"
+	unchanged(other, copied)
+	// Workload editors cannot authorize a configuration by editing its state.
+	patchState := func(raw string) {
+		t.Helper()
+		patch, err := json.Marshal(map[string]any{"metadata": map[string]any{"annotations": map[string]any{StateAnnotation: raw}}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := kube.AppsV1().Deployments(selected).Patch(ctx, deployment.Name, types.MergePatchType, patch, meta.PatchOptions{}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	originalState := deployment.Annotations[StateAnnotation]
+	patchState(`{"current":{"enabled":true,"image":"forged"}}`)
+	denied("edited unsigned workload state", owned, true)
+	patchState(originalState)
+	selectedSnapshot := store.Get()
+	store.Set(Snapshot{Synced: true})
+	restored, err := createOwned(owned)
+	if err != nil || restored.Annotations[AppliedAnnotation] != owned.Annotations[RevisionAnnotation] {
+		t.Fatalf("authenticated recovery was overridden by policy removal: %v", err)
+	}
+	skipped, err := createOwned(forged)
+	if err != nil || skipped.Annotations[AppliedAnnotation] != "" {
+		t.Fatalf("unselected forged snapshot authorized injection or blocked admission: %v", err)
+	}
+	store.Set(selectedSnapshot)
+	t.Log("authenticated recovery survived absent current policy; forged configuration remained uninstrumented")
+	t.Log("snapshot authority: authenticated controller accepted; forged/copied/stale/malformed snapshots, unsigned state, and forged applied markers rejected; unselected copy admitted unchanged")
+
 	yes := true
 	for _, ns := range []string{other, selected} {
 		missing := pod("missing-owner")

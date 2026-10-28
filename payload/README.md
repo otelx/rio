@@ -21,18 +21,24 @@ The operator mounts the image root at `/__otel_sdk_auto_instrumentation__`. For 
 
 ## Inputs
 
-[versions.json](versions.json) records the release assets and SHA-256 checksums:
+[versions.json](versions.json) records upstream release assets and SHA-256 checksums, dependency versions, and separate RIO bundle-extension metadata:
 
 | Component | Pinned input |
 | --- | --- |
 | Injector | 0.11.0, separate amd64 and arm64 libraries |
 | Java | Upstream OpenTelemetry Java agent 2.33.1 |
-| Node.js | Zero-Code package 0.82.0, npm lockfile |
-| Python | Distro 0.66b1 / SDK 1.45.1, hashed dependency lock |
-| .NET | Zero-Code package 1.17.0, both libc variants per architecture |
-| Ruby | Upstream commit `68af0a92d6d9c2cd0ee38a9327e98797673227d1`, Bundler lockfile |
+| Node.js | Zero-Code package 0.82.0; agent-side Winston transport 0.35.0, npm integrity lockfile |
+| Python | Distro 0.66b1 / SDK 1.45.1, hashed dependency lock and source-checked RIO repairs |
+| .NET | Automatic instrumentation 1.17.0, both libc variants per architecture; RIO bootstrap and propagation plugin |
+| Ruby | Upstream commit `68af0a92d6d9c2cd0ee38a9327e98797673227d1`; Logger bridge 0.4.0; RIO Rack metrics extension 1.0.0; frozen Bundler lockfile |
 
-Downloads fail on a checksum mismatch. Python requirements derive from the upstream Operator v0.160.0, with dependency security updates, and include the HTTP/protobuf exporter, rather than a Python-version-dependent gRPC exporter. Node uses `npm ci`. Ruby uses a frozen Bundler dependency graph and a pinned upstream checkout. Its tiny local loader only locates the upstream entry point; it does not implement an SDK or change signal behavior. Python's `sitecustomize.py` calls the upstream Zero-Code loader. See [dependency security](../docs/dependency-security.md) for final-image scans and supplemental Java/.NET inventories.
+Downloads fail on a checksum mismatch. Python requirements derive from upstream Operator v0.160.0 and include the HTTP/protobuf exporter, rather than a Python-version-dependent gRPC exporter. Node uses `npm ci`; its agent-side Winston transport supplies the transport required by the bundled logging instrumentation without adding an application OpenTelemetry dependency.
+
+Ruby uses a frozen Bundler graph and pinned upstream checkout. Its local bootstrap resolves the application's bundle before invoking the upstream loader so the SDK cannot activate conflicting default gems. It defers eager `Bundler.require` until the Logger bridge and RIO Rack metrics extension are loaded, then restores and honors the user's eager-loading setting. The Rack extension measures request duration through automatic middleware and reuses the upstream distro's configured meter provider and resource; it does not initialize another SDK or exporter. Its version and pinned Rack instrumentation 0.30.0 / metrics SDK 0.13.1 are recorded separately in `versions.json`.
+
+Python's `sitecustomize.py` calls the upstream Zero-Code loader. Bundle repairs preserve OTLP span/link trace flags and attach/detach the full extracted aiohttp request context. Each repair checks the exact pinned source hash before applying and updates the installed package's `RECORD` hashes. Dependency changes require reviewing or removing these repairs.
+
+The [.NET bundle extension](dotnet/README.md) uses the upstream 1.17.0 plugin API to align the runtime's `DistributedContextPropagator` with the SDK's configured propagators. A BCL-only `Rio.Bootstrap` hook activates the plugin for .NET 8+ and invokes the unmodified original upstream hook, retained alongside it as `OpenTelemetry.AutoInstrumentation.StartupHook.original.dll`; the original assembly identity and bytes are preserved. The bootstrap targets netstandard2.1 and the plugin targets net8.0, using the immutable SDK input recorded in `versions.json` and references from the checksum-verified agent. Activation belongs to the bundle, preserving user plugin strings without adding a plugin dependency to older payloads through operator configuration. RIO extension metadata remains separate from upstream asset pins.
 
 Python payloads are built on Python 3.14 and Ruby payloads on Ruby 3.3. Runtime, framework, libc, and native-extension compatibility still requires application testing; bundling five agents does not promise every runtime version or framework. Traces, metrics, and logs use the standard agent exporter configuration. Exporter availability and automatic capture of a particular signal are distinct: an application must use libraries that the corresponding agent instruments.
 

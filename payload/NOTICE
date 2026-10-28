@@ -4,9 +4,41 @@ Licensed under the Apache License, Version 2.0; see LICENSE.
 Python requirements originate from the OpenTelemetry Authors' Operator v0.160.0:
 https://github.com/open-telemetry/opentelemetry-operator/blob/v0.160.0/autoinstrumentation/python/requirements.txt
 
+RIO modifies Python OTLP exporter 1.45.0 to preserve span/link W3C trace flags
+alongside remote-parent flags. This backports the behavior proposed upstream:
+https://github.com/open-telemetry/opentelemetry-python/issues/4666
+https://github.com/open-telemetry/opentelemetry-python/pull/5667
+The upstream Apache-2.0 source and package license remain in the payload.
+
+RIO modifies aiohttp-server instrumentation 0.66b0 to activate the full incoming
+request context and clean it up after request handling, preserving configured
+baggage propagation. The same defect and an earlier proposal are documented at:
+https://github.com/open-telemetry/opentelemetry-python-contrib/pull/2510
+
 The Ruby dependency graph was adapted from Grafana Beyla's Apache-2.0 image build,
 with its OpenTelemetry Ruby source revision updated and locked:
 https://github.com/grafana/beyla/tree/main/pkg/webhook/image/ruby
 
 Bundled Injector and language agents are upstream OpenTelemetry distributions.
-Their licenses and notices remain with their release/package contents.
+The Injector v0.11.0 Apache-2.0 license is preserved in
+/licenses/upstream/injector/LICENSE (from its tagged upstream source).
+Its Zig 0.15.2 standard-library MIT notice is preserved alongside it.
+Supplemental native .NET dependency license texts are under
+/licenses/upstream/dotnet; /licenses/upstream/manifest.json records immutable
+sources and hashes. These materials do not complete the redistribution review.
+Managed .NET package metadata, licenses, and third-party notices are under
+/licenses/upstream/dotnet/managed. Its inventory.json maps every upstream managed DLL to
+verified original package bytes or the instrumentation source project and records
+the preserved texts' sources and hashes.
+Java's embedded META-INF/licenses material, .NET's LICENSE files, and the
+Node.js, Python, and Ruby packages' license/notice files remain in /dist.
+Alpine package source archives, patches, recipes, and packaging scripts are
+preserved in /licenses/sources/alpine-source-inputs.tar.gz. Its SOURCE_INPUTS.json
+records the installed package versions, source-origin commits, and file hashes.
+See THIRD_PARTY.md in the source distribution for the inventory, generated
+notice snapshots, and outstanding review of embedded and base-image components.
+
+RIO adds its own .NET bootstrap and propagation assemblies (Apache-2.0).
+The upstream startup hook is retained unchanged as
+OpenTelemetry.AutoInstrumentation.StartupHook.original.dll alongside the RIO
+wrapper. Source and build details are in payload/dotnet in the source distribution.

@@ -15,13 +15,13 @@ baseline=${UPGRADE_BASELINE:-alpha2}
 case "$baseline" in
   alpha2)
     source_commit=be271b81fae80b7bd041a81e98b3abccb18997a1
-    export PREVIOUS_OPERATOR_IMAGE=ghcr.io/otelx/rio:issue-6-alpha2
-    export PREVIOUS_PAYLOAD_IMAGE=ghcr.io/otelx/rio-payload:issue-6-alpha2
+    export PREVIOUS_OPERATOR_IMAGE=${PREVIOUS_OPERATOR_IMAGE:-ghcr.io/otelx/rio:issue-6-alpha2}
+    export PREVIOUS_PAYLOAD_IMAGE=${PREVIOUS_PAYLOAD_IMAGE:-ghcr.io/otelx/rio-payload:issue-6-alpha2}
     ;;
   alpha3)
     source_commit=431f265d139206e98b34b8ce1ed6ddf2c2a0fd8c
-    export PREVIOUS_OPERATOR_IMAGE=ghcr.io/otelx/rio/operator:issue-6-alpha3
-    export PREVIOUS_PAYLOAD_IMAGE=ghcr.io/otelx/rio/instrumentation:issue-6-alpha3
+    export PREVIOUS_OPERATOR_IMAGE=${PREVIOUS_OPERATOR_IMAGE:-ghcr.io/otelx/rio/operator:issue-6-alpha3}
+    export PREVIOUS_PAYLOAD_IMAGE=${PREVIOUS_PAYLOAD_IMAGE:-ghcr.io/otelx/rio/instrumentation:issue-6-alpha3}
     ;;
   *) printf 'UPGRADE_BASELINE must be alpha2 or alpha3\n' >&2; exit 2 ;;
 esac

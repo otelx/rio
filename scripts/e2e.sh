@@ -116,14 +116,17 @@ kubectl apply -f "$artifacts/workloads.json"
 for kind in deployment statefulset daemonset; do
   kubectl rollout status "$kind/$kind" -n injector-component-test --timeout=180s
 done
-python3 - "${PREVIOUS_PAYLOAD_IMAGE:-$payload_image}" > "$artifacts/policy.json" <<'PY'
+healthy_timeout=60
+if [[ -n "${PREVIOUS_SOURCE:-}" ]]; then healthy_timeout=180; fi
+python3 - "${PREVIOUS_PAYLOAD_IMAGE:-$payload_image}" "$healthy_timeout" > "$artifacts/policy.json" <<'PY'
 import json,sys
 print(json.dumps({'apiVersion':'rio.otelx.github.io/v1alpha1','kind':'Instrumentation','metadata':{'name':'cluster'},'spec':{
     'image':sys.argv[1],'endpoint':'http://collector.invalid:4318','signals':{'traces':True,'metrics':True,'logs':True},
-    'timeoutSeconds':60,'rules':[{'name':'override','selector':{'namespaces':['injector-component-test'],'workloads':[{'kind':'Deployment','name':'deployment'}]},'action':'Inject','image':sys.argv[1]},{'name':'fixture','selector':{'namespaces':['injector-component-test']},'action':'Inject'}]}}))
+    'timeoutSeconds':int(sys.argv[2]),'rules':[{'name':'override','selector':{'namespaces':['injector-component-test'],'workloads':[{'kind':'Deployment','name':'deployment'}]},'action':'Inject','image':sys.argv[1]},{'name':'fixture','selector':{'namespaces':['injector-component-test']},'action':'Inject'}]}}))
 PY
 wait_phase() {
   local wanted=$1
+  local admission_retries=0 running_operator expected_image
   for attempt in $(seq 1 100); do
     kubectl get instrumentations.rio.otelx.github.io cluster -o json > "$artifacts/status.json"
     if python3 - "$artifacts/status.json" "$wanted" <<'PY'
@@ -134,10 +137,42 @@ observed=status.get('observedGeneration')==p['metadata']['generation']
 sys.exit(0 if observed and len(w)==3 and all(x['phase']==sys.argv[2] for x in w) else 1)
 PY
     then cp "$artifacts/status.json" "$artifacts/$wanted.json"; return 0; fi
+    # Ignore can legitimately create an uninstrumented but healthy Pod. Exercise
+    # the supported repair flow explicitly; never count that as rollback success.
+    if [[ ( "$wanted" == Ready || "$wanted" == RolledBack ) && "$admission_retries" -lt 2 ]] && python3 - "$artifacts/status.json" <<'PY'
+import json,sys
+rows=json.load(open(sys.argv[1])).get('status',{}).get('workloads',[])
+sys.exit(0 if any(row['namespace']=='injector-component-test' and row['phase']=='InjectionMissing' for row in rows) else 1)
+PY
+    then
+      running_operator=$(kubectl get deployment rio -n rio-system -o jsonpath='{.spec.template.spec.containers[0].image}')
+      if [[ "$running_operator" == "$operator_image" ]]; then
+        expected_image=$(python3 - "$artifacts/status.json" <<'PY'
+import json,sys
+print(json.load(open(sys.argv[1]))['spec']['image'])
+PY
+)
+        wait_admission "$expected_image"
+        admission_retries=$((admission_retries + 1))
+        python3 - "$artifacts/status.json" "$admission_retries" > "$artifacts/admission-retry.json" <<'PY'
+import json,sys
+policy=json.load(open(sys.argv[1]))
+token=policy['spec'].get('retryToken','')+'-admission-'+sys.argv[2]
+print(json.dumps({'spec':{'retryToken':token}}))
+PY
+        printf 'Verified admission; requesting instrumentation retry %s\n' "$admission_retries"
+        kubectl patch instrumentations.rio.otelx.github.io cluster --type=merge --patch-file="$artifacts/admission-retry.json"
+      fi
+    fi
     sleep 2
   done
   cat "$artifacts/status.json"
-  kubectl logs deployment/rio -n rio-system > "$artifacts/operator.log"
+  # Best-effort diagnostics from this fixture; retain the original phase failure.
+  kubectl logs deployment/rio -n rio-system > "$artifacts/operator.log" 2>&1 || true
+  kubectl get pods -n injector-component-test -o json > "$artifacts/failed-pods.json" 2> "$artifacts/failed-pods.err" || true
+  kubectl get deployments,statefulsets,daemonsets -n injector-component-test -o json > "$artifacts/failed-workloads.json" 2> "$artifacts/failed-workloads.err" || true
+  kubectl get events -n injector-component-test -o json > "$artifacts/failed-events.json" 2> "$artifacts/failed-events.err" || true
+  kubectl logs -n kube-system -l component=kube-controller-manager --tail=200 --prefix=true > "$artifacts/controller-manager.log" 2>&1 || true
   return 1
 }
 wait_admission() {
@@ -182,11 +217,11 @@ kubectl rollout restart deployment/rio -n rio-system
 kubectl rollout status deployment/rio -n rio-system --timeout=120s
 wait_phase RolledBack
 if [[ -n "${PREVIOUS_SOURCE:-}" ]]; then
-  # Both stable and blocked revisions must survive upgrading the controller.
+  # Unsigned history must be refused without overwriting the last successful
+  # configuration or blocked revision. Cleanup still belongs to the old binary.
   kubectl get deployments,statefulsets,daemonsets -n injector-component-test -o json > "$artifacts/before-upgrade.json"
   "$component/scripts/install.sh" "$operator_image"
-  wait_phase RolledBack
-  wait_admission "$PREVIOUS_PAYLOAD_IMAGE"
+  wait_phase Error
   kubectl get deployments,statefulsets,daemonsets -n injector-component-test -o json > "$artifacts/after-upgrade.json"
   python3 - "$artifacts" <<'CHECK'
 import json,pathlib,sys
@@ -197,6 +232,10 @@ a,b=states('before-upgrade.json'),states('after-upgrade.json')
 for kind in a:
     for key in ('current','stable','failedRevision','phase'): assert a[kind][key]==b[kind][key], (kind,key)
 CHECK
+  kubectl set image deployment/rio -n rio-system "operator=$PREVIOUS_OPERATOR_IMAGE"
+  kubectl rollout status deployment/rio -n rio-system --timeout=180s
+  wait_phase RolledBack
+  wait_admission "$PREVIOUS_PAYLOAD_IMAGE"
   # Supported migration off retired repositories: establish an uninstrumented
   # stable baseline before trying the new payload. No deleted image is needed
   # by recovery if the first migration attempt fails.
@@ -210,6 +249,28 @@ for x in json.load(open(sys.argv[1]))['items']:
     assert not state['current']['enabled'] and not state['stable']['enabled'], state
     assert not json.loads(x['spec']['template']['metadata']['annotations']['rio.otelx.github.io/configuration'])['enabled']
 CHECK
+  # A platform administrator resets only the verified disabled fixtures, with
+  # the old controller stopped. No old annotation is signed or adopted as input.
+  kubectl scale deployment/rio -n rio-system --replicas=0
+  kubectl rollout status deployment/rio -n rio-system --timeout=180s
+  python3 - "$artifacts/migration-baseline.json" "$artifacts" <<'CHECK'
+import json,pathlib,subprocess,sys
+root=pathlib.Path(sys.argv[2]); prefix='rio.otelx.github.io/'
+for obj in json.load(open(sys.argv[1]))['items']:
+    state=json.loads(obj['metadata']['annotations'][prefix+'state'])
+    assert not state['current']['enabled'] and not state['stable']['enabled']
+    patch={'metadata':{'annotations':{prefix+'state':None,prefix+'state-signature':None}},
+           'spec':{'template':{'metadata':{'annotations':{prefix+key:None for key in ('configuration','revision','workload-uid')}}}}}
+    path=root/('reset-'+obj['metadata']['name']+'.json');path.write_text(json.dumps(patch))
+    subprocess.run(['kubectl','patch',obj['kind'].lower()+'/'+obj['metadata']['name'],'-n',obj['metadata']['namespace'],
+                    '--type=merge','--patch-file',str(path)],check=True)
+CHECK
+  # Resetting template annotations starts another uninstrumented rollout.
+  # Let it converge before a failing candidate tests OrderedReady recovery.
+  for kind in deployment statefulset daemonset; do
+    kubectl rollout status "$kind/$kind" -n injector-component-test --timeout=180s
+  done
+  "$component/scripts/install.sh" "$operator_image"
   # Remove the retired fixture reference from each node after cleanup. A
   # subsequent failed migration must recover without pulling that reference.
   if [[ "$PREVIOUS_PAYLOAD_IMAGE" == ghcr.io/otelx/rio-payload:* ]]; then
@@ -229,7 +290,13 @@ CHECK
   kubectl apply -f "$artifacts/migrated-policy.json"
   wait_phase RolledBack
 fi
-kubectl patch instrumentations.rio.otelx.github.io cluster --type=merge -p '{"spec":{"timeoutSeconds":60,"retryToken":"corrected","env":[]}}'
+# Copy delivery updates DaemonSet nodes sequentially; successful upgrade paths
+# need time for every copy. Deliberately broken candidates still use 15 seconds.
+python3 - "$healthy_timeout" > "$artifacts/corrected-policy-patch.json" <<'PY'
+import json,sys
+print(json.dumps({'spec':{'timeoutSeconds':int(sys.argv[1]),'retryToken':'corrected','env':[]}}))
+PY
+kubectl patch instrumentations.rio.otelx.github.io cluster --type=merge --patch-file="$artifacts/corrected-policy-patch.json"
 wait_phase Ready
 if [[ -n "${PREVIOUS_SOURCE:-}" ]]; then
   kubectl get deployments,statefulsets,daemonsets -n injector-component-test -o json > "$artifacts/migrated-workloads.json"
@@ -246,12 +313,12 @@ CHECK
     # checking overrides and saved successful snapshots in both directions.
     for payload_target in previous candidate; do
       if [[ "$payload_target" == previous ]]; then payload_ref=$PREVIOUS_PAYLOAD_IMAGE; else payload_ref=$payload_image; fi
-      python3 - "$artifacts/policy.json" "$payload_ref" "$payload_target" > "$artifacts/payload-$payload_target-policy.json" <<'CHECK'
+      python3 - "$artifacts/policy.json" "$payload_ref" "$payload_target" "$healthy_timeout" > "$artifacts/payload-$payload_target-policy.json" <<'CHECK'
 import json,sys
 p=json.load(open(sys.argv[1])); p['spec']['image']=sys.argv[2]
 for r in p['spec']['rules']:
     if 'image' in r: r['image']=sys.argv[2]
-p['spec']['timeoutSeconds']=120
+p['spec']['timeoutSeconds']=int(sys.argv[4])
 p['spec']['retryToken']='payload-'+sys.argv[3]
 print(json.dumps(p))
 CHECK
@@ -268,8 +335,10 @@ for x in json.load(open(sys.argv[1]))['items']:
 CHECK
     done
   fi
-  # Alpha.2 and alpha.3 share the v1alpha1 CRD, Config hash, and State schema.
+  # A historical controller may read unchanged authenticated state for this
+  # diagnostic rollback, but must never rewrite it or issue new trusted history.
   cmp "$PREVIOUS_SOURCE/config/crd.yaml" "$component/config/crd.yaml"
+  kubectl get deployments,statefulsets,daemonsets -n injector-component-test -o json > "$artifacts/before-controller-rollback.json"
   kubectl set image deployment/rio -n rio-system "operator=$PREVIOUS_OPERATOR_IMAGE"
   kubectl rollout status deployment/rio -n rio-system --timeout=180s
   wait_phase Ready
@@ -279,6 +348,15 @@ CHECK
   kubectl rollout restart deployment/deployment -n injector-component-test
   kubectl rollout status deployment/deployment -n injector-component-test --timeout=180s
   wait_phase Ready
+  kubectl get deployments,statefulsets,daemonsets -n injector-component-test -o json > "$artifacts/after-controller-rollback.json"
+  python3 - "$artifacts" <<'CHECK'
+import json,pathlib,sys
+root=pathlib.Path(sys.argv[1]);prefix='rio.otelx.github.io/'
+def snapshots(name):
+    return {obj['metadata']['uid']:tuple(obj['metadata']['annotations'][prefix+key] for key in ('state','state-signature'))
+            for obj in json.loads((root/name).read_text())['items']}
+assert snapshots('before-controller-rollback.json')==snapshots('after-controller-rollback.json')
+CHECK
   "$component/scripts/install.sh" "$operator_image"
   wait_phase Ready
   wait_admission "$payload_image"

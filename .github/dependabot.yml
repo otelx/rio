@@ -11,7 +11,7 @@ updates:
       interval: weekly
     assignees: [MrAlias]
   - package-ecosystem: docker
-    directories: [/, /payload, /payload/tests/dotnet]
+    directories: [/, /payload, /payload/tests/dotnet, /scripts/telemetry/fixtures/node, /scripts/telemetry/fixtures/python, /scripts/telemetry/fixtures/ruby, /scripts/telemetry/fixtures/java, /scripts/telemetry/fixtures/dotnet]
     schedule:
       interval: weekly
     assignees: [MrAlias]

@@ -188,6 +188,9 @@ GEM
       opentelemetry-instrumentation-base (~> 0.25)
     opentelemetry-instrumentation-lmdb (0.25.0)
       opentelemetry-instrumentation-base (~> 0.25)
+    opentelemetry-instrumentation-logger (0.4.0)
+      opentelemetry-instrumentation-base (~> 0.25)
+      opentelemetry-logs-api (~> 0.1)
     opentelemetry-instrumentation-mongo (0.25.1)
       opentelemetry-instrumentation-base (~> 0.25)
     opentelemetry-instrumentation-mysql2 (0.33.0)
@@ -281,6 +284,7 @@ PLATFORMS
 
 DEPENDENCIES
   opentelemetry-auto-instrumentation!
+  opentelemetry-instrumentation-logger (= 0.4.0)
 
 BUNDLED WITH
    2.5.22

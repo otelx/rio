@@ -39,21 +39,36 @@
       "opentelemetry-dotnet-instrumentation-linux-musl-x64.zip": {
         "url": "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.17.0/opentelemetry-dotnet-instrumentation-linux-musl-x64.zip",
         "sha256": "36eb55ce2f7a9da8ffd70ccbd97761a1917d7f57709f1a6ca9e7029dfa120516"
-      },
-      "sbom.spdx.json": {
-        "url": "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.17.0/sbom.spdx.json",
-        "sha256": "698f7db934b759546319a0e7b7530f1984684e06c9847125fa354c073f3bd508"
       }
     }
   },
   "node": "0.82.0",
+  "nodeWinstonTransport": "0.35.0",
   "python": {
     "distro": "0.66b1",
     "sdk": "1.45.1",
-    "operatorRequirements": "v0.160.0"
+    "operatorRequirements": "v0.160.0",
+    "patches": [
+      "OTLP span/link trace flags backport: opentelemetry-python#4666 / #5667",
+      "aiohttp-server 0.66b1 full request-context repair; related opentelemetry-python-contrib#2510 (closed unmerged)"
+    ]
   },
   "ruby": {
     "commit": "68af0a92d6d9c2cd0ee38a9327e98797673227d1",
-    "version": "0.1.0"
+    "version": "0.1.0",
+    "loggerInstrumentation": "0.4.0"
+  },
+  "dotnetRioPropagation": {
+    "version": "1",
+    "source": "payload/dotnet",
+    "targetFramework": "net8.0",
+    "bootstrapTargetFramework": "netstandard2.1",
+    "sdkImage": "mcr.microsoft.com/dotnet/sdk:8.0.427-bookworm-slim@sha256:ff39a765f04619c8d146796fc09b38499ae5984f4a2a4c3a0a57d0022855daee"
+  },
+  "rubyRioRackMetrics": {
+    "version": "1.0.0",
+    "source": "payload/ruby/rio-rack-metrics.rb",
+    "rackInstrumentation": "0.30.0",
+    "metricsSdk": "0.13.1"
   }
 }

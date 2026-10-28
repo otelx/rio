@@ -35,14 +35,15 @@ jobs:
           scripts/install-security-tools.sh
           .artifacts/bin/govulncheck ./...
           python3 -m unittest discover -s scripts -p 'test_security.py'
+      - name: Release and source-policy regression checks
+        run: python3 -m unittest discover -s scripts/tests -v
       - name: Check source formatting and shell scripts
         run: |
           test -z "$(gofmt -l cmd internal)"
           shellcheck scripts/*.sh payload/scripts/*.sh payload/*.sh
           python3 -m py_compile payload/scripts/download.py payload/python/sitecustomize.py
+          python3 -m py_compile scripts/telemetry_e2e.py scripts/telemetry/*.py
           python3 -m json.tool payload/versions.json > /dev/null
-      - name: Check release source policy
-        run: python3 -m unittest discover -s scripts/tests -p 'test_*.py'
 
   images:
     name: Build and load agents (${{ matrix.arch }})
@@ -70,6 +71,7 @@ jobs:
         with:
           context: .
           load: true
+          provenance: false # Sign the tested release digests later, using OIDC.
           tags: ${{ env.OPERATOR_IMAGE }}
           platforms: linux/${{ matrix.arch }}
           cache-from: type=gha,scope=operator-${{ matrix.arch }}
@@ -79,6 +81,7 @@ jobs:
         with:
           context: payload
           load: true
+          provenance: false # Docker archives carry the exact runnable image.
           tags: ${{ env.PAYLOAD_IMAGE }}
           platforms: linux/${{ matrix.arch }}
           cache-from: type=gha,scope=payload-${{ matrix.arch }}
@@ -101,12 +104,42 @@ jobs:
           retention-days: 30
       - name: Verify all five language loaders with glibc and musl
         run: make smoke
+      - name: Preserve final-image notices and image identities
+        run: |
+          mkdir -p .artifacts/notices
+          python3 scripts/image_notices.py "$OPERATOR_IMAGE" .artifacts/notices/operator
+          python3 scripts/image_notices.py "$PAYLOAD_IMAGE" .artifacts/notices/instrumentation
+          docker image inspect --format '{{.Id}}' "$OPERATOR_IMAGE" > .artifacts/operator.id
+          docker image inspect --format '{{.Id}}' "$PAYLOAD_IMAGE" > .artifacts/instrumentation.id
+      - name: Inventory the tested operator image
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0
+        with:
+          image: docker:${{ env.OPERATOR_IMAGE }}
+          syft-version: v1.55.0
+          output-file: .artifacts/operator.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
+      - name: Inventory the tested instrumentation image
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0
+        with:
+          image: docker:${{ env.PAYLOAD_IMAGE }}
+          syft-version: v1.55.0
+          output-file: .artifacts/instrumentation.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
       - name: Archive tested images
-        run: docker save "$OPERATOR_IMAGE" "$PAYLOAD_IMAGE" | gzip > .artifacts/release-images.tar.gz
+        run: |
+          docker save "$OPERATOR_IMAGE" "$PAYLOAD_IMAGE" | gzip > .artifacts/release-images.tar.gz
+          (cd .artifacts && sha256sum release-images.tar.gz > archive.sha256)
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: tested-release-images-${{ matrix.arch }}
-          path: .artifacts/release-images.tar.gz
+          path: |
+            .artifacts/release-images.tar.gz
+            .artifacts/archive.sha256
+            .artifacts/*.id
+            .artifacts/*.spdx.json
+            .artifacts/notices/
           include-hidden-files: true
           retention-days: 3
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -121,7 +154,8 @@ jobs:
     name: Integration (${{ matrix.arch }}, ${{ matrix.delivery }})
     needs: images
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
-    timeout-minutes: 30
+    # Full native signal/propagator matrix; individual export waits remain bounded.
+    timeout-minutes: 90
     env:
       OPERATOR_IMAGE: ghcr.io/otelx/rio/operator:dev-${{ matrix.arch }}
       PAYLOAD_IMAGE: ghcr.io/otelx/rio/instrumentation:dev-${{ matrix.arch }}
@@ -167,6 +201,8 @@ jobs:
         run: |
           export CLUSTER_NAME="${CLUSTER_NAME,,}"
           make e2e
+      - name: Verify five-language telemetry and cross-language propagation
+        run: python3 scripts/telemetry_e2e.py --arch '${{ matrix.arch }}' --delivery '${{ matrix.delivery }}'
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
@@ -175,6 +211,9 @@ jobs:
             .artifacts/admission/**/*.log
             .artifacts/e2e/**/*.log
             .artifacts/e2e/**/*.json
+            .artifacts/telemetry/**/*.log
+            .artifacts/telemetry/**/*.json
+            .artifacts/telemetry/**/*.jsonl
           include-hidden-files: true
           if-no-files-found: ignore
 
@@ -316,7 +355,10 @@ jobs:
           retention-days: 30
 
   release:
-    name: Publish validated alpha release
+    name: Prepare validated release and attest artifacts
+    concurrency:
+      group: release-publication
+      cancel-in-progress: false
     if: startsWith(github.ref, 'refs/tags/') && github.event_name == 'push'
     needs: [quality, integration, upgrades, platforms]
     runs-on: ubuntu-24.04
@@ -325,6 +367,8 @@ jobs:
       actions: read
       contents: write
       packages: write
+      id-token: write
+      attestations: write
       pull-requests: read
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -345,7 +389,266 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
-      - name: Publish tested images and source
+      - name: Require effective release protections
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_SETTINGS_TOKEN }}
+        run: |
+          test -n "$GH_TOKEN"
+          test "$(gh api repos/otelx/rio/immutable-releases --jq .enabled)" = true
+          python3 scripts/check_license_review.py
+      - name: Prepare tested images and source
+        id: prepare
         env:
           GH_TOKEN: ${{ github.token }}
         run: ./scripts/release.sh
+      - name: Inventory the released source archive
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0
+        with:
+          path: .artifacts/release/prepared/source
+          syft-version: v1.55.0
+          output-file: .artifacts/release/prepared/source.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
+      - name: Attest source provenance
+        id: source-provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-path: .artifacts/release/prepared/rio-*.tar.gz
+          create-storage-record: false
+      - name: Attest source SBOM
+        id: source-sbom
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-path: .artifacts/release/prepared/rio-*.tar.gz
+          sbom-path: .artifacts/release/prepared/source.spdx.json
+          create-storage-record: false
+      - name: Attest operator image-index provenance
+        id: operator-provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-name: ghcr.io/otelx/rio/operator
+          subject-digest: ${{ steps.prepare.outputs.operator-digest }}
+          push-to-registry: true
+          create-storage-record: false
+      - name: Attest operator amd64 SBOM
+        id: operator-amd64-sbom
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-name: ghcr.io/otelx/rio/operator
+          subject-digest: ${{ steps.prepare.outputs.operator-amd64-digest }}
+          sbom-path: .artifacts/release/prepared/operator-amd64.spdx.json
+          push-to-registry: true
+          create-storage-record: false
+      - name: Attest operator arm64 SBOM
+        id: operator-arm64-sbom
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-name: ghcr.io/otelx/rio/operator
+          subject-digest: ${{ steps.prepare.outputs.operator-arm64-digest }}
+          sbom-path: .artifacts/release/prepared/operator-arm64.spdx.json
+          push-to-registry: true
+          create-storage-record: false
+      - name: Attest instrumentation image-index provenance
+        id: instrumentation-provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-name: ghcr.io/otelx/rio/instrumentation
+          subject-digest: ${{ steps.prepare.outputs.instrumentation-digest }}
+          push-to-registry: true
+          create-storage-record: false
+      - name: Attest instrumentation amd64 SBOM
+        id: instrumentation-amd64-sbom
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-name: ghcr.io/otelx/rio/instrumentation
+          subject-digest: ${{ steps.prepare.outputs.instrumentation-amd64-digest }}
+          sbom-path: .artifacts/release/prepared/instrumentation-amd64.spdx.json
+          push-to-registry: true
+          create-storage-record: false
+      - name: Attest instrumentation arm64 SBOM
+        id: instrumentation-arm64-sbom
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-name: ghcr.io/otelx/rio/instrumentation
+          subject-digest: ${{ steps.prepare.outputs.instrumentation-arm64-digest }}
+          sbom-path: .artifacts/release/prepared/instrumentation-arm64.spdx.json
+          push-to-registry: true
+          create-storage-record: false
+      - name: Preserve signed attestation bundles
+        env:
+          SOURCE_PROVENANCE: ${{ steps.source-provenance.outputs.bundle-path }}
+          SOURCE_SBOM: ${{ steps.source-sbom.outputs.bundle-path }}
+          OPERATOR_PROVENANCE: ${{ steps.operator-provenance.outputs.bundle-path }}
+          OPERATOR_AMD64_SBOM: ${{ steps.operator-amd64-sbom.outputs.bundle-path }}
+          OPERATOR_ARM64_SBOM: ${{ steps.operator-arm64-sbom.outputs.bundle-path }}
+          INSTRUMENTATION_PROVENANCE: ${{ steps.instrumentation-provenance.outputs.bundle-path }}
+          INSTRUMENTATION_AMD64_SBOM: ${{ steps.instrumentation-amd64-sbom.outputs.bundle-path }}
+          INSTRUMENTATION_ARM64_SBOM: ${{ steps.instrumentation-arm64-sbom.outputs.bundle-path }}
+        run: |
+          cp "$SOURCE_PROVENANCE" .artifacts/release/prepared/source-provenance.sigstore.json
+          cp "$SOURCE_SBOM" .artifacts/release/prepared/source-sbom.sigstore.json
+          cp "$OPERATOR_PROVENANCE" .artifacts/release/prepared/operator-provenance.sigstore.json
+          cp "$OPERATOR_AMD64_SBOM" .artifacts/release/prepared/operator-amd64-sbom.sigstore.json
+          cp "$OPERATOR_ARM64_SBOM" .artifacts/release/prepared/operator-arm64-sbom.sigstore.json
+          cp "$INSTRUMENTATION_PROVENANCE" .artifacts/release/prepared/instrumentation-provenance.sigstore.json
+          cp "$INSTRUMENTATION_AMD64_SBOM" .artifacts/release/prepared/instrumentation-amd64-sbom.sigstore.json
+          cp "$INSTRUMENTATION_ARM64_SBOM" .artifacts/release/prepared/instrumentation-arm64-sbom.sigstore.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: prepared-release
+          path: .artifacts/release/prepared/
+          include-hidden-files: true
+          retention-days: 7
+
+  release-check:
+    name: Anonymous released quickstart (${{ matrix.arch }})
+    needs: release
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Install kind
+        env:
+          GOBIN: ${{ github.workspace }}/.artifacts/bin
+        run: |
+          mkdir -p .artifacts/tmp
+          export TMPDIR="$PWD/.artifacts/tmp"
+          go install sigs.k8s.io/kind@v0.33.0
+          echo "$GOBIN" >> "$GITHUB_PATH"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: prepared-release
+          path: .artifacts/release/prepared
+      - name: Pull anonymously and execute the documented quickstart
+        env:
+          RELEASE_ARCH: ${{ matrix.arch }}
+        run: scripts/verify-release.sh .artifacts/release/prepared/release.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: anonymous-release-check-${{ matrix.arch }}
+          path: .artifacts/release-check/**/verified-*.json
+          include-hidden-files: true
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: anonymous-release-diagnostics-${{ matrix.arch }}
+          path: |
+            .artifacts/release-check/**/*.log
+            .artifacts/release-check/**/nodes.json
+          include-hidden-files: true
+          if-no-files-found: ignore
+
+  release-publish:
+    name: Publish verified immutable release
+    needs: [release, release-check]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      packages: read
+      attestations: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: prepared-release
+          path: .artifacts/release/prepared
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: anonymous-release-check-*
+          path: .artifacts/release/checks
+      - name: Collect architecture verification records
+        run: |
+          find .artifacts/release/checks -name 'verified-*.json' -exec cp {} .artifacts/release/prepared/ \;
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify attestations, attach assets, and publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_SETTINGS_TOKEN: ${{ secrets.RELEASE_SETTINGS_TOKEN }}
+        run: scripts/finalize-release.sh
+
+  attestation-audit:
+    name: Audit source attestations without publishing
+    if: github.event_name == 'workflow_dispatch'
+    needs: quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Prepare an audit archive from the exact checked-out source
+        run: |
+          mkdir -p .artifacts/attestation-audit/source
+          git archive HEAD | tar -x -C .artifacts/attestation-audit/source
+          git archive --format=tar.gz --prefix=rio-audit/ HEAD > .artifacts/attestation-audit/rio-issue-5-attestation-audit.tar.gz
+      - name: Generate the audit archive's SBOM
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0
+        with:
+          path: .artifacts/attestation-audit/source
+          syft-version: v1.55.0
+          output-file: .artifacts/attestation-audit/source.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
+      - name: Sign audit source provenance
+        id: provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-path: .artifacts/attestation-audit/rio-issue-5-attestation-audit.tar.gz
+          create-storage-record: false
+      - name: Sign the audit source SBOM
+        id: sbom
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-path: .artifacts/attestation-audit/rio-issue-5-attestation-audit.tar.gz
+          sbom-path: .artifacts/attestation-audit/source.spdx.json
+          create-storage-record: false
+      - name: Verify signatures, source identity, and rejection of a wrong commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PROVENANCE_BUNDLE: ${{ steps.provenance.outputs.bundle-path }}
+          SBOM_BUNDLE: ${{ steps.sbom.outputs.bundle-path }}
+        run: |
+          archive=.artifacts/attestation-audit/rio-issue-5-attestation-audit.tar.gz
+          signer=otelx/rio/.github/workflows/ci.yml
+          gh attestation verify "$archive" --repo otelx/rio --signer-workflow "$signer" --source-digest "$GITHUB_SHA"
+          gh attestation verify "$archive" --repo otelx/rio --signer-workflow "$signer" --source-digest "$GITHUB_SHA" --predicate-type https://spdx.dev/Document/v2.3
+          if gh attestation verify "$archive" --repo otelx/rio --signer-workflow "$signer" --source-digest 0000000000000000000000000000000000000000; then
+            echo 'Incorrect source identity was accepted' >&2
+            exit 1
+          fi
+          cp "$PROVENANCE_BUNDLE" .artifacts/attestation-audit/provenance.sigstore.json
+          cp "$SBOM_BUNDLE" .artifacts/attestation-audit/sbom.sigstore.json
+          (cd .artifacts/attestation-audit && sha256sum -- *.tar.gz *.spdx.json *.sigstore.json > SHA256SUMS)
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: issue-5-attestation-audit
+          path: |
+            .artifacts/attestation-audit/*.tar.gz
+            .artifacts/attestation-audit/*.spdx.json
+            .artifacts/attestation-audit/*.sigstore.json
+            .artifacts/attestation-audit/SHA256SUMS
+          include-hidden-files: true
+          if-no-files-found: error
