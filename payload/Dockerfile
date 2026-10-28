@@ -16,7 +16,12 @@ COPY --from=runtime-base /lib/apk/db/installed /installed-packages
 COPY alpine-sources.lock.json scripts/alpine_sources.py ./
 RUN python alpine_sources.py /installed-packages alpine-sources.lock.json /alpine-source-inputs.tar.gz --base-image "$RUNTIME_IMAGE"
 
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0.427-bookworm-slim@sha256:ff39a765f04619c8d146796fc09b38499ae5984f4a2a4c3a0a57d0022855daee AS dotnet-propagation
+# Supply the net8.0 reference packs and test runtime without NuGet downloads.
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0.427-bookworm-slim@sha256:ff39a765f04619c8d146796fc09b38499ae5984f4a2a4c3a0a57d0022855daee AS dotnet-net8
+
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0.320-bookworm-slim@sha256:7e3a4bd66701a451823db2028154ae16ff191bc452596ba618ef4d0c58f9cd01 AS dotnet-propagation
+COPY --from=dotnet-net8 /usr/share/dotnet/packs/ /usr/share/dotnet/packs/
+COPY --from=dotnet-net8 /usr/share/dotnet/shared/ /usr/share/dotnet/shared/
 WORKDIR /source
 COPY --from=downloads /payload/dotnet/glibc/net /agent/net
 COPY dotnet/Rio.Propagation.csproj dotnet/PropagationPlugin.cs dotnet/NuGet.Config ./
