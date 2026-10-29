@@ -5,16 +5,28 @@ updates:
     schedule:
       interval: weekly
     assignees: [MrAlias]
+    groups:
+      kubernetes:
+        patterns: ["k8s.io/*"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
     assignees: [MrAlias]
+    groups:
+      ci-actions:
+        patterns: ["*"]
   - package-ecosystem: docker
     directories: [/, /payload, /payload/tests/dotnet, /scripts/telemetry/fixtures/node, /scripts/telemetry/fixtures/python, /scripts/telemetry/fixtures/ruby, /scripts/telemetry/fixtures/java, /scripts/telemetry/fixtures/dotnet]
     schedule:
       interval: weekly
     assignees: [MrAlias]
+    # Native gems target the supported Ruby 3.3 ABI. Validate other ABI lines manually.
+    ignore:
+      - dependency-name: ruby
+        update-types:
+          - version-update:semver-major
+          - version-update:semver-minor
   - package-ecosystem: npm
     directory: /payload/node
     schedule:
