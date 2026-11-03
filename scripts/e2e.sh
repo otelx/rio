@@ -85,6 +85,19 @@ print('Cluster architectures:', sorted(actual))
 PY
 if [[ -n "${PREVIOUS_SOURCE:-}" ]]; then
   kind load docker-image --name "$cluster" "$PREVIOUS_OPERATOR_IMAGE" "$PREVIOUS_PAYLOAD_IMAGE"
+  # Historical kubectl wait exits immediately if a new CRD has no conditions
+  # yet. Establish the baseline CRD before calling its unmodified installer.
+  kubectl apply -f "$PREVIOUS_SOURCE/config/crd.yaml"
+  for attempt in {1..30}; do
+    if kubectl wait --for=condition=Established crd/instrumentations.rio.otelx.github.io --timeout=2s; then
+      break
+    fi
+    if [[ "$attempt" == 30 ]]; then
+      printf 'Historical RIO CRD did not become established.\n' >&2
+      exit 1
+    fi
+    sleep 1
+  done
   "$PREVIOUS_SOURCE/scripts/install.sh" "$PREVIOUS_OPERATOR_IMAGE"
 else
   "$component/scripts/install.sh" "$operator_image"
