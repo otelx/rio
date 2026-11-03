@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 ARG BASE_IMAGE=eclipse-temurin:21.0.12.1_1-jre-resolute@sha256:6ef3295d2cef695fd288f928a15a92081a7ce61da9e785b6fd09b2ea0c1aa8e5
-FROM --platform=$BUILDPLATFORM eclipse-temurin:21.0.12.1_1-jdk-resolute@sha256:197896188467cab150da54ace1e9368e8d485f6b82b377f78cb2a2b353959bac AS build
+FROM --platform=$BUILDPLATFORM eclipse-temurin:21.0.13_9-jdk-resolute@sha256:7d760d0aecb9f6dc319583802bdb32ed55234e6c79a0e8ae56077ec4da382f22 AS build
 WORKDIR /app
 ADD --checksum=sha256:3e1533d0321f8815eef46750aee0111b41554f9a4644c3c4d2d404744b09f60f https://repo.maven.apache.org/maven2/ch/qos/logback/logback-classic/1.5.18/logback-classic-1.5.18.jar /app/lib/logback-classic-1.5.18.jar
 ADD --checksum=sha256:85139e7b57b464f8e5e36326dd81317648bed199ccc4f98cd42585f8d7571027 https://repo.maven.apache.org/maven2/ch/qos/logback/logback-core/1.5.18/logback-core-1.5.18.jar /app/lib/logback-core-1.5.18.jar
