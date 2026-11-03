@@ -7,7 +7,7 @@ urllib3 <2.8.1
 opentelemetry-exporter-otlp-proto-http==1.45.1
 opentelemetry-exporter-prometheus==0.66b1
 
-opentelemetry-propagator-b3==1.45.1
+opentelemetry-propagator-b3==1.45.2
 opentelemetry-propagator-jaeger==1.45.1
 opentelemetry-propagator-aws-xray==1.0.2
 
