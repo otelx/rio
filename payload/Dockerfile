@@ -39,7 +39,7 @@ COPY Dockerfile /sources/Dockerfile
 COPY scripts/dotnet_inventory.py /sources/scripts/dotnet_inventory.py
 RUN python /sources/scripts/dotnet_inventory.py /sources /generated /build/versions.json /rio-dotnet-inventory.json
 
-FROM node:25@sha256:78839ac448c23517f8eab2e8f7943d9b4f73979eb7f8bed2c73dbf72ff869e7b AS node
+FROM node:26@sha256:6d2c7d5d074bf72f81ddc252b4fbb5d625bc028eeda49cb4b8c2ff8eda1ee617 AS node
 WORKDIR /build
 COPY node/package.json node/package-lock.json ./
 RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
