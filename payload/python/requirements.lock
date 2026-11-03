@@ -558,17 +558,17 @@ opentelemetry-propagator-aws-xray==1.0.2 \
     #   -r requirements.in
     #   opentelemetry-instrumentation-aws-lambda
     #   opentelemetry-instrumentation-botocore
-opentelemetry-propagator-b3==1.45.1 \
-    --hash=sha256:0f7d346b2cc2e9ec157c4e5c03f787d8631e61edc4b71978bb3bca2bb228db94 \
-    --hash=sha256:cd811519968dced23dda1240f2adf488e579d1361340a666af8540cd8a1e17ac
+opentelemetry-propagator-b3==1.45.2 \
+    --hash=sha256:86c7f921a8390c0f7d88a27450765b6d075a3579f2592baa623723e9e527a1b8 \
+    --hash=sha256:e3ab95b91a3fd70c89b30bc366702984f1eb811a53416bf8555e700c290997ab
     # via -r requirements.in
-opentelemetry-propagator-jaeger==1.45.1 \
-    --hash=sha256:008705ce03fb827244e2bc310272d6324073b20cb08939cac09752e22481938d \
-    --hash=sha256:96b5a71ec3177715a2fad3653d93cbc05ac358f2cbe437681edf88a055674af6
+opentelemetry-propagator-jaeger==1.45.2 \
+    --hash=sha256:7be08f21b4d199f00f5fdaad2368772079619e83aa74a4b0edd213c3aa380b5e \
+    --hash=sha256:9d85049d8601ff613071f9013fad006202c7f25719dbb5047b4b89b5bbded179
     # via -r requirements.in
-opentelemetry-propagator-ot-trace==0.66b1 \
-    --hash=sha256:0217b23e344f16b76cfcc9f0cea729e205ff4323d564a70d350f688f50c34370 \
-    --hash=sha256:d9891354966cf8941c85b90d483f52d6f79e5b9c27145eee2082c8767924f6eb
+opentelemetry-propagator-ot-trace==0.66b2 \
+    --hash=sha256:eb0ec818815a80bce811b7d93ac8885ac7fcaeba520a7a3bdefa9b90f71f7fb2 \
+    --hash=sha256:fc864b70e772befaf668c0fd9a63eba926df95a59475786a67911bce9e621f29
     # via -r requirements.in
 opentelemetry-proto==1.45.1 \
     --hash=sha256:79e0fb95e4616691a469439238aa9224d75779b3e108e895d1aa125ab29ca77c \
