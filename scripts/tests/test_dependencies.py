@@ -1,11 +1,25 @@
-"""Keep the Python inputs consistent with the lockfile used by image builds."""
+"""Keep dependency inputs and version metadata consistent with image locks."""
 
+import json
 from pathlib import Path
 import re
 import unittest
 
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+class NodeVersionTests(unittest.TestCase):
+    def test_reported_agent_versions_match_installed_lock(self):
+        versions = json.loads((ROOT / 'payload/versions.json').read_text())
+        lock = json.loads((ROOT / 'payload/node/package-lock.json').read_text())
+        for metadata, package in (
+            ('node', '@opentelemetry/auto-instrumentations-node'),
+            ('nodeWinstonTransport', '@opentelemetry/winston-transport'),
+        ):
+            with self.subTest(package=package):
+                self.assertEqual(versions[metadata],
+                                 lock['packages'][f'node_modules/{package}']['version'])
 
 
 class PythonRequirementsTests(unittest.TestCase):

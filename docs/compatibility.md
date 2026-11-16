@@ -31,7 +31,7 @@ The matrix below is validated through Kubernetes admission, the shipped Injector
 
 | Language | Pinned runtime and HTTP framework/client | Agent/bundle inputs | glibc fixture | musl fixture |
 | --- | --- | --- | --- | --- |
-| [Node.js](../scripts/telemetry/fixtures/node/fixture.json) | Node.js 24.22.1; built-in `node:http` server/client | Auto-instrumentations 0.82.0; Winston transport 0.35.0 | Debian 12; glibc 2.36 (`2.36-9+deb12u14`) | Alpine 3.24.3; musl 1.2.6 |
+| [Node.js](../scripts/telemetry/fixtures/node/fixture.json) | Node.js 24.22.1; built-in `node:http` server/client | Auto-instrumentations 0.83.0; Winston transport 0.35.0 | Debian 12; glibc 2.36 (`2.36-9+deb12u14`) | Alpine 3.24.3; musl 1.2.6 |
 | [Java](../scripts/telemetry/fixtures/java/fixture.json) | Temurin OpenJDK 21.0.12.1+1; JDK `HttpServer`/`HttpClient`; Gson 2.13.1 | Java agent 2.33.1 | Ubuntu 26.04.1; glibc 2.43 (`2.43-2ubuntu2.4`) | Alpine 3.24.3; musl 1.2.6 |
 | [.NET](../scripts/telemetry/fixtures/dotnet/fixture.json) | .NET/ASP.NET Core 8.0.33; Kestrel and `System.Net.Http.HttpClient` | Automatic instrumentation 1.17.0; RIO propagation/bootstrap extension 1 | Debian 12; glibc 2.36 (`2.36-9+deb12u14`) | Alpine 3.24.3; musl 1.2.6 |
 | [Python](../scripts/telemetry/fixtures/python/fixture.json) | Python 3.14.6; aiohttp 3.13.3 server/`ClientSession` | Distro/instrumentations 0.66b1; SDK 1.45.1; RIO source-checked OTLP flags and aiohttp context repairs | Debian 13.6; glibc 2.41 (`2.41-12+deb13u3`) | Alpine 3.23.5; musl 1.2.5 |
