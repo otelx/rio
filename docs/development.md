@@ -12,7 +12,7 @@ scripts/               Installation, removal, and lifecycle integration checks
 .artifacts/            Ignored binaries, caches, certificates, logs, and evidence
 ```
 
-Go 1.27.3, Docker with Buildx, Bash, kubectl, kind, Python 3, OpenSSL, and ShellCheck are used by the development workflow. The exact CI Go patch version follows `go.mod` and must match the controller builder. Build caches and working files stay under `.artifacts/`.
+Go 1.27.4, Docker with Buildx, Bash, kubectl, kind, Python 3, OpenSSL, and ShellCheck are used by the development workflow. The exact CI Go patch version follows `go.mod` and must match the controller builder. Build caches and working files stay under `.artifacts/`.
 
 ## Build and test
 
