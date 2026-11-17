@@ -74,7 +74,7 @@ COPY ruby/opentelemetry-auto-instrumentation.rb ruby/rio-rack-metrics.rb /payloa
 COPY ruby/tests/ /build/tests/
 RUN RIO_METRICS_EXTENSION=/payload/rio-rack-metrics.rb bundle exec ruby /build/tests/rack_metrics_test.rb
 
-FROM ruby:3.3.13-alpine3.23@sha256:31b755aee0630b8512d4d78bded44a83a587e9484cf3be5460ae9bfd2c9b620f AS ruby-musl
+FROM ruby:3.3.13-alpine3.23@sha256:bb01b282e4c9c7eacc54d032412c297cedd50c448d88974166f1b60e1b2b4d0d AS ruby-musl
 WORKDIR /build
 RUN apk add --no-cache git build-base
 COPY ruby/Gemfile ruby/Gemfile.lock ./
