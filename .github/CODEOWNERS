@@ -4,7 +4,7 @@
 /Dockerfile @MrAlias
 /payload/ @MrAlias
 /.github/workflows/ @MrAlias
-/.github/dependabot.yml @MrAlias
+/.github/renovate.json5 @MrAlias
 /security/ @MrAlias
 /scripts/*security* @MrAlias
 /scripts/scan-image.sh @MrAlias

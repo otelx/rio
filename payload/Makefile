@@ -18,6 +18,6 @@ test: prepare
 	docker run --rm "$(IMAGE)" /verify-layout.sh
 lock: prepare
 	npm --prefix node install --package-lock-only --ignore-scripts
-	uv pip compile python/requirements.in --python-version 3.14 --generate-hashes -o python/requirements.lock
+	uv pip compile python/requirements.in --python-version=3.14 --generate-hashes --output-file=python/requirements.lock
 prepare:
 	mkdir -p "$(TMPDIR)" "$(UV_CACHE_DIR)" "$(npm_config_cache)"
