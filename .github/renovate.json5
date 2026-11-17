@@ -1,0 +1,102 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: ['config:best-practices'],
+  timezone: 'Etc/UTC',
+  schedule: ['* 0-6 * * 1'],
+  assignees: ['MrAlias'],
+  labels: ['dependencies'],
+  automerge: false,
+  prConcurrentLimit: 5,
+  prHourlyLimit: 2,
+  separateMajorMinor: true,
+
+  // Keep fixture dependencies and payload/tests/dotnet/Dockerfile in scope.
+  // Override the preset's test exclusions, while still ignoring generated files.
+  ignorePaths: ['**/node_modules/**', '**/bower_components/**', '**/vendor/**', '.artifacts/**'],
+
+  lockFileMaintenance: {
+    enabled: true,
+    schedule: ['* 0-6 * * 1'],
+  },
+
+  // Read uv's compile command from each lockfile header so input pins and
+  // generated hashes change together. Do not edit hashed locks as raw pip files.
+  'pip-compile': {
+    managerFilePatterns: ['/(^|/)requirements\\.lock$/'],
+  },
+
+  packageRules: [
+    {
+      description: 'Group routine Go module updates separately from the toolchain',
+      matchManagers: ['gomod'],
+      matchDepTypes: ['require', 'indirect'],
+      matchUpdateTypes: ['minor', 'patch'],
+      groupName: 'Go modules (non-major)',
+    },
+    {
+      description: 'Keep the Kubernetes client libraries on the same release',
+      matchManagers: ['gomod'],
+      matchPackageNames: ['k8s.io/api', 'k8s.io/apimachinery', 'k8s.io/client-go'],
+      groupName: 'Kubernetes client libraries',
+    },
+    {
+      description: 'Group routine CI action updates and digest refreshes',
+      matchManagers: ['github-actions'],
+      matchUpdateTypes: ['minor', 'patch', 'pin', 'digest', 'pinDigest'],
+      groupName: 'GitHub Actions (non-major)',
+    },
+    {
+      description: 'Group routine base image updates and digest refreshes',
+      matchDatasources: ['docker'],
+      matchUpdateTypes: ['minor', 'patch', 'pin', 'digest', 'pinDigest'],
+      groupName: 'container images (non-major)',
+    },
+    {
+      description: 'Update the Go directive as well as the builder image',
+      matchManagers: ['gomod'],
+      matchDepTypes: ['golang'],
+      enabled: true,
+      rangeStrategy: 'bump',
+    },
+    {
+      description: 'The controller build requires identical Go patch versions',
+      matchManagers: ['gomod', 'dockerfile'],
+      matchPackageNames: ['go', 'golang'],
+      groupName: 'Go toolchain',
+    },
+    {
+      description: 'Native gems require the supported Ruby 3.3 ABI',
+      matchDatasources: ['docker'],
+      matchPackageNames: ['ruby'],
+      allowedVersions: '<3.4',
+    },
+    {
+      description: 'Group routine Node instrumentation dependency updates',
+      matchManagers: ['npm'],
+      matchFileNames: ['payload/node/**'],
+      matchUpdateTypes: ['minor', 'patch', 'pin', 'digest'],
+      groupName: 'Node instrumentation (non-major)',
+    },
+    {
+      description: 'Group routine Python instrumentation dependency updates',
+      matchManagers: ['pip-compile'],
+      matchFileNames: ['payload/python/**'],
+      matchUpdateTypes: ['minor', 'patch', 'pin', 'digest'],
+      groupName: 'Python instrumentation (non-major)',
+    },
+    {
+      description: 'Group routine Ruby instrumentation dependency updates',
+      matchManagers: ['bundler'],
+      matchFileNames: ['payload/ruby/**'],
+      matchUpdateTypes: ['minor', 'patch', 'pin', 'digest'],
+      groupName: 'Ruby instrumentation (non-major)',
+    },
+    {
+      description: 'Keep fixture package updates separate from shipped agents',
+      matchManagers: ['npm', 'pip-compile', 'bundler', 'nuget'],
+      matchFileNames: ['scripts/telemetry/fixtures/**'],
+      matchUpdateTypes: ['minor', 'patch', 'pin', 'digest'],
+      groupName: 'telemetry fixtures (non-major)',
+    },
+  ],
+}

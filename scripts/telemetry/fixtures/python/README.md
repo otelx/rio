@@ -30,7 +30,7 @@ docker build --build-arg BASE_IMAGE=IMAGE -t rio-issue-17-python:LIBC scripts/te
 Regenerate the dependency lock from this directory with uv 0.13.0:
 
 ```sh
-uv pip compile requirements.in --python-version 3.14 --generate-hashes -o requirements.lock
+uv pip compile requirements.in --python-version=3.14 --generate-hashes --output-file=requirements.lock
 ```
 
 Admission, signal suppression, negative controls, propagation ancestry, matrix
