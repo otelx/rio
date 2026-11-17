@@ -17,9 +17,9 @@ COPY alpine-sources.lock.json scripts/alpine_sources.py ./
 RUN python alpine_sources.py /installed-packages alpine-sources.lock.json /alpine-source-inputs.tar.gz --base-image "$RUNTIME_IMAGE"
 
 # Supply the net8.0 reference packs and test runtime without NuGet downloads.
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0.427-bookworm-slim@sha256:ff39a765f04619c8d146796fc09b38499ae5984f4a2a4c3a0a57d0022855daee AS dotnet-net8
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0.321-bookworm-slim@sha256:1dfdb27e9c2c345cb598925ccf6b13719ecfebea8467bd4745c23a3c108cdf84 AS dotnet-net8
 
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0.320-bookworm-slim@sha256:7e3a4bd66701a451823db2028154ae16ff191bc452596ba618ef4d0c58f9cd01 AS dotnet-propagation
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0.321-bookworm-slim@sha256:1dfdb27e9c2c345cb598925ccf6b13719ecfebea8467bd4745c23a3c108cdf84 AS dotnet-propagation
 COPY --from=dotnet-net8 /usr/share/dotnet/packs/ /usr/share/dotnet/packs/
 COPY --from=dotnet-net8 /usr/share/dotnet/shared/ /usr/share/dotnet/shared/
 WORKDIR /source
